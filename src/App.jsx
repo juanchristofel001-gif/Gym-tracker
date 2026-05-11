@@ -1,15 +1,22 @@
 import { useState, useEffect, useCallback } from "react";
+import { get as idbGet, set as idbSet } from "idb-keyval";
 
 // ──────────────── STORAGE HELPER ────────────────
 const storage = {
-  get(key) {
+  async get(key) {
     try {
-      const v = localStorage.getItem(key);
-      return v ? JSON.parse(v) : null;
+      // Auto-migrate from localStorage if exists
+      const oldV = localStorage.getItem(key);
+      let v = await idbGet(key);
+      if (v === undefined && oldV) {
+        v = JSON.parse(oldV);
+        await idbSet(key, v);
+      }
+      return v !== undefined ? v : null;
     } catch { return null; }
   },
-  set(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+  async set(key, value) {
+    try { await idbSet(key, value); } catch {}
   },
 };
 
@@ -104,12 +111,23 @@ const defaultState = {
 
 // ──────────────── APP ────────────────
 export default function App() {
-  const [state, setState] = useState(() => {
-    const saved = storage.get(STORAGE_KEY);
-    return saved ? { ...defaultState, ...saved } : defaultState;
-  });
+  const [state, setState] = useState(defaultState);
+  const [isDbLoaded, setIsDbLoaded] = useState(false);
   const [tab, setTab] = useState("workout");
   const [activeDay, setActiveDay] = useState(0);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadDb = async () => {
+      const saved = await storage.get(STORAGE_KEY);
+      if (mounted) {
+        if (saved) setState({ ...defaultState, ...saved });
+        setIsDbLoaded(true);
+      }
+    };
+    loadDb();
+    return () => { mounted = false; };
+  }, []);
   const [toast, setToast] = useState(null);
   const [editingGoal, setEditingGoal] = useState(null);
   const [newPrExercise, setNewPrExercise] = useState("");
@@ -238,6 +256,19 @@ export default function App() {
   const currentExercises = currentWorkout.exercises[state.selectedTier];
   const rank = getRank();
   const nextRank = getNextRank();
+
+  if (!isDbLoaded) {
+    return (
+      <div style={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#0b0b12" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>🔋</div>
+          <div style={{ color: "#2EC4B6", fontFamily: "'JetBrains Mono'", letterSpacing: 2, fontSize: 14 }}>
+            LOADING DATABASE...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.shell}>
