@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { get as idbGet, set as idbSet } from "idb-keyval";
 
 // ──────────────── STORAGE HELPER ────────────────
@@ -138,6 +138,22 @@ export default function App() {
     const d = new Date().getDay();
     return d === 0 ? 6 : d - 1; // 0=Sunday->6, 1=Monday->0
   });
+  
+  const weekDates = useMemo(() => {
+    const dates = [];
+    const now = new Date();
+    const day = now.getDay();
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(now.setDate(diff));
+    
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      dates.push(d.getDate());
+    }
+    return dates;
+  }, []);
+
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
   const [exerciseDb, setExerciseDb] = useState([]);
   const [editingRoutine, setEditingRoutine] = useState(null); // e.g. "pull"
@@ -418,7 +434,10 @@ export default function App() {
                 >
                   {done && <span style={styles.doneCheck}>✓</span>}
                   <span style={{ fontSize: 16 }}>{dayRoutine.emoji}</span>
-                  <span style={{ ...styles.dayPillLabel, color: act ? dayRoutine.color : "#555" }}>{day.shortDay}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span style={{ ...styles.dayPillLabel, color: act ? dayRoutine.color : "#555" }}>{day.shortDay}</span>
+                    <span style={{ fontSize: 10, color: act ? dayRoutine.color : "#444", fontWeight: 700 }}>{weekDates[i]}</span>
+                  </div>
                   <div style={styles.miniBar}>
                     <div
                       style={{
