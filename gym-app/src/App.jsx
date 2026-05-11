@@ -193,11 +193,12 @@ export default function App() {
     update((s) => {
       const wasChecked = !!s.checkedItems[key];
       const next = { ...s, checkedItems: { ...s.checkedItems, [key]: !wasChecked } };
-      if (!wasChecked) {
-        const schedule = s.customSchedule || defaultState.customSchedule;
-        const routineId = schedule[dayId];
-        const ex = WORKOUT_LIBRARY[routineId]?.exercises[tier];
-        if (ex) {
+      const schedule = s.customSchedule || defaultState.customSchedule;
+      const routineId = schedule[dayId];
+      const ex = WORKOUT_LIBRARY[routineId]?.exercises[tier];
+
+      if (ex) {
+        if (!wasChecked) {
           const allDone = ex.items.every((_, i) => i === idx || !!s.checkedItems[`${dayId}-${tier}-${i}`]);
           if (allDone) {
             const earnedXP = TIER_CFG[tier].xp;
@@ -212,6 +213,14 @@ export default function App() {
             }
             next.lastWorkoutDate = d;
             showToast(`+${earnedXP} XP — ${WORKOUT_LIBRARY[routineId].title} complete!`);
+          }
+        } else {
+          const wasAllDone = ex.items.every((_, i) => !!s.checkedItems[`${dayId}-${tier}-${i}`]);
+          if (wasAllDone) {
+            const earnedXP = TIER_CFG[tier].xp;
+            next.xp = Math.max(0, (s.xp || 0) - earnedXP);
+            next.totalWorkouts = Math.max(0, (s.totalWorkouts || 0) - 1);
+            showToast(`-${earnedXP} XP (Batal Selesai)`);
           }
         }
       }
