@@ -326,9 +326,7 @@ export default function App() {
               <h1
                 style={{
                   ...styles.headerTitle,
-                  background: `linear-gradient(135deg, ${currentWorkout.color}, #fff)`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
+                  color: currentWorkout.color,
                 }}
               >
                 GYM LOG
