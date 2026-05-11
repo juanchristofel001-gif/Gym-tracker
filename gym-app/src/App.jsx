@@ -587,16 +587,20 @@ export default function App() {
             />
 
             {/* Water Card */}
-            <div style={styles.trackerCard}>
+            <div style={{ ...styles.trackerCard, position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: -50, right: -50, width: 100, height: 100, background: '#3b82f6', filter: 'blur(60px)', opacity: 0.15, borderRadius: '50%' }} />
+              
               <div style={styles.trackerHeader}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 20 }}>💧</span>
-                  <span style={styles.trackerTitle}>HYDRATION</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ fontSize: 24, background: `#3b82f615`, padding: 8, borderRadius: 12 }}>💧</div>
+                  <span style={{ ...styles.trackerTitle, fontSize: 16 }}>HYDRATION</span>
                 </div>
-                <button onClick={() => setEditingGoal(editingGoal === "water" ? null : "water")} style={styles.goalEditBtn}>
-                  {waterToday}/{state.waterGoal} gelas
+                <button onClick={() => setEditingGoal(editingGoal === "water" ? null : "water")} style={{ ...styles.goalEditBtn, background: '#1a1a28', border: '1px solid #333' }}>
+                  {waterToday}/{state.waterGoal}
+                  <span style={{ fontSize: 10, color: '#888', marginLeft: 4 }}>gelas</span>
                 </button>
               </div>
+              
               {editingGoal === "water" && (
                 <GoalEditor
                   current={state.waterGoal}
@@ -607,49 +611,67 @@ export default function App() {
                   }}
                 />
               )}
-              <div style={styles.waterRow}>
-                {Array.from({ length: state.waterGoal }, (_, i) => (
-                  <button
-                    key={i}
-                    onClick={() =>
-                      update((s) => ({
-                        ...s,
-                        water: { ...s.water, [d]: i < waterToday ? i : i + 1 },
-                      }))
-                    }
-                    style={{
-                      ...styles.waterDrop,
-                      background: i < waterToday ? "#3b82f6" : "#1a1a28",
-                      borderColor: i < waterToday ? "#3b82f6" : "#252535",
-                      transform: i < waterToday ? "scale(1.05)" : "scale(1)",
-                    }}
-                  >
-                    💧
-                  </button>
-                ))}
+              
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24, marginBottom: 8 }}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', flex: 1 }}>
+                  {Array.from({ length: state.waterGoal }, (_, i) => {
+                    const isFilled = i < waterToday;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() =>
+                          update((s) => ({
+                            ...s,
+                            water: { ...s.water, [d]: isFilled ? i : i + 1 },
+                          }))
+                        }
+                        style={{
+                          width: 32,
+                          height: 40,
+                          borderRadius: '12px 12px 16px 16px',
+                          border: `1px solid ${isFilled ? '#3b82f6' : '#222'}`,
+                          background: isFilled ? 'linear-gradient(180deg, #60a5fa, #3b82f6)' : '#111118',
+                          boxShadow: isFilled ? '0 4px 12px rgba(59, 130, 246, 0.4), inset 0 2px 4px rgba(255,255,255,0.3)' : 'none',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          transform: isFilled ? 'scale(1.05) translateY(-2px)' : 'scale(1)',
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+                <div style={{ fontSize: 40, fontWeight: 900, color: '#3b82f6', fontFamily: "'Outfit'", textShadow: '0 0 20px rgba(59, 130, 246, 0.4)', marginLeft: 16 }}>
+                  {waterToday}
+                </div>
               </div>
-              <div style={styles.barTrack}>
+              
+              <div style={{ ...styles.barTrack, height: 4, borderRadius: 4, background: '#111118', marginTop: 16 }}>
                 <div
                   style={{
                     ...styles.barFill,
+                    height: '100%',
                     width: `${Math.min(100, (waterToday / state.waterGoal) * 100)}%`,
                     background: "linear-gradient(90deg, #3b82f6, #60a5fa)",
+                    boxShadow: "0 0 10px #3b82f688"
                   }}
                 />
               </div>
             </div>
 
             {/* Sleep Card */}
-            <div style={styles.trackerCard}>
+            <div style={{ ...styles.trackerCard, position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: -50, right: -50, width: 100, height: 100, background: '#9b5de5', filter: 'blur(60px)', opacity: 0.15, borderRadius: '50%' }} />
+              
               <div style={styles.trackerHeader}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 20 }}>😴</span>
-                  <span style={styles.trackerTitle}>REST</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ fontSize: 24, background: `#9b5de515`, padding: 8, borderRadius: 12 }}>😴</div>
+                  <span style={{ ...styles.trackerTitle, fontSize: 16 }}>REST</span>
                 </div>
-                <button onClick={() => setEditingGoal(editingGoal === "sleep" ? null : "sleep")} style={styles.goalEditBtn}>
+                <button onClick={() => setEditingGoal(editingGoal === "sleep" ? null : "sleep")} style={{ ...styles.goalEditBtn, background: '#1a1a28', border: '1px solid #333' }}>
                   Goal: {state.sleepGoal}h
                 </button>
               </div>
+              
               {editingGoal === "sleep" && (
                 <GoalEditor
                   current={state.sleepGoal}
@@ -661,15 +683,20 @@ export default function App() {
                   }}
                 />
               )}
-              <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 8 }}>
-                <button onClick={() => setSleep(Math.max(0, sleepToday - 0.5))} style={styles.circleBtn}>
+              
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, marginTop: 24, marginBottom: 20 }}>
+                <button 
+                  onClick={() => setSleep(Math.max(0, sleepToday - 0.5))} 
+                  style={{ ...styles.circleBtn, width: 48, height: 48, fontSize: 24, background: '#111118', border: '1px solid #333', color: '#888' }}
+                >
                   −
                 </button>
-                <div style={{ flex: 1, textAlign: "center" }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <div
                     style={{
-                      fontSize: 40,
-                      fontWeight: 800,
+                      fontSize: 64,
+                      lineHeight: 0.9,
+                      fontWeight: 900,
                       color:
                         sleepToday >= state.sleepGoal
                           ? "#2EC4B6"
@@ -677,33 +704,41 @@ export default function App() {
                           ? "#fbbf24"
                           : "#ef4444",
                       fontFamily: "'Outfit'",
+                      textShadow: `0 0 30px ${sleepToday >= state.sleepGoal ? '#2EC4B6' : sleepToday >= state.sleepGoal * 0.75 ? '#fbbf24' : '#ef4444'}66`
                     }}
                   >
                     {sleepToday}
                   </div>
-                  <div style={{ fontSize: 11, color: "#555", fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>
-                    JAM TIDUR
+                  <div style={{ fontSize: 12, color: "#666", fontFamily: "'JetBrains Mono'", letterSpacing: 2, marginTop: 8, fontWeight: 600 }}>
+                    HOURS
                   </div>
                 </div>
-                <button onClick={() => setSleep(Math.min(14, sleepToday + 0.5))} style={styles.circleBtn}>
+                <button 
+                  onClick={() => setSleep(Math.min(14, sleepToday + 0.5))} 
+                  style={{ ...styles.circleBtn, width: 48, height: 48, fontSize: 24, background: '#111118', border: '1px solid #333', color: '#888' }}
+                >
                   +
                 </button>
               </div>
-              <div style={{ ...styles.barTrack, marginTop: 12 }}>
+              
+              <div style={{ ...styles.barTrack, height: 6, borderRadius: 6, background: '#111118' }}>
                 <div
                   style={{
                     ...styles.barFill,
+                    height: '100%',
                     width: `${Math.min(100, (sleepToday / state.sleepGoal) * 100)}%`,
                     background:
                       sleepToday >= state.sleepGoal
                         ? "linear-gradient(90deg, #2EC4B6, #6ee7b7)"
-                        : "linear-gradient(90deg, #fbbf24, #f59e0b)",
+                        : "linear-gradient(90deg, #ef4444, #fbbf24)",
+                    boxShadow: `0 0 12px ${sleepToday >= state.sleepGoal ? '#2EC4B6' : '#fbbf24'}88`,
+                    borderRadius: 6
                   }}
                 />
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-                <span style={{ fontSize: 9, color: "#444", fontFamily: "'JetBrains Mono'" }}>0h</span>
-                <span style={{ fontSize: 9, color: "#444", fontFamily: "'JetBrains Mono'" }}>{state.sleepGoal}h</span>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
+                <span style={{ fontSize: 10, color: "#555", fontFamily: "'JetBrains Mono'" }}>0h</span>
+                <span style={{ fontSize: 10, color: "#555", fontFamily: "'JetBrains Mono'" }}>{state.sleepGoal}h Target</span>
               </div>
             </div>
 
@@ -1078,35 +1113,41 @@ function NavBtn({ icon, label, active, onClick, color }) {
 function TrackerCard({ title, icon, value, goal, unit, color, onAdd, buttons, canSubtract, onEditGoal, isEditing, goalValue, onSetGoal }) {
   const pct = Math.min(100, (value / goal) * 100);
   return (
-    <div style={styles.trackerCard}>
+    <div style={{ ...styles.trackerCard, position: 'relative', overflow: 'hidden' }}>
+      {/* Background Glow */}
+      <div style={{ position: 'absolute', top: -50, right: -50, width: 100, height: 100, background: color, filter: 'blur(60px)', opacity: 0.15, borderRadius: '50%' }} />
+      
       <div style={styles.trackerHeader}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 20 }}>{icon}</span>
-          <span style={styles.trackerTitle}>{title}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ fontSize: 24, background: `${color}15`, padding: 8, borderRadius: 12 }}>{icon}</div>
+          <span style={{ ...styles.trackerTitle, fontSize: 16 }}>{title}</span>
         </div>
-        <button onClick={onEditGoal} style={styles.goalEditBtn}>
+        <button onClick={onEditGoal} style={{ ...styles.goalEditBtn, background: '#1a1a28', border: '1px solid #333' }}>
           {value}/{goal}
-          {unit}
+          <span style={{ fontSize: 10, color: '#888', marginLeft: 4 }}>{unit}</span>
         </button>
       </div>
       {isEditing && <GoalEditor current={goalValue} unit={unit} onSave={onSetGoal} />}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
-        <div style={{ fontSize: 36, fontWeight: 800, color: pct >= 100 ? "#2EC4B6" : color, fontFamily: "'Outfit'" }}>
+      
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 8, marginTop: 16, marginBottom: 16 }}>
+        <div style={{ fontSize: 56, lineHeight: 0.8, fontWeight: 900, color: pct >= 100 ? "#2EC4B6" : color, fontFamily: "'Outfit'", textShadow: `0 0 20px ${pct >= 100 ? "#2EC4B6" : color}44` }}>
           {value}
         </div>
-        <span style={{ fontSize: 14, color: "#555" }}>{unit}</span>
+        <span style={{ fontSize: 18, color: "#666", fontWeight: 600, paddingBottom: 4 }}>{unit}</span>
       </div>
-      <div style={{ ...styles.barTrack, marginTop: 10 }}>
-        <div style={{ ...styles.barFill, width: `${pct}%`, background: `linear-gradient(90deg, ${color}, ${color}bb)` }} />
+      
+      <div style={{ ...styles.barTrack, height: 8, borderRadius: 8, background: '#111118', border: '1px solid #222' }}>
+        <div style={{ ...styles.barFill, width: `${pct}%`, height: '100%', borderRadius: 8, background: `linear-gradient(90deg, ${color}, ${color}dd)`, boxShadow: `0 0 10px ${color}66` }} />
       </div>
-      <div style={{ display: "flex", gap: 6, marginTop: 12, flexWrap: "wrap" }}>
+      
+      <div style={{ display: "flex", gap: 8, marginTop: 20, flexWrap: "wrap" }}>
         {canSubtract && (
-          <button onClick={() => onAdd(-10)} style={{ ...styles.addBtn, borderColor: "#333", color: "#666" }}>
+          <button onClick={() => onAdd(-10)} style={{ ...styles.addBtn, background: '#111118', borderColor: "#222", color: "#666", borderRadius: 20, padding: '8px 16px' }}>
             -10
           </button>
         )}
         {buttons.map((b) => (
-          <button key={b} onClick={() => onAdd(b)} style={{ ...styles.addBtn, borderColor: `${color}44`, color }}>
+          <button key={b} onClick={() => onAdd(b)} style={{ ...styles.addBtn, background: `${color}11`, borderColor: `${color}44`, color, borderRadius: 20, padding: '8px 16px', fontWeight: 700, boxShadow: `0 4px 12px ${color}11` }}>
             +{b}
           </button>
         ))}
