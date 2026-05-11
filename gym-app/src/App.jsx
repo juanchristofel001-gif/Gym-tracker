@@ -442,32 +442,32 @@ export default function App() {
             <div style={styles.statChip}>
               <span style={styles.microLabel}>DONE</span>
               <span style={styles.statVal}>
-                {currentExercises.items.filter((_, i) => state.checkedItems[`${currentWorkout.id}-${state.selectedTier}-${i}`]).length}/
+                {currentExercises.items.filter((_, i) => state.checkedItems[`${activeDay}-${state.selectedTier}-${i}`]).length}/
                 {currentExercises.items.length}
               </span>
             </div>
             <div
               style={{
                 ...styles.statVal,
-                color: getDayProgress(currentWorkout.id) === 100 ? "#2EC4B6" : currentWorkout.color,
+                color: getDayProgress(activeDay) === 100 ? "#2EC4B6" : currentWorkout.color,
                 fontFamily: "'JetBrains Mono'",
                 fontSize: 14,
                 fontWeight: 700,
               }}
             >
-              {getDayProgress(currentWorkout.id)}%
+              {getDayProgress(activeDay)}%
             </div>
           </div>
 
           {/* Exercise list */}
           <div style={{ padding: "0 20px 120px" }}>
             {currentExercises.items.map((ex, idx) => {
-              const key = `${currentWorkout.id}-${state.selectedTier}-${idx}`;
+              const key = `${activeDay}-${state.selectedTier}-${idx}`;
               const checked = !!state.checkedItems[key];
               return (
                 <button
                   key={key}
-                  onClick={() => toggleItem(currentWorkout.id, state.selectedTier, idx)}
+                  onClick={() => toggleItem(activeDay, state.selectedTier, idx)}
                   style={{
                     ...styles.exBtn,
                     background: checked ? `${currentWorkout.color}08` : "#111118",
