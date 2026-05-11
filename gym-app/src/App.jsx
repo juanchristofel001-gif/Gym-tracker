@@ -411,7 +411,6 @@ export default function App() {
               🔄 GANTI
             </button>
           </div>
-          </div>
 
           {/* Tier selector */}
           <div style={styles.tierRow}>
