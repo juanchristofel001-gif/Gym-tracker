@@ -126,6 +126,7 @@ const defaultState = {
   height: 0,
   personalRecords: {},
   customSchedule: ["pull", "push", "legs", "upper", "fatburn", "rest", "rest"],
+  customRoutines: {}, // { "pull": ["3_4_Sit-Up", "Adductor"], ... }
 };
 
 // ──────────────── APP ────────────────
@@ -138,7 +139,15 @@ export default function App() {
     return d === 0 ? 6 : d - 1; // 0=Sunday->6, 1=Monday->0
   });
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
+  const [exerciseDb, setExerciseDb] = useState([]);
+  const [editingRoutine, setEditingRoutine] = useState(null); // e.g. "pull"
 
+  useEffect(() => {
+    fetch('/exercises.json')
+      .then(r => r.json())
+      .then(data => setExerciseDb(data))
+      .catch(console.error);
+  }, []);
   useEffect(() => {
     let mounted = true;
     const loadDb = async () => {
@@ -188,6 +197,19 @@ export default function App() {
   };
 
   // ── Workout logic ──
+  const getRoutineExercises = (routineId, tier, s = state) => {
+    const custom = s.customRoutines?.[routineId];
+    if (custom && custom.length > 0) {
+      const limit = tier === "minimum" ? 4 : tier === "optimal" ? 6 : 10;
+      return custom.slice(0, limit).map(exId => {
+         const dbEx = exerciseDb.find(e => e.id === exId);
+         return dbEx || { id: exId, name: exId, isCustom: true };
+      });
+    }
+    const defaultItems = WORKOUT_LIBRARY[routineId]?.exercises[tier]?.items || [];
+    return defaultItems.map(name => ({ id: name, name, isCustom: false }));
+  };
+
   const toggleItem = (dayId, tier, idx) => {
     const key = `${dayId}-${tier}-${idx}`;
     update((s) => {
@@ -195,11 +217,11 @@ export default function App() {
       const next = { ...s, checkedItems: { ...s.checkedItems, [key]: !wasChecked } };
       const schedule = s.customSchedule || defaultState.customSchedule;
       const routineId = schedule[dayId];
-      const ex = WORKOUT_LIBRARY[routineId]?.exercises[tier];
+      const exItems = getRoutineExercises(routineId, tier, s);
 
-      if (ex) {
+      if (exItems.length > 0) {
         if (!wasChecked) {
-          const allDone = ex.items.every((_, i) => i === idx || !!s.checkedItems[`${dayId}-${tier}-${i}`]);
+          const allDone = exItems.every((_, i) => i === idx || !!s.checkedItems[`${dayId}-${tier}-${i}`]);
           if (allDone) {
             const earnedXP = TIER_CFG[tier].xp;
             next.xp = (s.xp || 0) + earnedXP;
@@ -215,7 +237,7 @@ export default function App() {
             showToast(`+${earnedXP} XP — ${WORKOUT_LIBRARY[routineId].title} complete!`);
           }
         } else {
-          const wasAllDone = ex.items.every((_, i) => !!s.checkedItems[`${dayId}-${tier}-${i}`]);
+          const wasAllDone = exItems.every((_, i) => !!s.checkedItems[`${dayId}-${tier}-${i}`]);
           if (wasAllDone) {
             const earnedXP = TIER_CFG[tier].xp;
             next.xp = Math.max(0, (s.xp || 0) - earnedXP);
@@ -231,10 +253,10 @@ export default function App() {
   const getDayProgress = (dayId) => {
     const schedule = state.customSchedule || defaultState.customSchedule;
     const routineId = schedule[dayId];
-    const ex = WORKOUT_LIBRARY[routineId]?.exercises[state.selectedTier];
-    if (!ex) return 0;
-    const done = ex.items.filter((_, i) => state.checkedItems[`${dayId}-${state.selectedTier}-${i}`]).length;
-    return Math.round((done / ex.items.length) * 100);
+    const exItems = getRoutineExercises(routineId, state.selectedTier, state);
+    if (!exItems || exItems.length === 0) return 0;
+    const done = exItems.filter((_, i) => state.checkedItems[`${dayId}-${state.selectedTier}-${i}`]).length;
+    return Math.round((done / exItems.length) * 100);
   };
 
   const resetWeek = () => {
@@ -291,7 +313,13 @@ export default function App() {
   const currentSchedule = state.customSchedule || defaultState.customSchedule;
   const currentRoutineId = currentSchedule[activeDay];
   const currentWorkout = WORKOUT_LIBRARY[currentRoutineId];
-  const currentExercises = currentWorkout.exercises[state.selectedTier];
+  const activeExItems = getRoutineExercises(currentRoutineId, state.selectedTier, state);
+  const currentExercises = {
+    totalSets: (state.customRoutines && state.customRoutines[currentRoutineId] && state.customRoutines[currentRoutineId].length > 0) 
+        ? `${activeExItems.length} Gerakan` 
+        : (currentWorkout.exercises[state.selectedTier]?.totalSets || ""),
+    items: activeExItems
+  };
   const rank = getRank();
   const nextRank = getNextRank();
 
@@ -411,12 +439,20 @@ export default function App() {
               <h2 style={{ ...styles.dayName, color: currentWorkout.color }}>{currentWorkout.title}</h2>
               <span style={styles.daySub}>{currentWorkout.subtitle}</span>
             </div>
-            <button 
-              onClick={() => setIsEditingSchedule(true)} 
-              style={{ background: "transparent", border: `1px solid ${currentWorkout.color}55`, color: currentWorkout.color, padding: "4px 12px", borderRadius: 8, fontSize: 12, cursor: "pointer", fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}
-            >
-              🔄 GANTI
-            </button>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button 
+                onClick={() => setEditingRoutine(currentWorkout.id)} 
+                style={{ background: "transparent", border: `1px solid ${currentWorkout.color}55`, color: currentWorkout.color, padding: "4px 12px", borderRadius: 8, fontSize: 12, cursor: "pointer", fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}
+              >
+                ✏️ CUSTOM
+              </button>
+              <button 
+                onClick={() => setIsEditingSchedule(true)} 
+                style={{ background: "transparent", border: `1px solid ${currentWorkout.color}55`, color: currentWorkout.color, padding: "4px 12px", borderRadius: 8, fontSize: 12, cursor: "pointer", fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}
+              >
+                🔄 GANTI
+              </button>
+            </div>
           </div>
 
           {/* Tier selector */}
@@ -499,15 +535,32 @@ export default function App() {
                   <div
                     style={{
                       flex: 1,
-                      fontSize: 14,
-                      fontWeight: 500,
-                      color: checked ? "#666" : "#ddd",
-                      textDecoration: checked ? "line-through" : "none",
-                      textDecorationColor: `${currentWorkout.color}55`,
                       textAlign: "left",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
                     }}
                   >
-                    {ex}
+                    {ex.images && ex.images.length > 0 && (
+                      <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', background: '#1a1a28', flexShrink: 0 }}>
+                        <img 
+                          src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${ex.images[0]}`} 
+                          alt={ex.name} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', filter: checked ? 'grayscale(1)' : 'none', opacity: checked ? 0.5 : 1 }}
+                        />
+                      </div>
+                    )}
+                    <div
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 500,
+                        color: checked ? "#666" : "#ddd",
+                        textDecoration: checked ? "line-through" : "none",
+                        textDecorationColor: `${currentWorkout.color}55`,
+                      }}
+                    >
+                      {ex.name}
+                    </div>
                   </div>
                   <div
                     style={{
@@ -1062,6 +1115,17 @@ export default function App() {
         </div>
       )}
 
+      {/* ═══════ ROUTINE EDITOR MODAL ═══════ */}
+      {editingRoutine && (
+        <RoutineEditorModal 
+          routineId={editingRoutine}
+          onClose={() => setEditingRoutine(null)}
+          update={update}
+          state={state}
+          exerciseDb={exerciseDb}
+        />
+      )}
+
       {/* ═══════ BOTTOM NAV ═══════ */}
       <div style={styles.bottomNav}>
         <NavBtn icon="🏋️" label="Workout" active={tab === "workout"} onClick={() => setTab("workout")} color="#FF6B35" />
@@ -1230,6 +1294,147 @@ function StatBox({ icon, label, value }) {
       <div style={{ fontSize: 20, marginBottom: 4 }}>{icon}</div>
       <div style={{ fontSize: 22, fontWeight: 800, color: "#ddd", fontFamily: "'Outfit'" }}>{value}</div>
       <div style={{ fontSize: 9, color: "#555", fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginTop: 2 }}>{label}</div>
+    </div>
+  );
+}
+
+function RoutineEditorModal({ routineId, onClose, update, state, exerciseDb }) {
+  const workoutInfo = WORKOUT_LIBRARY[routineId];
+  const [query, setQuery] = useState("");
+  const [customList, setCustomList] = useState(state.customRoutines?.[routineId] || []);
+  const [searchResults, setSearchResults] = useState([]);
+
+  useEffect(() => {
+    if (query.length > 1) {
+      const q = query.toLowerCase();
+      setSearchResults(exerciseDb.filter(ex => ex.name.toLowerCase().includes(q) || (ex.primaryMuscles && ex.primaryMuscles.some(m => m.toLowerCase().includes(q)))).slice(0, 20));
+    } else {
+      setSearchResults([]);
+    }
+  }, [query, exerciseDb]);
+
+  const handleSave = () => {
+    update(s => ({
+      ...s,
+      customRoutines: {
+        ...s.customRoutines,
+        [routineId]: customList
+      }
+    }));
+    onClose();
+  };
+
+  const handleReset = () => {
+    update(s => {
+      const next = { ...s, customRoutines: { ...s.customRoutines } };
+      delete next.customRoutines[routineId];
+      return next;
+    });
+    onClose();
+  };
+
+  const moveItem = (index, dir) => {
+    const newList = [...customList];
+    const target = index + dir;
+    if (target >= 0 && target < newList.length) {
+      [newList[index], newList[target]] = [newList[target], newList[index]];
+      setCustomList(newList);
+    }
+  };
+
+  const addItem = (exId) => {
+    if (customList.length < 10 && !customList.includes(exId)) {
+      setCustomList([...customList, exId]);
+      setQuery("");
+    }
+  };
+
+  const removeItem = (exId) => {
+    setCustomList(customList.filter(id => id !== exId));
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.9)", zIndex: 1000, display: "flex", flexDirection: "column", padding: "40px 20px" }}>
+      <div style={{ background: "#111118", borderRadius: 24, padding: 24, flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", border: `1px solid ${workoutInfo.color}44` }}>
+        <h2 style={{ color: workoutInfo.color, margin: "0 0 16px 0", fontSize: 24 }}>Custom: {workoutInfo.title}</h2>
+        
+        <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Current List */}
+          <div>
+            <h3 style={{ color: "#aaa", fontSize: 14, marginBottom: 8 }}>Gerakan Terpilih ({customList.length}/10)</h3>
+            <p style={{ color: "#666", fontSize: 11, marginBottom: 12 }}>Urutkan dari yang wajib (Minimum) ke tambahan (Max). Tier Minimum ambil 4 teratas, Optimal 6, Max semua.</p>
+            {customList.length === 0 ? (
+              <div style={{ color: "#555", fontStyle: "italic", fontSize: 13 }}>Belum ada gerakan kustom. Akan menggunakan default.</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {customList.map((exId, idx) => {
+                  const dbEx = exerciseDb.find(e => e.id === exId);
+                  const name = dbEx ? dbEx.name : exId;
+                  const thumb = dbEx && dbEx.images && dbEx.images.length > 0 ? `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${dbEx.images[0]}` : null;
+                  return (
+                    <div key={exId} style={{ display: "flex", alignItems: "center", gap: 12, background: "#1a1a28", padding: 8, borderRadius: 12 }}>
+                      <div style={{ fontWeight: "bold", color: "#555", width: 20 }}>{idx + 1}.</div>
+                      {thumb && <img src={thumb} style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />}
+                      <div style={{ flex: 1, color: "#ddd", fontSize: 14, fontWeight: 500 }}>{name}</div>
+                      <div style={{ display: "flex", gap: 4 }}>
+                        <button onClick={() => moveItem(idx, -1)} disabled={idx === 0} style={{ background: "#222", border: "none", color: idx === 0 ? "#444" : "#fff", padding: "6px 10px", borderRadius: 6 }}>↑</button>
+                        <button onClick={() => moveItem(idx, 1)} disabled={idx === customList.length - 1} style={{ background: "#222", border: "none", color: idx === customList.length - 1 ? "#444" : "#fff", padding: "6px 10px", borderRadius: 6 }}>↓</button>
+                        <button onClick={() => removeItem(exId)} style={{ background: "#4a1c1c", border: "none", color: "#ff6b6b", padding: "6px 10px", borderRadius: 6 }}>✕</button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <hr style={{ borderColor: "#222", margin: "8px 0" }} />
+
+          {/* Search */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1, minHeight: 0 }}>
+            <h3 style={{ color: "#aaa", fontSize: 14 }}>Tambah Gerakan Baru</h3>
+            <input 
+              type="text" 
+              placeholder="Cari gerakan (Inggris)..." 
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              style={{ width: "100%", padding: 12, borderRadius: 12, border: "1px solid #333", background: "#0b0b12", color: "#fff", outline: "none", boxSizing: "border-box" }}
+            />
+            {query.length > 1 && (
+              <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8, marginTop: 8, background: "#0b0b12", padding: 8, borderRadius: 12 }}>
+                {searchResults.length === 0 ? (
+                  <div style={{ color: "#555", fontSize: 13, textAlign: "center", padding: 12 }}>Tidak ditemukan</div>
+                ) : searchResults.map(ex => {
+                  const thumb = ex.images && ex.images.length > 0 ? `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${ex.images[0]}` : null;
+                  const isAdded = customList.includes(ex.id);
+                  return (
+                    <div key={ex.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 8, borderRadius: 8, background: "#1a1a28", border: `1px solid ${isAdded ? workoutInfo.color : "transparent"}` }}>
+                      {thumb && <img src={thumb} style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ color: "#fff", fontSize: 14, fontWeight: 500 }}>{ex.name}</div>
+                        <div style={{ color: "#888", fontSize: 11 }}>{ex.primaryMuscles?.[0] || ex.category}</div>
+                      </div>
+                      <button 
+                        onClick={() => addItem(ex.id)}
+                        disabled={isAdded || customList.length >= 10}
+                        style={{ background: isAdded ? "#222" : workoutInfo.color, color: isAdded ? "#555" : "#fff", border: "none", padding: "6px 12px", borderRadius: 8, fontWeight: "bold" }}
+                      >
+                        {isAdded ? "Added" : "+"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
+          <button onClick={onClose} style={{ flex: 1, padding: 14, background: "#222", color: "#fff", border: "none", borderRadius: 12, fontWeight: "bold" }}>Batal</button>
+          <button onClick={handleReset} style={{ padding: 14, background: "#4a1c1c", color: "#ff6b6b", border: "none", borderRadius: 12, fontWeight: "bold" }}>Reset Default</button>
+          <button onClick={handleSave} style={{ flex: 2, padding: 14, background: workoutInfo.color, color: "#fff", border: "none", borderRadius: 12, fontWeight: "bold" }}>Simpan</button>
+        </div>
+      </div>
     </div>
   );
 }
