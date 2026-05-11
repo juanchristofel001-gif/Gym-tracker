@@ -1305,13 +1305,23 @@ function RoutineEditorModal({ routineId, onClose, update, state, exerciseDb }) {
   const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
-    if (query.length > 1) {
+    if (query.trim().length > 0) {
       const q = query.toLowerCase();
-      setSearchResults(exerciseDb.filter(ex => ex.name.toLowerCase().includes(q) || (ex.primaryMuscles && ex.primaryMuscles.some(m => m.toLowerCase().includes(q)))).slice(0, 20));
+      setSearchResults(exerciseDb.filter(ex => ex.name.toLowerCase().includes(q) || (ex.primaryMuscles && ex.primaryMuscles.some(m => m.toLowerCase().includes(q)))).slice(0, 50));
     } else {
-      setSearchResults([]);
+      const targetMuscles = {
+         pull: ["lats", "middle back", "lower back", "biceps", "forearms"],
+         push: ["chest", "triceps", "shoulders"],
+         legs: ["quadriceps", "hamstrings", "calves", "glutes", "adductors", "abductors"]
+      }[routineId] || [];
+      
+      let recs = exerciseDb;
+      if (targetMuscles.length > 0) {
+         recs = exerciseDb.filter(ex => ex.primaryMuscles && ex.primaryMuscles.some(m => targetMuscles.includes(m.toLowerCase())));
+      }
+      setSearchResults(recs.slice(0, 30));
     }
-  }, [query, exerciseDb]);
+  }, [query, exerciseDb, routineId]);
 
   const handleSave = () => {
     update(s => ({
@@ -1400,32 +1410,30 @@ function RoutineEditorModal({ routineId, onClose, update, state, exerciseDb }) {
               onChange={e => setQuery(e.target.value)}
               style={{ width: "100%", padding: 12, borderRadius: 12, border: "1px solid #333", background: "#0b0b12", color: "#fff", outline: "none", boxSizing: "border-box" }}
             />
-            {query.length > 1 && (
-              <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8, marginTop: 8, background: "#0b0b12", padding: 8, borderRadius: 12 }}>
-                {searchResults.length === 0 ? (
-                  <div style={{ color: "#555", fontSize: 13, textAlign: "center", padding: 12 }}>Tidak ditemukan</div>
-                ) : searchResults.map(ex => {
-                  const thumb = ex.images && ex.images.length > 0 ? `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${ex.images[0]}` : null;
-                  const isAdded = customList.includes(ex.id);
-                  return (
-                    <div key={ex.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 8, borderRadius: 8, background: "#1a1a28", border: `1px solid ${isAdded ? workoutInfo.color : "transparent"}` }}>
-                      {thumb && <img src={thumb} style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />}
-                      <div style={{ flex: 1 }}>
-                        <div style={{ color: "#fff", fontSize: 14, fontWeight: 500 }}>{ex.name}</div>
-                        <div style={{ color: "#888", fontSize: 11 }}>{ex.primaryMuscles?.[0] || ex.category}</div>
-                      </div>
-                      <button 
-                        onClick={() => addItem(ex.id)}
-                        disabled={isAdded || customList.length >= 10}
-                        style={{ background: isAdded ? "#222" : workoutInfo.color, color: isAdded ? "#555" : "#fff", border: "none", padding: "6px 12px", borderRadius: 8, fontWeight: "bold" }}
-                      >
-                        {isAdded ? "Added" : "+"}
-                      </button>
+            <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8, marginTop: 8, background: "#0b0b12", padding: 8, borderRadius: 12 }}>
+              {searchResults.length === 0 ? (
+                <div style={{ color: "#555", fontSize: 13, textAlign: "center", padding: 12 }}>Tidak ditemukan</div>
+              ) : searchResults.map(ex => {
+                const thumb = ex.images && ex.images.length > 0 ? `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${ex.images[0]}` : null;
+                const isAdded = customList.includes(ex.id);
+                return (
+                  <div key={ex.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 8, borderRadius: 8, background: "#1a1a28", border: `1px solid ${isAdded ? workoutInfo.color : "transparent"}` }}>
+                    {thumb && <img src={thumb} style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: "#fff", fontSize: 14, fontWeight: 500 }}>{ex.name}</div>
+                      <div style={{ color: "#888", fontSize: 11 }}>{ex.primaryMuscles?.[0] || ex.category}</div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                    <button 
+                      onClick={() => addItem(ex.id)}
+                      disabled={isAdded || customList.length >= 10}
+                      style={{ background: isAdded ? "#222" : workoutInfo.color, color: isAdded ? "#555" : "#fff", border: "none", padding: "6px 12px", borderRadius: 8, fontWeight: "bold" }}
+                    >
+                      {isAdded ? "Added" : "+"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
