@@ -338,6 +338,7 @@ export default function App() {
   };
   const rank = getRank();
   const nextRank = getNextRank();
+  const currentDayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
   if (!isDbLoaded) {
     return (
@@ -422,14 +423,23 @@ export default function App() {
               const act = i === activeDay;
               const done = prog === 100;
               const dayRoutine = WORKOUT_LIBRARY[currentSchedule[i]];
+              const isFuture = i > currentDayIndex;
               return (
                 <button
                   key={day.id}
-                  onClick={() => setActiveDay(i)}
+                  onClick={() => {
+                    if (isFuture) {
+                      showToast("Belum waktunya! Sabar ya 💪");
+                    } else {
+                      setActiveDay(i);
+                    }
+                  }}
                   style={{
                     ...styles.dayPill,
                     background: act ? `${dayRoutine.color}14` : done ? "#0d1a0d" : "#111118",
                     borderColor: act ? dayRoutine.color : done ? "#2EC4B633" : "#1a1a28",
+                    opacity: isFuture ? 0.4 : 1,
+                    cursor: isFuture ? "not-allowed" : "pointer"
                   }}
                 >
                   {done && <span style={styles.doneCheck}>✓</span>}
