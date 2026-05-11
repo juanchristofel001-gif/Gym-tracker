@@ -21,48 +21,66 @@ const storage = {
 };
 
 // ──────────────── DATA ────────────────
-const WORKOUT_PLAN = [
-  {
-    id: 1, day: "Hari 1", title: "PULL", subtitle: "Punggung & Bisep", emoji: "🔙", color: "#FF6B35",
+const WEEK_DAYS = [
+  { id: 0, day: "Senin", shortDay: "SEN" },
+  { id: 1, day: "Selasa", shortDay: "SEL" },
+  { id: 2, day: "Rabu", shortDay: "RAB" },
+  { id: 3, day: "Kamis", shortDay: "KAM" },
+  { id: 4, day: "Jumat", shortDay: "JUM" },
+  { id: 5, day: "Sabtu", shortDay: "SAB" },
+  { id: 6, day: "Minggu", shortDay: "MIN" },
+];
+
+const WORKOUT_LIBRARY = {
+  pull: {
+    id: "pull", title: "PULL", subtitle: "Punggung & Bisep", emoji: "🔙", color: "#FF6B35",
     exercises: {
       minimum: { label: "Minimum", totalSets: "9 Set", items: ["Lat Pulldown (3x12)", "Chest-Supported Row (3x12)", "Machine Bicep Curl (3x15)"] },
       optimal: { label: "Optimal", totalSets: "15 Set", items: ["Lat Pulldown (3x12)", "Chest-Supported Row (3x12)", "Seated Cable Row (3x12)", "Face Pulls (3x15)", "Seated DB Hammer Curl (3x12)"] },
       maximum: { label: "Maximum", totalSets: "23 Set", items: ["Lat Pulldown (3x12)", "Straight Arm Pulldown (3x15)", "Chest-Supported Row (4x10)", "Seated Cable Row (3x12)", "Rev. Pec Deck (4x15)", "Incline DB Curl (3x12)", "Machine Preacher Curl (3x15)"] },
     },
   },
-  {
-    id: 2, day: "Hari 2", title: "PUSH", subtitle: "Dada, Bahu, Trisep", emoji: "💪", color: "#E63946",
+  push: {
+    id: "push", title: "PUSH", subtitle: "Dada, Bahu, Trisep", emoji: "💪", color: "#E63946",
     exercises: {
       minimum: { label: "Minimum", totalSets: "9 Set", items: ["Seated Machine Chest Press (3x12)", "Seated Machine Shoulder Press (3x12)", "Triceps Cable Pushdown (3x15)"] },
       optimal: { label: "Optimal", totalSets: "15 Set", items: ["Machine Chest Press (3x12)", "Incline Machine Press (3x12)", "Pec Deck Fly (3x15)", "Seated Shoulder Press (3x12)", "Triceps Pushdown (3x15)"] },
       maximum: { label: "Maximum", totalSets: "23 Set", items: ["Machine Chest Press (4x10)", "Incline Machine Press (3x12)", "Pec Deck Fly (4x15)", "Seated Shoulder Press (3x12)", "Seated Lateral Raise (3x15)", "Triceps Pushdown (3x15)", "Overhead Cable Tricep Ext. (3x15)"] },
     },
   },
-  {
-    id: 3, day: "Hari 3", title: "LEGS & LISS", subtitle: "Kaki & Kardio", emoji: "🦵", color: "#2EC4B6",
+  legs: {
+    id: "legs", title: "LEGS & LISS", subtitle: "Kaki & Kardio", emoji: "🦵", color: "#2EC4B6",
     exercises: {
       minimum: { label: "Minimum", totalSets: "6 Set + 15m", items: ["Leg Extension (3x15)", "Seated Leg Curl (3x15)", "Jalan Treadmill 15 Menit"] },
       optimal: { label: "Optimal", totalSets: "9 Set + 30m", items: ["Leg Extension (3x15)", "Seated Leg Curl (3x15)", "Seated Calf Raise (3x20)", "Jalan Treadmill 30 Menit"] },
       maximum: { label: "Maximum", totalSets: "15 Set + 45m", items: ["Leg Extension (4x15)", "Seated Leg Curl (4x15)", "Seated Calf Raise (4x20)", "Seated Hip Abductor (3x15)", "Jalan Treadmill 45 Menit"] },
     },
   },
-  {
-    id: 4, day: "Hari 4", title: "UPPER MIX", subtitle: "Dada, Punggung, Bahu", emoji: "🎯", color: "#9B5DE5",
+  upper: {
+    id: "upper", title: "UPPER MIX", subtitle: "Dada, Punggung, Bahu", emoji: "🎯", color: "#9B5DE5",
     exercises: {
       minimum: { label: "Minimum", totalSets: "9 Set", items: ["Lat Pulldown (3x12)", "Machine Chest Press (3x12)", "Seated Lateral Raise - DB ringan (3x15)"] },
       optimal: { label: "Optimal", totalSets: "15 Set", items: ["Lat Pulldown (3x12)", "Chest-Supported Row (3x12)", "Incline Machine Press (3x12)", "Pec Deck Fly (3x15)", "Seated Lateral Raise (3x15)"] },
       maximum: { label: "Maximum", totalSets: "23 Set", items: ["Lat Pulldown (4x12)", "Chest-Supported Row (4x12)", "Machine Chest Press (4x12)", "Pec Deck Fly (3x15)", "Seated Lateral Raise (4x15)", "Shrugs Duduk (4x15)"] },
     },
   },
-  {
-    id: 5, day: "Hari 5", title: "FAT BURN", subtitle: "LISS Recovery", emoji: "🔥", color: "#F77F00",
+  fatburn: {
+    id: "fatburn", title: "FAT BURN", subtitle: "LISS Recovery", emoji: "🔥", color: "#F77F00",
     exercises: {
       minimum: { label: "Minimum", totalSets: "20 Min", items: ["Sepeda Statis Recumbent 20 Menit"] },
       optimal: { label: "Optimal", totalSets: "40 Min", items: ["Jalan Treadmill (Incline 3-5%, 4-5 km/jam) 40 Menit"] },
       maximum: { label: "Maximum", totalSets: "60 Min", items: ["Sepeda Recumbent 30 Menit", "Jalan Treadmill (Kemiringan ringan) 30 Menit"] },
     },
   },
-];
+  rest: {
+    id: "rest", title: "REST DAY", subtitle: "Pemulihan Tubuh", emoji: "🧘", color: "#64748b",
+    exercises: {
+      minimum: { label: "Minimum", totalSets: "Rest", items: ["Selesai Istirahat"] },
+      optimal: { label: "Optimal", totalSets: "Rest + Stretch", items: ["Selesai Istirahat", "Peregangan Ringan 10 Menit"] },
+      maximum: { label: "Maximum", totalSets: "Active Rest", items: ["Selesai Istirahat", "Peregangan Ringan 10 Menit", "Jalan Kaki Santai 20 Menit"] },
+    },
+  },
+};
 
 const TIER_CFG = {
   minimum: { label: "MIN", border: "#64748b", icon: "⚡", xp: 10 },
@@ -107,6 +125,7 @@ const defaultState = {
   weight: 0,
   height: 0,
   personalRecords: {},
+  customSchedule: ["pull", "push", "legs", "upper", "fatburn", "rest", "rest"],
 };
 
 // ──────────────── APP ────────────────
@@ -114,7 +133,11 @@ export default function App() {
   const [state, setState] = useState(defaultState);
   const [isDbLoaded, setIsDbLoaded] = useState(false);
   const [tab, setTab] = useState("workout");
-  const [activeDay, setActiveDay] = useState(0);
+  const [activeDay, setActiveDay] = useState(() => {
+    const d = new Date().getDay();
+    return d === 0 ? 6 : d - 1; // 0=Sunday->6, 1=Monday->0
+  });
+  const [isEditingSchedule, setIsEditingSchedule] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -171,7 +194,9 @@ export default function App() {
       const wasChecked = !!s.checkedItems[key];
       const next = { ...s, checkedItems: { ...s.checkedItems, [key]: !wasChecked } };
       if (!wasChecked) {
-        const ex = WORKOUT_PLAN.find((d) => d.id === dayId)?.exercises[tier];
+        const schedule = s.customSchedule || defaultState.customSchedule;
+        const routineId = schedule[dayId];
+        const ex = WORKOUT_LIBRARY[routineId]?.exercises[tier];
         if (ex) {
           const allDone = ex.items.every((_, i) => i === idx || !!s.checkedItems[`${dayId}-${tier}-${i}`]);
           if (allDone) {
@@ -186,7 +211,7 @@ export default function App() {
               next.streak = s.lastWorkoutDate === yStr ? (s.streak || 0) + 1 : 1;
             }
             next.lastWorkoutDate = d;
-            showToast(`+${earnedXP} XP — Day ${dayId} complete!`);
+            showToast(`+${earnedXP} XP — ${WORKOUT_LIBRARY[routineId].title} complete!`);
           }
         }
       }
@@ -195,14 +220,16 @@ export default function App() {
   };
 
   const getDayProgress = (dayId) => {
-    const ex = WORKOUT_PLAN.find((d) => d.id === dayId)?.exercises[state.selectedTier];
+    const schedule = state.customSchedule || defaultState.customSchedule;
+    const routineId = schedule[dayId];
+    const ex = WORKOUT_LIBRARY[routineId]?.exercises[state.selectedTier];
     if (!ex) return 0;
     const done = ex.items.filter((_, i) => state.checkedItems[`${dayId}-${state.selectedTier}-${i}`]).length;
     return Math.round((done / ex.items.length) * 100);
   };
 
   const resetWeek = () => {
-    const completed = WORKOUT_PLAN.filter((d) => getDayProgress(d.id) === 100).length;
+    const completed = WEEK_DAYS.filter((d) => getDayProgress(d.id) === 100).length;
     update((s) => {
       const hist =
         completed > 0
@@ -211,7 +238,7 @@ export default function App() {
                 date: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
                 tier: s.selectedTier,
                 completedDays: completed,
-                totalDays: 5,
+                totalDays: 7,
               },
               ...(s.weekHistory || []),
             ].slice(0, 20)
@@ -252,7 +279,9 @@ export default function App() {
   const setSleep = (val) => update((s) => ({ ...s, sleep: { ...s.sleep, [d]: val } }));
   const setGoal = (type, val) => update((s) => ({ ...s, [`${type}Goal`]: val }));
 
-  const currentWorkout = WORKOUT_PLAN[activeDay];
+  const currentSchedule = state.customSchedule || defaultState.customSchedule;
+  const currentRoutineId = currentSchedule[activeDay];
+  const currentWorkout = WORKOUT_LIBRARY[currentRoutineId];
   const currentExercises = currentWorkout.exercises[state.selectedTier];
   const rank = getRank();
   const nextRank = getNextRank();
@@ -321,14 +350,14 @@ export default function App() {
             <div style={styles.weekBarInner}>
               <span style={styles.microLabel}>WEEK</span>
               <span style={{ ...styles.microVal, color: currentWorkout.color }}>
-                {WORKOUT_PLAN.filter((w) => getDayProgress(w.id) === 100).length}/5
+                {WEEK_DAYS.filter((w) => getDayProgress(w.id) === 100).length}/7
               </span>
             </div>
             <div style={styles.barTrack}>
               <div
                 style={{
                   ...styles.barFill,
-                  width: `${(WORKOUT_PLAN.filter((w) => getDayProgress(w.id) === 100).length / 5) * 100}%`,
+                  width: `${(WEEK_DAYS.filter((w) => getDayProgress(w.id) === 100).length / 7) * 100}%`,
                   background: currentWorkout.color,
                 }}
               />
@@ -337,29 +366,30 @@ export default function App() {
 
           {/* Day pills */}
           <div style={styles.dayRow}>
-            {WORKOUT_PLAN.map((day, i) => {
+            {WEEK_DAYS.map((day, i) => {
               const prog = getDayProgress(day.id);
               const act = i === activeDay;
               const done = prog === 100;
+              const dayRoutine = WORKOUT_LIBRARY[currentSchedule[i]];
               return (
                 <button
                   key={day.id}
                   onClick={() => setActiveDay(i)}
                   style={{
                     ...styles.dayPill,
-                    background: act ? `${day.color}14` : done ? "#0d1a0d" : "#111118",
-                    borderColor: act ? day.color : done ? "#2EC4B633" : "#1a1a28",
+                    background: act ? `${dayRoutine.color}14` : done ? "#0d1a0d" : "#111118",
+                    borderColor: act ? dayRoutine.color : done ? "#2EC4B633" : "#1a1a28",
                   }}
                 >
                   {done && <span style={styles.doneCheck}>✓</span>}
-                  <span style={{ fontSize: 16 }}>{day.emoji}</span>
-                  <span style={{ ...styles.dayPillLabel, color: act ? day.color : "#555" }}>D{day.id}</span>
+                  <span style={{ fontSize: 16 }}>{dayRoutine.emoji}</span>
+                  <span style={{ ...styles.dayPillLabel, color: act ? dayRoutine.color : "#555" }}>{day.shortDay}</span>
                   <div style={styles.miniBar}>
                     <div
                       style={{
                         ...styles.miniBarFill,
                         width: `${prog}%`,
-                        background: done ? "#2EC4B6" : day.color,
+                        background: done ? "#2EC4B6" : dayRoutine.color,
                       }}
                     />
                   </div>
@@ -369,9 +399,18 @@ export default function App() {
           </div>
 
           {/* Day title */}
-          <div style={styles.dayTitle}>
-            <h2 style={{ ...styles.dayName, color: currentWorkout.color }}>{currentWorkout.title}</h2>
-            <span style={styles.daySub}>{currentWorkout.subtitle}</span>
+          <div style={{ ...styles.dayTitle, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+            <div>
+              <h2 style={{ ...styles.dayName, color: currentWorkout.color }}>{currentWorkout.title}</h2>
+              <span style={styles.daySub}>{currentWorkout.subtitle}</span>
+            </div>
+            <button 
+              onClick={() => setIsEditingSchedule(true)} 
+              style={{ background: "transparent", border: `1px solid ${currentWorkout.color}55`, color: currentWorkout.color, padding: "4px 12px", borderRadius: 8, fontSize: 12, cursor: "pointer", fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}
+            >
+              🔄 GANTI
+            </button>
+          </div>
           </div>
 
           {/* Tier selector */}
@@ -936,6 +975,48 @@ export default function App() {
                 )}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* ═══════ EDIT SCHEDULE MODAL ═══════ */}
+      {isEditingSchedule && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20 }}>
+          <div style={{ backgroundColor: "#111118", padding: 24, borderRadius: 16, width: "100%", maxWidth: 360, border: "1px solid #333", maxHeight: "80vh", overflowY: "auto" }}>
+            <h3 style={{ margin: "0 0 16px", color: "#fff", fontSize: 18 }}>Ganti Latihan Hari {WEEK_DAYS[activeDay].day}</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {Object.values(WORKOUT_LIBRARY).map((routine) => (
+                <button
+                  key={routine.id}
+                  onClick={() => {
+                    update((s) => {
+                      const newSchedule = [...(s.customSchedule || defaultState.customSchedule)];
+                      newSchedule[activeDay] = routine.id;
+                      
+                      const newChecked = { ...s.checkedItems };
+                      Object.keys(newChecked).forEach(k => {
+                        if (k.startsWith(`${activeDay}-`)) delete newChecked[k];
+                      });
+                      
+                      return { ...s, customSchedule: newSchedule, checkedItems: newChecked };
+                    });
+                    setIsEditingSchedule(false);
+                    showToast(`Jadwal diubah ke ${routine.title}`);
+                  }}
+                  style={{
+                    background: currentRoutineId === routine.id ? `${routine.color}22` : "#1a1a28",
+                    border: `1px solid ${currentRoutineId === routine.id ? routine.color : "#333"}`,
+                    padding: 12, borderRadius: 8, color: "#fff", textAlign: "left", display: "flex", gap: 12, alignItems: "center", cursor: "pointer"
+                  }}
+                >
+                  <span style={{ fontSize: 20 }}>{routine.emoji}</span>
+                  <div>
+                    <div style={{ fontWeight: "bold", color: routine.color }}>{routine.title}</div>
+                    <div style={{ fontSize: 12, color: "#aaa" }}>{routine.subtitle}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setIsEditingSchedule(false)} style={{ width: "100%", padding: 12, marginTop: 16, background: "#333", color: "#fff", border: "none", borderRadius: 8, fontWeight: "bold", cursor: "pointer" }}>Batal</button>
           </div>
         </div>
       )}
