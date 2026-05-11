@@ -1110,7 +1110,6 @@ function StatBox({ icon, label, value }) {
 const styles = {
   shell: {
     background: "#0a0a0f",
-    minHeight: "100vh",
     minHeight: "100dvh",
     fontFamily: "'Outfit', sans-serif",
     color: "#e8e8e8",
