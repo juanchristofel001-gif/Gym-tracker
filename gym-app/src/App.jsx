@@ -83,19 +83,33 @@ const WORKOUT_LIBRARY = {
 };
 
 const TIER_CFG = {
-  minimum: { label: "MIN", border: "#64748b", icon: "⚡", xp: 10 },
-  optimal: { label: "OPT", border: "#3b82f6", icon: "🚀", xp: 20 },
-  maximum: { label: "MAX", border: "#a855f7", icon: "👑", xp: 35 },
+  minimum: { label: "MIN", border: "#64748b", icon: "⚡", xp: 2 },
+  optimal: { label: "OPT", border: "#3b82f6", icon: "🚀", xp: 4 },
+  maximum: { label: "MAX", border: "#a855f7", icon: "👑", xp: 7 },
 };
 
+// Realistic gym progression: ~3-5 XP/day avg → months per rank, years to top
 const RANKS = [
-  { name: "Newbie", icon: "🥚", minXP: 0, color: "#94a3b8" },
-  { name: "Bronze", icon: "🥉", minXP: 50, color: "#cd7f32" },
-  { name: "Silver", icon: "🥈", minXP: 150, color: "#c0c0c0" },
-  { name: "Gold", icon: "🥇", minXP: 350, color: "#ffd700" },
-  { name: "Platinum", icon: "💎", minXP: 700, color: "#00d4ff" },
-  { name: "Diamond", icon: "👑", minXP: 1200, color: "#b45fff" },
-  { name: "Legend", icon: "🔱", minXP: 2000, color: "#ff4500" },
+  { name: "Couch Potato",    icon: "🥔", minXP: 0,      color: "#6b7280" },
+  { name: "First Step",      icon: "👟", minXP: 30,     color: "#94a3b8" },
+  { name: "Gym Rookie",      icon: "🌱", minXP: 80,     color: "#78a55a" },
+  { name: "Iron Initiate",   icon: "⚙️", minXP: 180,    color: "#a8a29e" },
+  { name: "Bronze Grinder",  icon: "🥉", minXP: 350,    color: "#cd7f32" },
+  { name: "Steel Will",      icon: "🛡️", minXP: 600,    color: "#71717a" },
+  { name: "Silver Fury",     icon: "🥈", minXP: 1000,   color: "#c0c0c0" },
+  { name: "Iron Wolf",       icon: "🐺", minXP: 1600,   color: "#8b9dc3" },
+  { name: "Gold Warrior",    icon: "🥇", minXP: 2500,   color: "#ffd700" },
+  { name: "Platinum Beast",  icon: "💎", minXP: 4000,   color: "#00d4ff" },
+  { name: "Diamond Core",    icon: "💠", minXP: 6000,   color: "#b45fff" },
+  { name: "Obsidian Titan",  icon: "🗿", minXP: 9000,   color: "#1e1b4b" },
+  { name: "Phoenix Rising",  icon: "🔥", minXP: 13000,  color: "#ef4444" },
+  { name: "Shadow Olympian", icon: "⚡", minXP: 18000,  color: "#6366f1" },
+  { name: "Crimson Emperor", icon: "👑", minXP: 25000,  color: "#dc2626" },
+  { name: "Astral Demigod",  icon: "🌟", minXP: 35000,  color: "#f59e0b" },
+  { name: "Void Sovereign",  icon: "🌀", minXP: 50000,  color: "#7c3aed" },
+  { name: "Eternal Apex",    icon: "♾️", minXP: 75000,  color: "#14b8a6" },
+  { name: "Mythic Legend",   icon: "🔱", minXP: 110000, color: "#ff4500" },
+  { name: "G.O.A.T.",        icon: "🐐", minXP: 160000, color: "#fbbf24" },
 ];
 
 const STORAGE_KEY = "gym-app-v2";
