@@ -738,6 +738,38 @@ export default function App() {
                 </div>
               </div>
             )}
+
+            {/* Spotify Mini Player */}
+            <div style={{ ...styles.trackerCard, padding: 0, overflow: 'hidden', marginTop: 16 }}>
+              <button onClick={() => update(s => ({ ...s, showSpotify: !s.showSpotify }))}
+                style={{ width: '100%', padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 20 }}>🎵</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#1DB954', fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>GYM MUSIC</span>
+                </div>
+                <span style={{ fontSize: 12, color: '#666', transform: state.showSpotify ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {state.showSpotify && (
+                <div style={{ padding: '0 12px 12px' }}>
+                  <iframe
+                    style={{ borderRadius: 12, border: 'none', width: '100%', height: 152 }}
+                    src={`https://open.spotify.com/embed/playlist/${state.spotifyPlaylistId || '37i9dQZF1DX76Wlfdnj7AP'}?utm_source=generator&theme=0`}
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"
+                  />
+                  <button onClick={() => {
+                    const url = window.prompt("Paste Spotify Playlist URL:", "");
+                    if (url) {
+                      const match = url.match(/playlist\/([a-zA-Z0-9]+)/);
+                      if (match) { update(s => ({ ...s, spotifyPlaylistId: match[1] })); showToast("Playlist updated!"); }
+                      else showToast("URL tidak valid!");
+                    }
+                  }} style={{ width: '100%', marginTop: 8, padding: '8px', background: '#161622', border: '1px solid #1a1a28', borderRadius: 8, color: '#888', fontSize: 10, fontFamily: "'JetBrains Mono'", cursor: 'pointer' }}>
+                    🔗 GANTI PLAYLIST
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
