@@ -1341,7 +1341,7 @@ function AvatarImage({ rankColor, weight, height }) {
   return (
     <div style={{ height: 350, width: "100%", position: "relative", marginBottom: 24, borderRadius: 24, overflow: "hidden", background: "#111118", border: `1px solid ${rankColor}44`, display: "flex", justifyContent: "center", alignItems: "center" }}>
       <style>
-        {\`
+        {`
           @keyframes holo-flicker {
             0% { opacity: 0.8; }
             5% { opacity: 0.9; }
@@ -1353,7 +1353,7 @@ function AvatarImage({ rankColor, weight, height }) {
             0% { transform: translateY(-50px); }
             100% { transform: translateY(400px); }
           }
-        \`}
+        `}
       </style>
       <div style={{ position: "absolute", top: 16, left: 16, zIndex: 10 }}>
         <div style={{ fontSize: 12, color: "#aaa", letterSpacing: 1, fontFamily: "'JetBrains Mono'" }}>AVATAR</div>
@@ -1361,21 +1361,21 @@ function AvatarImage({ rankColor, weight, height }) {
       </div>
       
       {/* Background glow */}
-      <div style={{ position: "absolute", inset: 0, background: \`radial-gradient(circle at 50% 50%, \${rankColor}22 0%, transparent 60%)\`, pointerEvents: "none" }} />
+      <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 50% 50%, ${rankColor}22 0%, transparent 60%)`, pointerEvents: "none" }} />
       
       {/* Scanline */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: \`\${rankColor}88\`, boxShadow: \`0 0 10px \${rankColor}\`, animation: "scanline 3s linear infinite", zIndex: 20, pointerEvents: "none" }} />
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: `${rankColor}88`, boxShadow: `0 0 10px ${rankColor}`, animation: "scanline 3s linear infinite", zIndex: 20, pointerEvents: "none" }} />
 
       {/* Hologram SVG */}
       <div style={{ 
-        transform: \`scaleX(\${scaleX})\`, 
+        transform: `scaleX(${scaleX})`, 
         transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
         animation: "holo-flicker 4s infinite",
-        filter: \`drop-shadow(0 0 8px \${rankColor}) drop-shadow(0 0 16px \${rankColor}88)\`,
+        filter: `drop-shadow(0 0 8px ${rankColor}) drop-shadow(0 0 16px ${rankColor}88)`,
         pointerEvents: "none"
       }}>
         <svg viewBox="0 0 100 220" width="160" height="300">
-          <g stroke={rankColor} strokeWidth="2.5" fill={\`\${rankColor}15\`} strokeLinecap="round" strokeLinejoin="round">
+          <g stroke={rankColor} strokeWidth="2.5" fill={`${rankColor}15`} strokeLinecap="round" strokeLinejoin="round">
             {/* Head */}
             <circle cx="50" cy="30" r="14" />
             {/* Torso */}
