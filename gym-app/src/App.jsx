@@ -172,9 +172,11 @@ const defaultState = {
   protein: {},
   water: {},
   sleep: {},
+  calories: {},
   proteinGoal: 120,
   waterGoal: 8,
   sleepGoal: 8,
+  calorieGoal: 2500,
   weight: 0,
   height: 0,
   personalRecords: {},
@@ -428,10 +430,17 @@ export default function App() {
   const proteinToday = state.protein?.[d] || 0;
   const waterToday = state.water?.[d] || 0;
   const sleepToday = state.sleep?.[d] || 0;
+  const caloriesToday = state.calories?.[d] || 0;
+
+  // Auto-calculated goals from weight
+  const autoProteinGoal = state.weight > 0 ? Math.round(state.weight * 1.8) : state.proteinGoal;
+  const autoCalorieGoal = state.weight > 0 ? Math.round(state.weight * 33) : state.calorieGoal;
+  const autoWaterGoal = state.weight > 0 ? Math.round(state.weight / 8) : state.waterGoal;
 
   const addProtein = (amt) => update((s) => ({ ...s, protein: { ...s.protein, [d]: Math.max(0, (s.protein?.[d] || 0) + amt) } }));
   const addWater = (amt) => update((s) => ({ ...s, water: { ...s.water, [d]: Math.max(0, Math.min(20, (s.water?.[d] || 0) + amt)) } }));
   const setSleep = (val) => update((s) => ({ ...s, sleep: { ...s.sleep, [d]: val } }));
+  const addCalories = (amt) => update((s) => ({ ...s, calories: { ...s.calories, [d]: Math.max(0, (s.calories?.[d] || 0) + amt) } }));
   const setGoal = (type, val) => update((s) => ({ ...s, [`${type}Goal`]: val }));
 
   const currentSchedule = state.customSchedule || defaultState.customSchedule;
@@ -734,214 +743,151 @@ export default function App() {
       )}
 
       {/* ═══════ NUTRITION TAB ═══════ */}
-      {tab === "nutrition" && (
+      {tab === "nutrition" && (() => {
+        const pPct = Math.min(100, (proteinToday / autoProteinGoal) * 100);
+        const wPct = Math.min(100, (waterToday / autoWaterGoal) * 100);
+        const sPct = Math.min(100, (sleepToday / state.sleepGoal) * 100);
+        const cPct = Math.min(100, (caloriesToday / autoCalorieGoal) * 100);
+        const fuelScore = Math.round((pPct + wPct + sPct + cPct) / 4);
+        const fuelColor = fuelScore >= 80 ? '#2EC4B6' : fuelScore >= 50 ? '#fbbf24' : '#ef4444';
+        const MEAL_PRESETS = [
+          { name: "Whey Shake", protein: 25, cal: 120, icon: "🥤" },
+          { name: "Dada Ayam", protein: 31, cal: 165, icon: "🍗" },
+          { name: "Telur 2 butir", protein: 12, cal: 140, icon: "🥚" },
+          { name: "Nasi + Lauk", protein: 15, cal: 450, icon: "🍚" },
+          { name: "Oatmeal", protein: 5, cal: 150, icon: "🥣" },
+          { name: "Susu", protein: 8, cal: 120, icon: "🥛" },
+        ];
+        return (
         <div style={styles.page}>
           <div style={{ ...styles.header, paddingBottom: 12 }}>
             <div>
               <div style={styles.headerLabel}>DAILY TRACKER</div>
-              <h1
-                style={{
-                  ...styles.headerTitle,
-                  background: "linear-gradient(135deg, #2EC4B6, #fff)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                FUEL
-              </h1>
+              <h1 style={{ ...styles.headerTitle, background: "linear-gradient(135deg, #2EC4B6, #fff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>FUEL</h1>
             </div>
-            <div style={{ fontSize: 11, color: "#555", fontFamily: "'JetBrains Mono'" }}>
-              {new Date().toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short" })}
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: 32, fontWeight: 900, color: fuelColor, fontFamily: "'Outfit'", lineHeight: 1 }}>{fuelScore}</div>
+              <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>FUEL SCORE</div>
             </div>
           </div>
 
           <div style={{ padding: "0 20px 120px" }}>
+            {/* Auto-calc notice */}
+            {state.weight > 0 && (
+              <div style={{ background: '#161622', borderRadius: 12, padding: '10px 14px', marginBottom: 16, border: '1px solid #1a1a28', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 14 }}>⚡</span>
+                <span style={{ fontSize: 10, color: '#888', fontFamily: "'JetBrains Mono'" }}>
+                  Target otomatis dari berat {state.weight}kg — Protein: {autoProteinGoal}g · Kalori: {autoCalorieGoal} · Air: {autoWaterGoal} gelas
+                </span>
+              </div>
+            )}
+            {!state.weight && (
+              <div style={{ background: '#1a1a28', borderRadius: 12, padding: '12px 14px', marginBottom: 16, border: '1px solid #333', textAlign: 'center' }}>
+                <span style={{ fontSize: 11, color: '#fbbf24' }}>⚠️ Isi berat badan di tab Stats untuk target otomatis</span>
+              </div>
+            )}
+
+            {/* Fuel Score Ring */}
+            <div style={{ ...styles.trackerCard, display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ position: 'relative', width: 80, height: 80 }}>
+                <svg viewBox="0 0 36 36" width="80" height="80">
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#1a1a28" strokeWidth="3" />
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke={fuelColor} strokeWidth="3" strokeDasharray={`${fuelScore}, 100`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 0.6s ease' }} />
+                </svg>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 900, color: fuelColor, fontFamily: "'Outfit'" }}>{fuelScore}</div>
+              </div>
+              <div style={{ flex: 1 }}>
+                <SummaryRow label="Protein" value={`${proteinToday}/${autoProteinGoal}g`} pct={pPct} color="#FF6B35" />
+                <SummaryRow label="Kalori" value={`${caloriesToday}/${autoCalorieGoal}`} pct={cPct} color="#f59e0b" />
+                <SummaryRow label="Air" value={`${waterToday}/${autoWaterGoal}`} pct={wPct} color="#3b82f6" />
+                <SummaryRow label="Tidur" value={`${sleepToday}/${state.sleepGoal}h`} pct={sPct} color="#2EC4B6" />
+              </div>
+            </div>
+
+            {/* Meal Presets */}
+            <div style={styles.trackerCard}>
+              <div style={{ ...styles.trackerTitle, marginBottom: 12, letterSpacing: 2 }}>🍽️ QUICK ADD</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                {MEAL_PRESETS.map(m => (
+                  <button key={m.name} onClick={() => { addProtein(m.protein); addCalories(m.cal); showToast(`+${m.protein}g protein, +${m.cal} kcal`); }}
+                    style={{ background: '#161622', border: '1px solid #1a1a28', borderRadius: 12, padding: '12px 6px', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}>
+                    <div style={{ fontSize: 24 }}>{m.icon}</div>
+                    <div style={{ fontSize: 9, color: '#ddd', fontWeight: 600, marginTop: 4 }}>{m.name}</div>
+                    <div style={{ fontSize: 8, color: '#888', fontFamily: "'JetBrains Mono'", marginTop: 2 }}>{m.protein}g · {m.cal}kcal</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Calorie Card */}
+            <TrackerCard title="CALORIES" icon="🔥" value={caloriesToday} goal={autoCalorieGoal} unit="kcal" color="#f59e0b"
+              onAdd={(a) => addCalories(a)} buttons={[100, 200, 300, 500]} canSubtract
+              onEditGoal={() => {}} isEditing={false} goalValue={autoCalorieGoal} onSetGoal={() => {}} />
+
             {/* Protein Card */}
-            <TrackerCard
-              title="PROTEIN"
-              icon="🥩"
-              value={proteinToday}
-              goal={state.proteinGoal}
-              unit="g"
-              color="#FF6B35"
-              onAdd={(a) => addProtein(a)}
-              buttons={[10, 20, 30, 50]}
-              canSubtract
-              onEditGoal={() => setEditingGoal(editingGoal === "protein" ? null : "protein")}
-              isEditing={editingGoal === "protein"}
-              goalValue={state.proteinGoal}
-              onSetGoal={(v) => {
-                setGoal("protein", v);
-                setEditingGoal(null);
-              }}
-            />
+            <TrackerCard title="PROTEIN" icon="🥩" value={proteinToday} goal={autoProteinGoal} unit="g" color="#FF6B35"
+              onAdd={(a) => addProtein(a)} buttons={[10, 20, 30, 50]} canSubtract
+              onEditGoal={() => {}} isEditing={false} goalValue={autoProteinGoal} onSetGoal={() => {}} />
 
             {/* Water Card */}
             <div style={{ ...styles.trackerCard, position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: -50, right: -50, width: 100, height: 100, background: '#3b82f6', filter: 'blur(60px)', opacity: 0.15, borderRadius: '50%' }} />
-              
               <div style={styles.trackerHeader}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{ fontSize: 24, background: `#3b82f615`, padding: 8, borderRadius: 12 }}>💧</div>
                   <span style={{ ...styles.trackerTitle, fontSize: 16 }}>HYDRATION</span>
                 </div>
-                <button onClick={() => setEditingGoal(editingGoal === "water" ? null : "water")} style={{ ...styles.goalEditBtn, background: '#1a1a28', border: '1px solid #333' }}>
-                  {waterToday}/{state.waterGoal}
+                <div style={{ ...styles.goalEditBtn, background: '#1a1a28', border: '1px solid #333' }}>
+                  {waterToday}/{autoWaterGoal}
                   <span style={{ fontSize: 10, color: '#888', marginLeft: 4 }}>gelas</span>
-                </button>
+                </div>
               </div>
-              
-              {editingGoal === "water" && (
-                <GoalEditor
-                  current={state.waterGoal}
-                  unit="gelas"
-                  onSave={(v) => {
-                    setGoal("water", v);
-                    setEditingGoal(null);
-                  }}
-                />
-              )}
-              
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24, marginBottom: 8 }}>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', flex: 1 }}>
-                  {Array.from({ length: state.waterGoal }, (_, i) => {
+                  {Array.from({ length: autoWaterGoal }, (_, i) => {
                     const isFilled = i < waterToday;
                     return (
-                      <button
-                        key={i}
-                        onClick={() =>
-                          update((s) => ({
-                            ...s,
-                            water: { ...s.water, [d]: isFilled ? i : i + 1 },
-                          }))
-                        }
-                        style={{
-                          width: 32,
-                          height: 40,
-                          borderRadius: '12px 12px 16px 16px',
-                          border: `1px solid ${isFilled ? '#3b82f6' : '#222'}`,
+                      <button key={i} onClick={() => update((s) => ({ ...s, water: { ...s.water, [d]: isFilled ? i : i + 1 } }))}
+                        style={{ width: 32, height: 40, borderRadius: '12px 12px 16px 16px', border: `1px solid ${isFilled ? '#3b82f6' : '#222'}`,
                           background: isFilled ? 'linear-gradient(180deg, #60a5fa, #3b82f6)' : '#111118',
                           boxShadow: isFilled ? '0 4px 12px rgba(59, 130, 246, 0.4), inset 0 2px 4px rgba(255,255,255,0.3)' : 'none',
-                          cursor: 'pointer',
-                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                          transform: isFilled ? 'scale(1.05) translateY(-2px)' : 'scale(1)',
-                        }}
-                      />
+                          cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: isFilled ? 'scale(1.05) translateY(-2px)' : 'scale(1)' }} />
                     );
                   })}
                 </div>
-                <div style={{ fontSize: 40, fontWeight: 900, color: '#3b82f6', fontFamily: "'Outfit'", textShadow: '0 0 20px rgba(59, 130, 246, 0.4)', marginLeft: 16 }}>
-                  {waterToday}
-                </div>
+                <div style={{ fontSize: 40, fontWeight: 900, color: '#3b82f6', fontFamily: "'Outfit'", textShadow: '0 0 20px rgba(59, 130, 246, 0.4)', marginLeft: 16 }}>{waterToday}</div>
               </div>
-              
               <div style={{ ...styles.barTrack, height: 4, borderRadius: 4, background: '#111118', marginTop: 16 }}>
-                <div
-                  style={{
-                    ...styles.barFill,
-                    height: '100%',
-                    width: `${Math.min(100, (waterToday / state.waterGoal) * 100)}%`,
-                    background: "linear-gradient(90deg, #3b82f6, #60a5fa)",
-                    boxShadow: "0 0 10px #3b82f688"
-                  }}
-                />
+                <div style={{ ...styles.barFill, height: '100%', width: `${Math.min(100, (waterToday / autoWaterGoal) * 100)}%`, background: "linear-gradient(90deg, #3b82f6, #60a5fa)", boxShadow: "0 0 10px #3b82f688" }} />
               </div>
             </div>
 
             {/* Sleep Card */}
             <div style={{ ...styles.trackerCard, position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: -50, right: -50, width: 100, height: 100, background: '#9b5de5', filter: 'blur(60px)', opacity: 0.15, borderRadius: '50%' }} />
-              
               <div style={styles.trackerHeader}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{ fontSize: 24, background: `#9b5de515`, padding: 8, borderRadius: 12 }}>😴</div>
                   <span style={{ ...styles.trackerTitle, fontSize: 16 }}>REST</span>
                 </div>
-                <button onClick={() => setEditingGoal(editingGoal === "sleep" ? null : "sleep")} style={{ ...styles.goalEditBtn, background: '#1a1a28', border: '1px solid #333' }}>
-                  Goal: {state.sleepGoal}h
-                </button>
+                <div style={{ ...styles.goalEditBtn, background: '#1a1a28', border: '1px solid #333' }}>Goal: {state.sleepGoal}h</div>
               </div>
-              
-              {editingGoal === "sleep" && (
-                <GoalEditor
-                  current={state.sleepGoal}
-                  unit="jam"
-                  step={0.5}
-                  onSave={(v) => {
-                    setGoal("sleep", v);
-                    setEditingGoal(null);
-                  }}
-                />
-              )}
-              
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, marginTop: 24, marginBottom: 20 }}>
-                <button 
-                  onClick={() => setSleep(Math.max(0, sleepToday - 0.5))} 
-                  style={{ ...styles.circleBtn, width: 48, height: 48, fontSize: 24, background: '#111118', border: '1px solid #333', color: '#888' }}
-                >
-                  −
-                </button>
+                <button onClick={() => setSleep(Math.max(0, sleepToday - 0.5))} style={{ ...styles.circleBtn, width: 48, height: 48, fontSize: 24, background: '#111118', border: '1px solid #333', color: '#888' }}>−</button>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div
-                    style={{
-                      fontSize: 64,
-                      lineHeight: 0.9,
-                      fontWeight: 900,
-                      color:
-                        sleepToday >= state.sleepGoal
-                          ? "#2EC4B6"
-                          : sleepToday >= state.sleepGoal * 0.75
-                          ? "#fbbf24"
-                          : "#ef4444",
-                      fontFamily: "'Outfit'",
-                      textShadow: `0 0 30px ${sleepToday >= state.sleepGoal ? '#2EC4B6' : sleepToday >= state.sleepGoal * 0.75 ? '#fbbf24' : '#ef4444'}66`
-                    }}
-                  >
-                    {sleepToday}
-                  </div>
-                  <div style={{ fontSize: 12, color: "#666", fontFamily: "'JetBrains Mono'", letterSpacing: 2, marginTop: 8, fontWeight: 600 }}>
-                    HOURS
-                  </div>
+                  <div style={{ fontSize: 64, lineHeight: 0.9, fontWeight: 900, color: sleepToday >= state.sleepGoal ? "#2EC4B6" : sleepToday >= state.sleepGoal * 0.75 ? "#fbbf24" : "#ef4444", fontFamily: "'Outfit'" }}>{sleepToday}</div>
+                  <div style={{ fontSize: 12, color: "#666", fontFamily: "'JetBrains Mono'", letterSpacing: 2, marginTop: 8, fontWeight: 600 }}>HOURS</div>
                 </div>
-                <button 
-                  onClick={() => setSleep(Math.min(14, sleepToday + 0.5))} 
-                  style={{ ...styles.circleBtn, width: 48, height: 48, fontSize: 24, background: '#111118', border: '1px solid #333', color: '#888' }}
-                >
-                  +
-                </button>
+                <button onClick={() => setSleep(Math.min(14, sleepToday + 0.5))} style={{ ...styles.circleBtn, width: 48, height: 48, fontSize: 24, background: '#111118', border: '1px solid #333', color: '#888' }}>+</button>
               </div>
-              
               <div style={{ ...styles.barTrack, height: 6, borderRadius: 6, background: '#111118' }}>
-                <div
-                  style={{
-                    ...styles.barFill,
-                    height: '100%',
-                    width: `${Math.min(100, (sleepToday / state.sleepGoal) * 100)}%`,
-                    background:
-                      sleepToday >= state.sleepGoal
-                        ? "linear-gradient(90deg, #2EC4B6, #6ee7b7)"
-                        : "linear-gradient(90deg, #ef4444, #fbbf24)",
-                    boxShadow: `0 0 12px ${sleepToday >= state.sleepGoal ? '#2EC4B6' : '#fbbf24'}88`,
-                    borderRadius: 6
-                  }}
-                />
+                <div style={{ ...styles.barFill, height: '100%', width: `${sPct}%`, background: sleepToday >= state.sleepGoal ? "linear-gradient(90deg, #2EC4B6, #6ee7b7)" : "linear-gradient(90deg, #ef4444, #fbbf24)", boxShadow: `0 0 12px ${sleepToday >= state.sleepGoal ? '#2EC4B6' : '#fbbf24'}88`, borderRadius: 6 }} />
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
-                <span style={{ fontSize: 10, color: "#555", fontFamily: "'JetBrains Mono'" }}>0h</span>
-                <span style={{ fontSize: 10, color: "#555", fontFamily: "'JetBrains Mono'" }}>{state.sleepGoal}h Target</span>
-              </div>
-            </div>
-
-            {/* Daily summary */}
-            <div style={{ ...styles.trackerCard, background: "linear-gradient(135deg, #111118, #161622)" }}>
-              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>📋 DAILY SUMMARY</div>
-              <SummaryRow label="Protein" value={`${proteinToday}/${state.proteinGoal}g`} pct={Math.min(100, (proteinToday / state.proteinGoal) * 100)} color="#FF6B35" />
-              <SummaryRow label="Water" value={`${waterToday}/${state.waterGoal}`} pct={Math.min(100, (waterToday / state.waterGoal) * 100)} color="#3b82f6" />
-              <SummaryRow label="Sleep" value={`${sleepToday}/${state.sleepGoal}h`} pct={Math.min(100, (sleepToday / state.sleepGoal) * 100)} color="#2EC4B6" />
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* ═══════ RANK TAB ═══════ */}
       {tab === "rank" && (
