@@ -7,19 +7,19 @@ const __dirname = path.dirname(__filename);
 
 const images = [
   {
-    src: 'C:/Users/User/.gemini/antigravity/brain/0c915541-f220-4070-a434-a38a5a9896d6/bmi_underweight_1778558463727.png',
+    src: 'C:/Users/User/.gemini/antigravity/brain/0c915541-f220-4070-a434-a38a5a9896d6/holo_underweight_1778568418200.png',
     dest: 'public/bmi_underweight.png'
   },
   {
-    src: 'C:/Users/User/.gemini/antigravity/brain/0c915541-f220-4070-a434-a38a5a9896d6/bmi_normal_1778558481916.png',
+    src: 'C:/Users/User/.gemini/antigravity/brain/0c915541-f220-4070-a434-a38a5a9896d6/holo_normal_1778568432584.png',
     dest: 'public/bmi_normal.png'
   },
   {
-    src: 'C:/Users/User/.gemini/antigravity/brain/0c915541-f220-4070-a434-a38a5a9896d6/bmi_overweight_1778558500171.png',
+    src: 'C:/Users/User/.gemini/antigravity/brain/0c915541-f220-4070-a434-a38a5a9896d6/holo_overweight_1778568478297.png',
     dest: 'public/bmi_overweight.png'
   },
   {
-    src: 'C:/Users/User/.gemini/antigravity/brain/0c915541-f220-4070-a434-a38a5a9896d6/bmi_obese_1778558513803.png',
+    src: 'C:/Users/User/.gemini/antigravity/brain/0c915541-f220-4070-a434-a38a5a9896d6/holo_obese_1778568449151.png',
     dest: 'public/bmi_obese.png'
   }
 ];

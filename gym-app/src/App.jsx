@@ -1345,7 +1345,7 @@ function AvatarImage({ rankColor, weight, height }) {
         <div style={{ fontSize: 18, fontWeight: "bold", color: rankColor }}>{statusText.toUpperCase()}</div>
       </div>
       <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 50% 50%, ${rankColor}22 0%, transparent 60%)`, pointerEvents: "none" }} />
-      <img src={avatarSrc} alt="Avatar" style={{ height: "95%", objectFit: "contain", zIndex: 5, pointerEvents: "none" }} />
+      <img src={avatarSrc} alt="Avatar" style={{ height: "95%", objectFit: "contain", zIndex: 5, pointerEvents: "none", mixBlendMode: "screen", filter: `drop-shadow(0 0 10px ${rankColor})` }} />
     </div>
   );
 }
