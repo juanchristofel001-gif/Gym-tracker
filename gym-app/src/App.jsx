@@ -132,6 +132,34 @@ const EXERCISE_LIBRARY = [
   "Dumbbell Press", "Lateral Raise", "Leg Extension", "Leg Curl"
 ];
 
+// ──────────────── ACHIEVEMENTS ────────────────
+const ACHIEVEMENTS = [
+  // Workout milestones
+  { id: "first_blood",   icon: "🩸", name: "First Blood",        desc: "Selesaikan workout pertama",     check: s => (s.totalWorkouts || 0) >= 1,   category: "workout" },
+  { id: "getting_warm",  icon: "🌡️", name: "Getting Warm",       desc: "Selesaikan 10 workouts",         check: s => (s.totalWorkouts || 0) >= 10,  category: "workout" },
+  { id: "iron_habit",    icon: "⚒️", name: "Iron Habit",         desc: "Selesaikan 50 workouts",         check: s => (s.totalWorkouts || 0) >= 50,  category: "workout" },
+  { id: "centurion",     icon: "🏛️", name: "Centurion",          desc: "Selesaikan 100 workouts",        check: s => (s.totalWorkouts || 0) >= 100, category: "workout" },
+  { id: "spartan",       icon: "⚔️", name: "Spartan 300",        desc: "Selesaikan 300 workouts",        check: s => (s.totalWorkouts || 0) >= 300, category: "workout" },
+  { id: "titan_grind",   icon: "🗿", name: "Titan Grind",        desc: "Selesaikan 1000 workouts",       check: s => (s.totalWorkouts || 0) >= 1000,category: "workout" },
+  // Streak milestones
+  { id: "on_fire",       icon: "🔥", name: "On Fire",            desc: "Streak 3 hari berturut-turut",   check: s => (s.streak || 0) >= 3,          category: "streak" },
+  { id: "iron_week",     icon: "📅", name: "Iron Week",          desc: "Streak 7 hari berturut-turut",   check: s => (s.streak || 0) >= 7,          category: "streak" },
+  { id: "unstoppable",   icon: "🚂", name: "Unstoppable",        desc: "Streak 14 hari berturut-turut",  check: s => (s.streak || 0) >= 14,         category: "streak" },
+  { id: "machine",       icon: "🤖", name: "Machine",            desc: "Streak 30 hari berturut-turut",  check: s => (s.streak || 0) >= 30,         category: "streak" },
+  { id: "no_days_off",   icon: "♾️", name: "No Days Off",        desc: "Streak 100 hari berturut-turut", check: s => (s.streak || 0) >= 100,        category: "streak" },
+  // Week milestones
+  { id: "month_one",     icon: "📆", name: "Month One",          desc: "Selesaikan 4 minggu",            check: s => (s.weekHistory || []).length >= 4,  category: "milestone" },
+  { id: "quarter_beast", icon: "🦁", name: "Quarter Beast",      desc: "Selesaikan 12 minggu (3 bulan)", check: s => (s.weekHistory || []).length >= 12, category: "milestone" },
+  { id: "half_year",     icon: "🌗", name: "Half-Year Hero",     desc: "Selesaikan 26 minggu (6 bulan)", check: s => (s.weekHistory || []).length >= 26, category: "milestone" },
+  { id: "year_of_steel", icon: "🏆", name: "Year of Steel",      desc: "Selesaikan 52 minggu (1 tahun)", check: s => (s.weekHistory || []).length >= 52, category: "milestone" },
+  // Misc
+  { id: "know_thyself",  icon: "🪞", name: "Know Thyself",       desc: "Isi berat dan tinggi badan",     check: s => s.weight > 0 && s.height > 0,      category: "misc" },
+  { id: "record_setter", icon: "📝", name: "Record Setter",      desc: "Catat PR pertamamu",             check: s => Object.keys(s.personalRecords || {}).length >= 1, category: "misc" },
+  { id: "pr_collector",  icon: "🎯", name: "PR Collector",       desc: "Catat 5 Personal Records",       check: s => Object.keys(s.personalRecords || {}).length >= 5, category: "misc" },
+  { id: "scale_master",  icon: "⚖️", name: "Scale Master",       desc: "Log berat badan 7 kali",         check: s => (s.weightHistory || []).length >= 7, category: "misc" },
+  { id: "max_mode",      icon: "👑", name: "Maximum Effort",     desc: "Pilih tier MAXIMUM",             check: s => s.selectedTier === "maximum",       category: "misc" },
+];
+
 const defaultState = {
   checkedItems: {},
   selectedTier: "optimal",
@@ -974,6 +1002,87 @@ export default function App() {
               <StatBox icon="🔥" label="Streak" value={`${state.streak || 0}d`} />
               <StatBox icon="⚡" label="Total XP" value={state.xp || 0} />
               <StatBox icon="📅" label="Weeks" value={(state.weekHistory || []).length} />
+            </div>
+
+            {/* ═══════ ACHIEVEMENTS ═══════ */}
+            <div style={styles.trackerCard}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <div style={{ ...styles.trackerTitle, letterSpacing: 2, marginBottom: 0 }}>🏅 ACHIEVEMENTS</div>
+                <span style={{ fontSize: 11, color: '#888', fontFamily: "'JetBrains Mono'" }}>
+                  {ACHIEVEMENTS.filter(a => a.check(state)).length}/{ACHIEVEMENTS.length}
+                </span>
+              </div>
+
+              {/* Progress bar */}
+              <div style={{ ...styles.barTrack, height: 6, marginBottom: 16 }}>
+                <div style={{
+                  ...styles.barFill,
+                  height: 6,
+                  width: `${(ACHIEVEMENTS.filter(a => a.check(state)).length / ACHIEVEMENTS.length) * 100}%`,
+                  background: 'linear-gradient(90deg, #FF6B35, #fbbf24)',
+                  borderRadius: 3,
+                }} />
+              </div>
+
+              {/* Badge grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                {ACHIEVEMENTS.map(a => {
+                  const unlocked = a.check(state);
+                  return (
+                    <div key={a.id} style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                      padding: '12px 4px', borderRadius: 12,
+                      background: unlocked ? '#161622' : '#0d0d14',
+                      border: unlocked ? '1px solid #333' : '1px solid #1a1a28',
+                      opacity: unlocked ? 1 : 0.4,
+                      transition: 'all 0.3s ease',
+                    }}>
+                      <span style={{ fontSize: 24, filter: unlocked ? 'none' : 'grayscale(1)' }}>{a.icon}</span>
+                      <span style={{ fontSize: 8, fontFamily: "'JetBrains Mono'", color: unlocked ? '#ddd' : '#555', textAlign: 'center', lineHeight: 1.2, letterSpacing: 0.5 }}>
+                        {a.name}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Unlocked details */}
+              {ACHIEVEMENTS.filter(a => a.check(state)).length > 0 && (
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ fontSize: 10, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginBottom: 8 }}>UNLOCKED</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {ACHIEVEMENTS.filter(a => a.check(state)).map(a => (
+                      <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: '#161622', borderRadius: 8, border: '1px solid #2a2a3a' }}>
+                        <span style={{ fontSize: 20 }}>{a.icon}</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: '#eee' }}>{a.name}</div>
+                          <div style={{ fontSize: 9, color: '#888', fontFamily: "'JetBrains Mono'" }}>{a.desc}</div>
+                        </div>
+                        <span style={{ fontSize: 10, color: '#2EC4B6' }}>✓</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Next to unlock */}
+              {ACHIEVEMENTS.filter(a => !a.check(state)).length > 0 && (
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ fontSize: 10, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginBottom: 8 }}>NEXT TO UNLOCK</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {ACHIEVEMENTS.filter(a => !a.check(state)).slice(0, 3).map(a => (
+                      <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: '#0d0d14', borderRadius: 8, border: '1px solid #1a1a28', opacity: 0.6 }}>
+                        <span style={{ fontSize: 20, filter: 'grayscale(1)' }}>{a.icon}</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: '#888' }}>{a.name}</div>
+                          <div style={{ fontSize: 9, color: '#555', fontFamily: "'JetBrains Mono'" }}>{a.desc}</div>
+                        </div>
+                        <span style={{ fontSize: 10, color: '#555' }}>🔒</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Rank ladder */}
