@@ -115,6 +115,16 @@ const RANKS = [
 const STORAGE_KEY = "gym-app-v2";
 const today = () => new Date().toISOString().slice(0, 10);
 
+// Get ISO week ID like "2026-W20" for auto week tracking
+const getWeekId = () => {
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+};
+
 const EXERCISE_LIBRARY = [
   "Bench Press", "Squat", "Deadlift", "Overhead Press", "Barbell Row", 
   "Pull Up", "Lat Pulldown", "Leg Press", "Bicep Curl", "Tricep Extension", 
@@ -130,6 +140,7 @@ const defaultState = {
   streak: 0,
   lastWorkoutDate: null,
   weekHistory: [],
+  currentWeekId: null,
   protein: {},
   water: {},
   sleep: {},
@@ -139,6 +150,7 @@ const defaultState = {
   weight: 0,
   height: 0,
   personalRecords: {},
+  weightHistory: [],
   customSchedule: ["pull", "push", "legs", "upper", "fatburn", "rest", "rest"],
   customRoutines: {}, // { "pull": ["3_4_Sit-Up", "Adductor"], ... }
   avatarUrl: "",
@@ -184,7 +196,59 @@ export default function App() {
     const loadDb = async () => {
       const saved = await storage.get(STORAGE_KEY);
       if (mounted) {
-        if (saved) setState({ ...defaultState, ...saved });
+        if (saved) {
+          let s = { ...defaultState, ...saved };
+          // ── Auto week reset based on calendar ──
+          const thisWeek = getWeekId();
+          if (s.currentWeekId && s.currentWeekId !== thisWeek) {
+            // New week detected! Save old week to history
+            const schedule = s.customSchedule || defaultState.customSchedule;
+            const tier = s.selectedTier || 'optimal';
+            let completed = 0;
+            for (let dayId = 0; dayId < 7; dayId++) {
+              const routineId = schedule[dayId];
+              if (routineId === 'rest') continue;
+              const lib = WORKOUT_LIBRARY[routineId];
+              if (!lib) continue;
+              const custom = s.customRoutines?.[routineId];
+              let itemCount = 0;
+              if (custom && custom.length > 0) {
+                const limit = tier === 'minimum' ? 4 : tier === 'optimal' ? 6 : 10;
+                itemCount = Math.min(custom.length, limit);
+              } else {
+                itemCount = (lib.exercises[tier]?.items || []).length;
+              }
+              if (itemCount > 0) {
+                const allDone = Array.from({length: itemCount}, (_, i) => !!s.checkedItems[`${dayId}-${tier}-${i}`]).every(Boolean);
+                if (allDone) completed++;
+              }
+            }
+            if (completed > 0) {
+              s.weekHistory = [
+                {
+                  date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+                  weekId: s.currentWeekId,
+                  tier: tier,
+                  completedDays: completed,
+                  totalDays: 7,
+                },
+                ...(s.weekHistory || [])
+              ].slice(0, 52);
+            }
+            s.checkedItems = {};
+            s.currentWeekId = thisWeek;
+            storage.set(STORAGE_KEY, s);
+          } else if (!s.currentWeekId) {
+            s.currentWeekId = thisWeek;
+            storage.set(STORAGE_KEY, s);
+          }
+          setState(s);
+        } else {
+          // First time user
+          const init = { ...defaultState, currentWeekId: getWeekId() };
+          setState(init);
+          storage.set(STORAGE_KEY, init);
+        }
         setIsDbLoaded(true);
       }
     };
@@ -298,14 +362,15 @@ export default function App() {
           ? [
               {
                 date: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
+                weekId: getWeekId(),
                 tier: s.selectedTier,
                 completedDays: completed,
                 totalDays: 7,
               },
               ...(s.weekHistory || []),
-            ].slice(0, 20)
+            ].slice(0, 52)
           : s.weekHistory;
-      return { ...s, checkedItems: {}, weekHistory: hist };
+      return { ...s, checkedItems: {}, weekHistory: hist, currentWeekId: getWeekId() };
     });
     showToast("Week reset!");
   };
