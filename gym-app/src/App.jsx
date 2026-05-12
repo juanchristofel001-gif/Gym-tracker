@@ -1324,17 +1324,17 @@ function AvatarImage({ rankColor, weight, height }) {
     bmi = weight / Math.pow(height / 100, 2);
   }
 
-  let scaleX = 1;
+  let bmiClass = "normal";
   let statusText = "Normal";
 
   if (bmi < 18.5) {
-    scaleX = 0.8;
+    bmiClass = "underweight";
     statusText = "Underweight";
   } else if (bmi >= 25 && bmi < 30) {
-    scaleX = 1.3;
+    bmiClass = "overweight";
     statusText = "Overweight";
   } else if (bmi >= 30) {
-    scaleX = 1.6;
+    bmiClass = "obese";
     statusText = "Obese";
   }
   
@@ -1368,27 +1368,74 @@ function AvatarImage({ rankColor, weight, height }) {
 
       {/* Hologram SVG */}
       <div style={{ 
-        transform: `scaleX(${scaleX})`, 
-        transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+        transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
         animation: "holo-flicker 4s infinite",
         filter: `drop-shadow(0 0 8px ${rankColor}) drop-shadow(0 0 16px ${rankColor}88)`,
         pointerEvents: "none"
       }}>
-        <svg viewBox="0 0 100 220" width="160" height="300">
-          <g stroke={rankColor} strokeWidth="2.5" fill={`${rankColor}15`} strokeLinecap="round" strokeLinejoin="round">
-            {/* Head */}
-            <circle cx="50" cy="30" r="14" />
-            {/* Torso */}
-            <path d="M 32 55 Q 50 48 68 55 L 60 120 L 40 120 Z" />
-            {/* Arms */}
-            <path d="M 32 55 L 20 110 L 26 110 L 36 70 Z" />
-            <path d="M 68 55 L 80 110 L 74 110 L 64 70 Z" />
-            {/* Legs */}
-            <path d="M 40 120 L 32 210 L 42 210 L 48 150 L 52 150 L 58 210 L 68 210 L 60 120" />
-            {/* Inner details / Cyber lines */}
-            <path d="M 50 60 L 50 110" strokeWidth="1" strokeDasharray="4 4" opacity="0.6" fill="none" />
-            <circle cx="50" cy="85" r="4" fill={rankColor} />
-            <path d="M 35 150 L 65 150" strokeWidth="1" strokeDasharray="2 2" opacity="0.4" fill="none" />
+        <svg viewBox="0 0 100 200" width="180" height="320">
+          <g stroke={rankColor} strokeWidth="1.5" fill={`${rankColor}10`} strokeLinecap="round" strokeLinejoin="round">
+            
+            {bmiClass === 'underweight' && (
+              <>
+                <ellipse cx="50" cy="20" rx="10" ry="13" />
+                <path d="M 46 33 L 46 40 M 54 33 L 54 40" />
+                <path d="M 38 40 Q 50 38 62 40 L 58 100 L 42 100 Z" />
+                <path d="M 42 55 Q 50 60 58 55 M 50 40 L 50 55" />
+                <path d="M 44 70 L 48 68 M 56 70 L 52 68 M 45 80 L 49 78 M 55 80 L 51 78" />
+                <path d="M 38 40 L 28 95 L 33 95 L 42 45 Z" />
+                <path d="M 62 40 L 72 95 L 67 95 L 58 45 Z" />
+                <path d="M 42 100 L 35 180 L 42 180 L 48 100 Z" />
+                <path d="M 58 100 L 65 180 L 58 180 L 52 100 Z" />
+              </>
+            )}
+
+            {bmiClass === 'normal' && (
+              <>
+                <ellipse cx="50" cy="20" rx="11" ry="14" />
+                <path d="M 44 33 L 40 42 M 56 33 L 60 42" />
+                <path d="M 30 42 Q 50 38 70 42 L 58 100 L 42 100 Z" />
+                <path d="M 33 60 Q 42 70 50 62 Q 58 70 67 60 M 50 42 L 50 62" />
+                <path d="M 45 70 L 55 70 M 45 80 L 55 80 M 46 90 L 54 90 M 50 62 L 50 95" />
+                <path d="M 30 42 Q 20 55 24 70 Q 20 85 28 100 L 34 100 L 38 70 Z" />
+                <path d="M 70 42 Q 80 55 76 70 Q 80 85 72 100 L 66 100 L 62 70 Z" />
+                <path d="M 42 100 Q 30 130 35 180 L 44 180 L 48 100 Z" />
+                <path d="M 58 100 Q 70 130 65 180 L 56 180 L 52 100 Z" />
+              </>
+            )}
+
+            {bmiClass === 'overweight' && (
+              <>
+                <ellipse cx="50" cy="20" rx="12" ry="15" />
+                <path d="M 44 34 L 44 45 M 56 34 L 56 45" />
+                <path d="M 32 45 Q 25 80 35 110 L 65 110 Q 75 80 68 45 Z" />
+                <path d="M 35 65 Q 42 75 50 70 Q 58 75 65 65 M 50 45 L 50 65" />
+                <path d="M 32 95 Q 50 115 68 95" />
+                <circle cx="50" cy="85" r="1.5" />
+                <path d="M 32 45 Q 18 70 25 100 L 33 100 L 38 65 Z" />
+                <path d="M 68 45 Q 82 70 75 100 L 67 100 L 62 65 Z" />
+                <path d="M 35 110 Q 28 150 35 180 L 45 180 L 48 110 Z" />
+                <path d="M 65 110 Q 72 150 65 180 L 55 180 L 52 110 Z" />
+              </>
+            )}
+
+            {bmiClass === 'obese' && (
+              <>
+                <ellipse cx="50" cy="22" rx="14" ry="16" />
+                <path d="M 28 48 Q 10 90 25 125 Q 50 140 75 125 Q 90 90 72 48 Z" />
+                <path d="M 28 75 Q 42 90 50 80 Q 58 90 72 75 M 50 48 L 50 75" />
+                <path d="M 22 105 Q 50 135 78 105" />
+                <path d="M 25 125 Q 50 145 75 125" />
+                <circle cx="50" cy="95" r="1.5" />
+                <path d="M 28 48 Q 10 70 18 100 L 30 100 L 38 65 Z" />
+                <path d="M 72 48 Q 90 70 82 100 L 70 100 L 62 65 Z" />
+                <path d="M 25 125 Q 15 160 30 180 L 45 180 L 48 135 Z" />
+                <path d="M 75 125 Q 85 160 70 180 L 55 180 L 52 135 Z" />
+              </>
+            )}
+
+            {/* Inner details / Cyber lines (global) */}
+            <path d="M 50 10 L 50 0" strokeWidth="1" strokeDasharray="2 2" opacity="0.6" fill="none" />
           </g>
         </svg>
       </div>
