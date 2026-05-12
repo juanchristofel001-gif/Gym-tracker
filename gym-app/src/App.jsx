@@ -1349,7 +1349,7 @@ function AvatarModel({ url }) {
 }
 
 function AvatarScene({ rankColor, avatarUrl, onUpdateAvatar }) {
-  const defaultUrl = "https://models.readyplayer.me/64f1a9b1c7f07851239bf0b7.glb";
+  const defaultUrl = "https://vazxmixizvqxwwhosnxy.supabase.co/storage/v1/object/public/models/stacy/model.gltf";
   const currentUrl = avatarUrl || defaultUrl;
 
   const handleEdit = () => {
@@ -1381,7 +1381,6 @@ function AvatarScene({ rankColor, avatarUrl, onUpdateAvatar }) {
         
         <Suspense fallback={null}>
           <AvatarModel url={currentUrl} />
-          <Environment preset="city" />
           <ContactShadows position={[0, -1.8, 0]} opacity={0.7} scale={10} blur={2.5} far={4} color="#000" />
         </Suspense>
         
