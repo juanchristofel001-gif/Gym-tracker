@@ -1324,28 +1324,74 @@ function AvatarImage({ rankColor, weight, height }) {
     bmi = weight / Math.pow(height / 100, 2);
   }
 
-  let avatarSrc = "/bmi_normal.png";
+  let scaleX = 1;
   let statusText = "Normal";
 
   if (bmi < 18.5) {
-    avatarSrc = "/bmi_underweight.png";
+    scaleX = 0.8;
     statusText = "Underweight";
   } else if (bmi >= 25 && bmi < 30) {
-    avatarSrc = "/bmi_overweight.png";
+    scaleX = 1.3;
     statusText = "Overweight";
   } else if (bmi >= 30) {
-    avatarSrc = "/bmi_obese.png";
+    scaleX = 1.6;
     statusText = "Obese";
   }
   
   return (
-    <div style={{ height: 350, width: "100%", position: "relative", marginBottom: 24, borderRadius: 24, overflow: "hidden", background: "#111118", border: `1px solid ${rankColor}44`, display: "flex", justifyContent: "center", alignItems: "flex-end" }}>
+    <div style={{ height: 350, width: "100%", position: "relative", marginBottom: 24, borderRadius: 24, overflow: "hidden", background: "#111118", border: `1px solid ${rankColor}44`, display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <style>
+        {\`
+          @keyframes holo-flicker {
+            0% { opacity: 0.8; }
+            5% { opacity: 0.9; }
+            10% { opacity: 0.5; }
+            15% { opacity: 1; }
+            100% { opacity: 0.8; }
+          }
+          @keyframes scanline {
+            0% { transform: translateY(-50px); }
+            100% { transform: translateY(400px); }
+          }
+        \`}
+      </style>
       <div style={{ position: "absolute", top: 16, left: 16, zIndex: 10 }}>
         <div style={{ fontSize: 12, color: "#aaa", letterSpacing: 1, fontFamily: "'JetBrains Mono'" }}>AVATAR</div>
         <div style={{ fontSize: 18, fontWeight: "bold", color: rankColor }}>{statusText.toUpperCase()}</div>
       </div>
-      <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 50% 50%, ${rankColor}22 0%, transparent 60%)`, pointerEvents: "none" }} />
-      <img src={avatarSrc} alt="Avatar" style={{ height: "95%", objectFit: "contain", zIndex: 5, pointerEvents: "none", mixBlendMode: "screen", filter: `drop-shadow(0 0 10px ${rankColor})` }} />
+      
+      {/* Background glow */}
+      <div style={{ position: "absolute", inset: 0, background: \`radial-gradient(circle at 50% 50%, \${rankColor}22 0%, transparent 60%)\`, pointerEvents: "none" }} />
+      
+      {/* Scanline */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: \`\${rankColor}88\`, boxShadow: \`0 0 10px \${rankColor}\`, animation: "scanline 3s linear infinite", zIndex: 20, pointerEvents: "none" }} />
+
+      {/* Hologram SVG */}
+      <div style={{ 
+        transform: \`scaleX(\${scaleX})\`, 
+        transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+        animation: "holo-flicker 4s infinite",
+        filter: \`drop-shadow(0 0 8px \${rankColor}) drop-shadow(0 0 16px \${rankColor}88)\`,
+        pointerEvents: "none"
+      }}>
+        <svg viewBox="0 0 100 220" width="160" height="300">
+          <g stroke={rankColor} strokeWidth="2.5" fill={\`\${rankColor}15\`} strokeLinecap="round" strokeLinejoin="round">
+            {/* Head */}
+            <circle cx="50" cy="30" r="14" />
+            {/* Torso */}
+            <path d="M 32 55 Q 50 48 68 55 L 60 120 L 40 120 Z" />
+            {/* Arms */}
+            <path d="M 32 55 L 20 110 L 26 110 L 36 70 Z" />
+            <path d="M 68 55 L 80 110 L 74 110 L 64 70 Z" />
+            {/* Legs */}
+            <path d="M 40 120 L 32 210 L 42 210 L 48 150 L 52 150 L 58 210 L 68 210 L 60 120" />
+            {/* Inner details / Cyber lines */}
+            <path d="M 50 60 L 50 110" strokeWidth="1" strokeDasharray="4 4" opacity="0.6" fill="none" />
+            <circle cx="50" cy="85" r="4" fill={rankColor} />
+            <path d="M 35 150 L 65 150" strokeWidth="1" strokeDasharray="2 2" opacity="0.4" fill="none" />
+          </g>
+        </svg>
+      </div>
     </div>
   );
 }
