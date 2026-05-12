@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useCallback, useMemo, Suspense, Component } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useGLTF, OrbitControls, Environment, ContactShadows } from "@react-three/drei";
 import { get as idbGet, set as idbSet } from "idb-keyval";
@@ -1319,6 +1319,29 @@ function SummaryRow({ label, value, pct, color }) {
   );
 }
 
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ height: 350, width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", background: "#111118", borderRadius: 24, border: "1px solid #333", marginBottom: 24 }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>⚠️</div>
+          <div style={{ color: "#ff6b6b", fontWeight: "bold" }}>Gagal memuat Avatar 3D</div>
+          <div style={{ color: "#aaa", fontSize: 12, marginTop: 4 }}>URL tidak valid atau koneksi terputus.</div>
+          <button onClick={() => this.setState({ hasError: false })} style={{ marginTop: 16, padding: "8px 16px", background: "#333", color: "#fff", border: "none", borderRadius: 8 }}>Coba Lagi</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // ──────────────── 3D AVATAR COMPONENT ────────────────
 function AvatarModel({ url }) {
   const { scene } = useGLTF(url);
@@ -1337,7 +1360,8 @@ function AvatarScene({ rankColor, avatarUrl, onUpdateAvatar }) {
   };
   
   return (
-    <div style={{ height: 350, width: "100%", position: "relative", marginBottom: 24, borderRadius: 24, overflow: "hidden", background: "#111118", border: `1px solid ${rankColor}44` }}>
+    <ErrorBoundary>
+      <div style={{ height: 350, width: "100%", position: "relative", marginBottom: 24, borderRadius: 24, overflow: "hidden", background: "#111118", border: `1px solid ${rankColor}44` }}>
       <div style={{ position: "absolute", top: 16, left: 16, zIndex: 10 }}>
         <div style={{ fontSize: 12, color: "#aaa", letterSpacing: 1, fontFamily: "'JetBrains Mono'" }}>AVATAR</div>
         <div style={{ fontSize: 18, fontWeight: "bold", color: rankColor }}>3D MODE</div>
@@ -1363,10 +1387,11 @@ function AvatarScene({ rankColor, avatarUrl, onUpdateAvatar }) {
         
         <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={2} minPolarAngle={Math.PI/2.5} maxPolarAngle={Math.PI/1.5} />
       </Canvas>
-      <div style={{ position: "absolute", bottom: 12, width: "100%", textAlign: "center", pointerEvents: "none", fontSize: 10, color: "#666", fontFamily: "'JetBrains Mono'" }}>
-        DRAG TO ROTATE
+        <div style={{ position: "absolute", bottom: 12, width: "100%", textAlign: "center", pointerEvents: "none", fontSize: 10, color: "#666", fontFamily: "'JetBrains Mono'" }}>
+          DRAG TO ROTATE
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }
 
