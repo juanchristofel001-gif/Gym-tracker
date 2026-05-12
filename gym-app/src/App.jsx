@@ -1120,6 +1120,166 @@ export default function App() {
                 )}
               </div>
             </div>
+
+            {/* ═══════ PROGRESS OVERVIEW ═══════ */}
+            <div style={styles.trackerCard}>
+              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>📊 PROGRESS OVERVIEW</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 8 }}>
+                <div style={{ background: '#161622', borderRadius: 12, padding: '14px 8px', textAlign: 'center', border: '1px solid #1a1a28' }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: '#FF6B35', fontFamily: "'Outfit'" }}>{state.totalWorkouts || 0}</div>
+                  <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginTop: 2 }}>WORKOUTS</div>
+                </div>
+                <div style={{ background: '#161622', borderRadius: 12, padding: '14px 8px', textAlign: 'center', border: '1px solid #1a1a28' }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: '#2EC4B6', fontFamily: "'Outfit'" }}>{state.streak || 0}</div>
+                  <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginTop: 2 }}>STREAK</div>
+                </div>
+                <div style={{ background: '#161622', borderRadius: 12, padding: '14px 8px', textAlign: 'center', border: '1px solid #1a1a28' }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: rank.color, fontFamily: "'Outfit'" }}>{state.xp || 0}</div>
+                  <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginTop: 2 }}>TOTAL XP</div>
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <div style={{ background: '#161622', borderRadius: 12, padding: '14px 12px', textAlign: 'center', border: '1px solid #1a1a28' }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: '#ddd', fontFamily: "'Outfit'" }}>
+                    {(state.weekHistory || []).length}
+                  </div>
+                  <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginTop: 2 }}>WEEKS COMPLETED</div>
+                </div>
+                <div style={{ background: '#161622', borderRadius: 12, padding: '14px 12px', textAlign: 'center', border: '1px solid #1a1a28' }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: '#ddd', fontFamily: "'Outfit'" }}>
+                    {(state.weekHistory || []).length > 0
+                      ? Math.round((state.weekHistory || []).reduce((a, h) => a + h.completedDays, 0) / (state.weekHistory || []).length * 10) / 10
+                      : 0
+                    }/7
+                  </div>
+                  <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginTop: 2 }}>AVG DAYS/WEEK</div>
+                </div>
+              </div>
+            </div>
+
+            {/* ═══════ WEEK HISTORY CHART ═══════ */}
+            {(state.weekHistory || []).length > 0 && (
+              <div style={styles.trackerCard}>
+                <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>📅 WEEKLY HISTORY</div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 120, marginBottom: 12 }}>
+                  {(state.weekHistory || []).slice(0, 12).reverse().map((h, i) => {
+                    const pct = Math.round((h.completedDays / h.totalDays) * 100);
+                    const barColor = pct === 100 ? '#2EC4B6' : pct >= 70 ? '#FF6B35' : '#555';
+                    return (
+                      <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                        <div style={{ fontSize: 8, color: '#888', fontFamily: "'JetBrains Mono'" }}>{h.completedDays}</div>
+                        <div style={{ width: '100%', maxWidth: 28, height: `${Math.max(8, pct)}%`, background: barColor, borderRadius: '4px 4px 0 0', transition: 'height 0.4s ease', position: 'relative' }}>
+                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%)', borderRadius: 'inherit' }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  {(state.weekHistory || []).slice(0, 12).reverse().map((h, i) => (
+                    <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: 7, color: '#555', fontFamily: "'JetBrains Mono'", overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      {h.date.split(' ').slice(0, 2).join(' ')}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Full History List */}
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ fontSize: 10, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginBottom: 8 }}>ALL RECORDS</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 200, overflowY: 'auto' }}>
+                    {(state.weekHistory || []).map((h, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#161622', borderRadius: 8, border: '1px solid #1a1a28' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 14 }}>{h.completedDays === h.totalDays ? '✅' : h.completedDays >= 5 ? '🟡' : '🔴'}</span>
+                          <span style={{ fontSize: 11, color: '#aaa' }}>{h.date}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ fontSize: 8, color: '#555', fontFamily: "'JetBrains Mono'", textTransform: 'uppercase' }}>{h.tier}</span>
+                          <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "'JetBrains Mono'", color: h.completedDays === h.totalDays ? '#2EC4B6' : '#888' }}>
+                            {h.completedDays}/{h.totalDays}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ═══════ WEIGHT HISTORY ═══════ */}
+            <div style={styles.trackerCard}>
+              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>⚖️ WEIGHT LOG</div>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                <input 
+                  type="number" 
+                  placeholder="Berat hari ini (kg)"
+                  id="weight-log-input"
+                  style={{ ...styles.inputField, flex: 1 }} 
+                />
+                <button 
+                  onClick={() => {
+                    const inp = document.getElementById('weight-log-input');
+                    const val = Number(inp.value);
+                    if (!val) return;
+                    update(s => ({
+                      ...s,
+                      weight: val,
+                      weightHistory: [
+                        { date: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short" }), value: val },
+                        ...(s.weightHistory || [])
+                      ].slice(0, 30)
+                    }));
+                    inp.value = '';
+                    showToast(`Berat ${val}kg dicatat!`);
+                  }}
+                  style={{ background: '#FF6B35', border: 'none', borderRadius: 10, padding: '0 16px', color: '#000', fontWeight: 700, fontFamily: "'JetBrains Mono'", cursor: 'pointer', fontSize: 11 }}
+                >
+                  LOG
+                </button>
+              </div>
+              
+              {(state.weightHistory || []).length > 0 && (
+                <>
+                  {/* Mini weight chart */}
+                  {(() => {
+                    const data = (state.weightHistory || []).slice(0, 14).reverse();
+                    const values = data.map(d => d.value);
+                    const min = Math.min(...values) - 2;
+                    const max = Math.max(...values) + 2;
+                    const range = max - min || 1;
+                    return (
+                      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 80, marginBottom: 8, padding: '0 4px' }}>
+                        {data.map((d, i) => {
+                          const pct = ((d.value - min) / range) * 100;
+                          return (
+                            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                              <div style={{ fontSize: 7, color: '#888', fontFamily: "'JetBrains Mono'" }}>{d.value}</div>
+                              <div style={{ 
+                                width: '100%', maxWidth: 20, 
+                                height: `${Math.max(10, pct)}%`, 
+                                background: i === data.length - 1 ? '#FF6B35' : '#333',
+                                borderRadius: '3px 3px 0 0' 
+                              }} />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 150, overflowY: 'auto' }}>
+                    {(state.weightHistory || []).map((w, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 12px', background: '#161622', borderRadius: 8, border: '1px solid #1a1a28' }}>
+                        <span style={{ fontSize: 11, color: '#aaa' }}>{w.date}</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#FF6B35', fontFamily: "'JetBrains Mono'" }}>{w.value} kg</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+              {(state.weightHistory || []).length === 0 && (
+                <div style={{ textAlign: 'center', padding: 20, color: '#555', fontSize: 12 }}>Belum ada catatan berat badan.</div>
+              )}
+            </div>
           </div>
         </div>
       )}
