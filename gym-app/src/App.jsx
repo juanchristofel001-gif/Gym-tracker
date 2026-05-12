@@ -740,12 +740,26 @@ export default function App() {
             )}
 
             {/* Spotify Mini Player */}
-            <div style={{ ...styles.trackerCard, padding: 0, overflow: 'hidden', marginTop: 16 }}>
+            <div style={{ ...styles.trackerCard, padding: 0, overflow: 'hidden', marginTop: 16, border: state.showSpotify ? '1px solid #1DB954' : '1px solid #1a1a28' }}>
               <button onClick={() => update(s => ({ ...s, showSpotify: !s.showSpotify }))}
                 style={{ width: '100%', padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ fontSize: 20 }}>🎵</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#1DB954', fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>GYM MUSIC</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#1DB954', fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>GYM MUSIC</span>
+                    {state.showSpotify && (
+                      <div style={{ display: 'flex', gap: 2, height: 8, alignItems: 'flex-end', marginTop: 2 }}>
+                        {[1, 2, 3, 4, 5, 6].map(i => (
+                          <div key={i} style={{ 
+                            width: 2, 
+                            backgroundColor: '#1DB954', 
+                            borderRadius: 1,
+                            animation: `holo-flicker ${0.4 + (i * 0.1)}s infinite alternate ease-in-out` 
+                          }} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <span style={{ fontSize: 12, color: '#666', transform: state.showSpotify ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
               </button>
