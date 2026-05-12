@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { Canvas } from "@react-three/fiber";
+import { useGLTF, OrbitControls, Environment, ContactShadows } from "@react-three/drei";
 import { get as idbGet, set as idbSet } from "idb-keyval";
 
 // ──────────────── STORAGE HELPER ────────────────
@@ -127,6 +129,7 @@ const defaultState = {
   personalRecords: {},
   customSchedule: ["pull", "push", "legs", "upper", "fatburn", "rest", "rest"],
   customRoutines: {}, // { "pull": ["3_4_Sit-Up", "Adductor"], ... }
+  avatarUrl: "",
 };
 
 // ──────────────── APP ────────────────
@@ -1005,6 +1008,13 @@ export default function App() {
           </div>
 
           <div style={{ padding: "0 20px 120px" }}>
+            {/* 3D AVATAR SCENE */}
+            <AvatarScene 
+              rankColor={rank.color} 
+              avatarUrl={state.avatarUrl} 
+              onUpdateAvatar={(url) => update(s => ({ ...s, avatarUrl: url }))} 
+            />
+
             {/* Vitals Card */}
             <div style={styles.trackerCard}>
               <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>⚖️ BASIC VITALS</div>
@@ -1304,6 +1314,57 @@ function SummaryRow({ label, value, pct, color }) {
         <div
           style={{ height: "100%", width: `${pct}%`, background: pct >= 100 ? "#2EC4B6" : color, borderRadius: 4, transition: "width 0.4s ease" }}
         />
+      </div>
+    </div>
+  );
+}
+
+// ──────────────── 3D AVATAR COMPONENT ────────────────
+function AvatarModel({ url }) {
+  const { scene } = useGLTF(url);
+  return <primitive object={scene} scale={1.8} position={[0, -1.8, 0]} />;
+}
+
+function AvatarScene({ rankColor, avatarUrl, onUpdateAvatar }) {
+  const defaultUrl = "https://models.readyplayer.me/64f1a9b1c7f07851239bf0b7.glb";
+  const currentUrl = avatarUrl || defaultUrl;
+
+  const handleEdit = () => {
+    const url = window.prompt("Masukkan URL Avatar Ready Player Me (.glb):", currentUrl);
+    if (url !== null) {
+      onUpdateAvatar(url);
+    }
+  };
+  
+  return (
+    <div style={{ height: 350, width: "100%", position: "relative", marginBottom: 24, borderRadius: 24, overflow: "hidden", background: "#111118", border: `1px solid ${rankColor}44` }}>
+      <div style={{ position: "absolute", top: 16, left: 16, zIndex: 10 }}>
+        <div style={{ fontSize: 12, color: "#aaa", letterSpacing: 1, fontFamily: "'JetBrains Mono'" }}>AVATAR</div>
+        <div style={{ fontSize: 18, fontWeight: "bold", color: rankColor }}>3D MODE</div>
+      </div>
+      <button 
+        onClick={handleEdit}
+        style={{ position: "absolute", top: 16, right: 16, zIndex: 10, background: "#1a1a28", border: `1px solid ${rankColor}55`, color: rankColor, padding: "4px 10px", borderRadius: 8, fontSize: 10, cursor: "pointer", fontFamily: "'JetBrains Mono'" }}
+      >
+        ✏️ EDIT URL
+      </button>
+      <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 50% 50%, ${rankColor}22 0%, transparent 60%)`, pointerEvents: "none" }} />
+      <Canvas camera={{ position: [0, 0, 4.5], fov: 45 }}>
+        <ambientLight intensity={0.4} />
+        <directionalLight position={[5, 5, 5]} intensity={0.8} />
+        <pointLight position={[-5, 0, -5]} intensity={2} color={rankColor} />
+        <spotLight position={[0, 5, 0]} intensity={1.5} penumbra={1} color={rankColor} />
+        
+        <Suspense fallback={null}>
+          <AvatarModel url={currentUrl} />
+          <Environment preset="city" />
+          <ContactShadows position={[0, -1.8, 0]} opacity={0.7} scale={10} blur={2.5} far={4} color="#000" />
+        </Suspense>
+        
+        <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={2} minPolarAngle={Math.PI/2.5} maxPolarAngle={Math.PI/1.5} />
+      </Canvas>
+      <div style={{ position: "absolute", bottom: 12, width: "100%", textAlign: "center", pointerEvents: "none", fontSize: 10, color: "#666", fontFamily: "'JetBrains Mono'" }}>
+        DRAG TO ROTATE
       </div>
     </div>
   );
