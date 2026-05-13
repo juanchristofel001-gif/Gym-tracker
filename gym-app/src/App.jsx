@@ -118,7 +118,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 // ──────────────── SPOTIFY PKCE AUTH ────────────────
 const SPOTIFY_CLIENT_ID = '34e9165d4b534bb0b13e3b0a78a69563';
 const SPOTIFY_SCOPES = 'user-read-currently-playing user-read-playback-state user-modify-playback-state';
-const getSpotifyRedirect = () => window.location.origin + window.location.pathname;
+const getSpotifyRedirect = () => 'https://gym-tracker-pearl-nine.vercel.app/';
 
 function genRandom(len) {
   const c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
