@@ -115,6 +115,44 @@ const RANKS = [
 const STORAGE_KEY = "gym-app-v2";
 const today = () => new Date().toISOString().slice(0, 10);
 
+// ──────────────── SPOTIFY PKCE AUTH ────────────────
+const SPOTIFY_CLIENT_ID = '34e9165d4b534bb0b13e3b0a78a69563';
+const SPOTIFY_SCOPES = 'user-read-currently-playing user-read-playback-state user-modify-playback-state';
+const getSpotifyRedirect = () => window.location.origin + window.location.pathname;
+
+function genRandom(len) {
+  const c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  return Array.from(crypto.getRandomValues(new Uint8Array(len)), x => c[x % c.length]).join('');
+}
+async function pkceChallenge(verifier) {
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+  return btoa(String.fromCharCode(...new Uint8Array(hash))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+async function spotifyLogin() {
+  const v = genRandom(64);
+  localStorage.setItem('sp_verifier', v);
+  const ch = await pkceChallenge(v);
+  const p = new URLSearchParams({ response_type: 'code', client_id: SPOTIFY_CLIENT_ID, scope: SPOTIFY_SCOPES, code_challenge_method: 'S256', code_challenge: ch, redirect_uri: getSpotifyRedirect() });
+  window.location.href = `https://accounts.spotify.com/authorize?${p}`;
+}
+async function spotifyExchangeCode(code) {
+  const r = await fetch('https://accounts.spotify.com/api/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ client_id: SPOTIFY_CLIENT_ID, grant_type: 'authorization_code', code, redirect_uri: getSpotifyRedirect(), code_verifier: localStorage.getItem('sp_verifier') }) });
+  return r.json();
+}
+async function spotifyRefresh(rt) {
+  const r = await fetch('https://accounts.spotify.com/api/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ client_id: SPOTIFY_CLIENT_ID, grant_type: 'refresh_token', refresh_token: rt }) });
+  return r.json();
+}
+async function spotifyApi(token, endpoint, method = 'GET') {
+  const r = await fetch(`https://api.spotify.com/v1/me/player${endpoint}`, { method, headers: { Authorization: `Bearer ${token}` } });
+  if (r.status === 204 || r.status === 202) return null;
+  if (r.status === 401) return { error: 'expired' };
+  if (!r.ok) return null;
+  return r.json();
+}
+
 // Get ISO week ID like "2026-W20" for auto week tracking
 const getWeekId = () => {
   const now = new Date();
@@ -214,6 +252,66 @@ export default function App() {
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
   const [exerciseDb, setExerciseDb] = useState([]);
   const [editingRoutine, setEditingRoutine] = useState(null); // e.g. "pull"
+  
+  // ── Spotify state ──
+  const [spToken, setSpToken] = useState(localStorage.getItem('sp_token') || null);
+  const [spRefreshToken, setSpRefreshToken] = useState(localStorage.getItem('sp_refresh') || null);
+  const [spNowPlaying, setSpNowPlaying] = useState(null);
+
+  // Handle Spotify OAuth callback
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    if (code) {
+      window.history.replaceState({}, '', window.location.pathname);
+      spotifyExchangeCode(code).then(data => {
+        if (data.access_token) {
+          setSpToken(data.access_token);
+          setSpRefreshToken(data.refresh_token);
+          localStorage.setItem('sp_token', data.access_token);
+          localStorage.setItem('sp_refresh', data.refresh_token);
+        }
+      });
+    }
+  }, []);
+
+  // Poll now playing every 5s
+  useEffect(() => {
+    if (!spToken) return;
+    let active = true;
+    const poll = async () => {
+      const data = await spotifyApi(spToken, '/currently-playing');
+      if (!active) return;
+      if (data?.error === 'expired' && spRefreshToken) {
+        const fresh = await spotifyRefresh(spRefreshToken);
+        if (fresh.access_token) {
+          setSpToken(fresh.access_token);
+          localStorage.setItem('sp_token', fresh.access_token);
+          if (fresh.refresh_token) { setSpRefreshToken(fresh.refresh_token); localStorage.setItem('sp_refresh', fresh.refresh_token); }
+        } else { setSpToken(null); localStorage.removeItem('sp_token'); }
+        return;
+      }
+      if (data?.item) setSpNowPlaying({ name: data.item.name, artist: data.item.artists?.map(a => a.name).join(', '), album: data.item.album?.name, image: data.item.album?.images?.[0]?.url, isPlaying: data.is_playing, progress: data.progress_ms, duration: data.item.duration_ms });
+      else setSpNowPlaying(null);
+    };
+    poll();
+    const id = setInterval(poll, 5000);
+    return () => { active = false; clearInterval(id); };
+  }, [spToken, spRefreshToken]);
+
+  const spControl = async (action) => {
+    if (!spToken) return;
+    if (action === 'play') await spotifyApi(spToken, '/play', 'PUT');
+    else if (action === 'pause') await spotifyApi(spToken, '/pause', 'PUT');
+    else if (action === 'next') await spotifyApi(spToken, '/next', 'POST');
+    else if (action === 'prev') await spotifyApi(spToken, '/previous', 'POST');
+    setTimeout(async () => {
+      const data = await spotifyApi(spToken, '/currently-playing');
+      if (data?.item) setSpNowPlaying({ name: data.item.name, artist: data.item.artists?.map(a => a.name).join(', '), album: data.item.album?.name, image: data.item.album?.images?.[0]?.url, isPlaying: data.is_playing, progress: data.progress_ms, duration: data.item.duration_ms });
+    }, 500);
+  };
+
+  const spotifyLogout = () => { setSpToken(null); setSpRefreshToken(null); setSpNowPlaying(null); localStorage.removeItem('sp_token'); localStorage.removeItem('sp_refresh'); };
 
   useEffect(() => {
     fetch('/exercises.json')
@@ -739,50 +837,70 @@ export default function App() {
               </div>
             )}
 
-            {/* Spotify Mini Player */}
-            <div style={{ ...styles.trackerCard, padding: 0, overflow: 'hidden', marginTop: 16, border: state.showSpotify ? '1px solid #1DB95433' : '1px solid #1a1a28' }}>
+            {/* Spotify Connected Player */}
+            <div style={{ ...styles.trackerCard, padding: 0, overflow: 'hidden', marginTop: 16, border: spToken ? '1px solid #1DB95433' : '1px solid #1a1a28' }}>
               <button onClick={() => update(s => ({ ...s, showSpotify: !s.showSpotify }))}
                 style={{ width: '100%', padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ fontSize: 20 }}>🎵</span>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#1DB954', fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>GYM MUSIC</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#1DB954', fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>
+                      {spToken ? (spNowPlaying ? 'NOW PLAYING' : 'SPOTIFY CONNECTED') : 'GYM MUSIC'}
+                    </span>
+                    {spNowPlaying && !state.showSpotify && (
+                      <span style={{ fontSize: 9, color: '#888', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{spNowPlaying.name}</span>
+                    )}
                     {state.showSpotify && (
                       <div style={{ display: 'flex', gap: 2, height: 8, alignItems: 'flex-end', marginTop: 2 }}>
-                        {[1, 2, 3, 4, 5, 6].map(i => (
-                          <div key={i} style={{ width: 2, backgroundColor: '#1DB954', borderRadius: 1, animation: `holo-flicker ${0.4 + (i * 0.1)}s infinite alternate ease-in-out` }} />
-                        ))}
+                        {[1,2,3,4,5,6].map(i => <div key={i} style={{ width: 2, backgroundColor: '#1DB954', borderRadius: 1, animation: `holo-flicker ${0.4+(i*0.1)}s infinite alternate ease-in-out` }} />)}
                       </div>
                     )}
                   </div>
                 </div>
-                <span style={{ fontSize: 12, color: '#666', transform: state.showSpotify ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {spToken && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#1DB954', boxShadow: '0 0 6px #1DB954' }} />}
+                  <span style={{ fontSize: 12, color: '#666', transform: state.showSpotify ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+                </div>
               </button>
               {state.showSpotify && (
                 <div style={{ padding: '0 12px 12px' }}>
-                  {/* Open in Spotify App */}
-                  <a href={`https://open.spotify.com/playlist/${state.spotifyPlaylistId || '37i9dQZF1DX76Wlfdnj7AP'}`}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '12px', background: '#1DB954', borderRadius: 50, textDecoration: 'none', marginBottom: 10, fontWeight: 700, fontSize: 13, color: '#000', fontFamily: "'JetBrains Mono'", letterSpacing: 0.5 }}>
-                    ▶ OPEN IN SPOTIFY
-                  </a>
-                  {/* Compact embed for preview */}
-                  <iframe
-                    style={{ borderRadius: 12, border: 'none', width: '100%', height: 80 }}
-                    src={`https://open.spotify.com/embed/playlist/${state.spotifyPlaylistId || '37i9dQZF1DX76Wlfdnj7AP'}?utm_source=generator&theme=0`}
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"
-                  />
-                  <button onClick={() => {
-                    const url = window.prompt("Paste Spotify playlist/album/track URL:", "");
-                    if (url) {
-                      const match = url.match(/(playlist|album|track)\/([a-zA-Z0-9]+)/);
-                      if (match) { update(s => ({ ...s, spotifyPlaylistId: match[2], spotifyType: match[1] })); showToast("Updated!"); }
-                      else showToast("URL tidak valid!");
-                    }
-                  }} style={{ width: '100%', marginTop: 8, padding: '8px', background: '#161622', border: '1px solid #1a1a28', borderRadius: 8, color: '#888', fontSize: 10, fontFamily: "'JetBrains Mono'", cursor: 'pointer' }}>
-                    🔗 GANTI PLAYLIST
-                  </button>
+                  {!spToken ? (
+                    <>
+                      <button onClick={spotifyLogin} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '14px', background: '#1DB954', borderRadius: 50, border: 'none', fontWeight: 700, fontSize: 14, color: '#000', fontFamily: "'JetBrains Mono'", cursor: 'pointer', letterSpacing: 0.5 }}>
+                        🔗 CONNECT SPOTIFY
+                      </button>
+                      <div style={{ fontSize: 9, color: '#555', textAlign: 'center', marginTop: 8, fontFamily: "'JetBrains Mono'" }}>Login untuk kontrol musik langsung dari sini</div>
+                    </>
+                  ) : (
+                    <>
+                      {spNowPlaying ? (
+                        <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 12 }}>
+                          {spNowPlaying.image && <img src={spNowPlaying.image} alt="" style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover' }} />}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: '#eee', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{spNowPlaying.name}</div>
+                            <div style={{ fontSize: 10, color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{spNowPlaying.artist}</div>
+                            <div style={{ ...styles.barTrack, height: 3, marginTop: 8, borderRadius: 2 }}>
+                              <div style={{ height: '100%', width: `${(spNowPlaying.progress / spNowPlaying.duration) * 100}%`, background: '#1DB954', borderRadius: 2, transition: 'width 1s linear' }} />
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '12px 0', color: '#555', fontSize: 11 }}>
+                          Tidak ada lagu diputar — buka Spotify dan play sesuatu!
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 8 }}>
+                        <button onClick={() => spControl('prev')} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#aaa', padding: 8 }}>⏮</button>
+                        <button onClick={() => spControl(spNowPlaying?.isPlaying ? 'pause' : 'play')} style={{ background: '#1DB954', border: 'none', width: 44, height: 44, borderRadius: '50%', fontSize: 18, cursor: 'pointer', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {spNowPlaying?.isPlaying ? '⏸' : '▶'}
+                        </button>
+                        <button onClick={() => spControl('next')} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#aaa', padding: 8 }}>⏭</button>
+                      </div>
+                      <button onClick={spotifyLogout} style={{ width: '100%', padding: '6px', background: 'none', border: '1px solid #333', borderRadius: 8, color: '#555', fontSize: 9, fontFamily: "'JetBrains Mono'", cursor: 'pointer' }}>
+                        DISCONNECT
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
