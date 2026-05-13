@@ -198,6 +198,15 @@ const ACHIEVEMENTS = [
   { id: "max_mode",      icon: "👑", name: "Maximum Effort",     desc: "Pilih tier MAXIMUM",             check: s => s.selectedTier === "maximum",       category: "misc" },
 ];
 
+// ──────────────── PILLARS (like Ejen Ali) ────────────────
+const PILLARS = [
+  { id: "titan",   name: "TITAN",   desc: "Raw Strength & Power",       color: "#ef4444", icon: "🗿", stat: "Kekuatan mentah, angkatan berat" },
+  { id: "phantom", name: "PHANTOM", desc: "Speed, Agility & Endurance",  color: "#3b82f6", icon: "👻", stat: "Kecepatan, daya tahan, agility" },
+  { id: "forge",   name: "FORGE",   desc: "Discipline & Consistency",   color: "#f59e0b", icon: "🔥", stat: "Kedisiplinan, streak, konsistensi" },
+  { id: "aegis",   name: "AEGIS",   desc: "Recovery & Defense",         color: "#2EC4B6", icon: "🛡️", stat: "Nutrisi, tidur, hidrasi" },
+  { id: "zenith",  name: "ZENITH",  desc: "Mind & Mastery",             color: "#a855f7", icon: "🧠", stat: "XP, rank, achievement progress" },
+];
+
 const defaultState = {
   checkedItems: {},
   selectedTier: "optimal",
@@ -220,8 +229,14 @@ const defaultState = {
   personalRecords: {},
   weightHistory: [],
   customSchedule: ["pull", "push", "legs", "upper", "fatburn", "rest", "rest"],
-  customRoutines: {}, // { "pull": ["3_4_Sit-Up", "Adductor"], ... }
+  customRoutines: {},
   avatarUrl: "",
+  // Profile
+  profileName: "",
+  profileAge: "",
+  profileNickname: "",
+  profileBio: "",
+  pillarBoosts: { titan: 0, phantom: 0, forge: 0, aegis: 0, zenith: 0 },
 };
 
 // ──────────────── APP ────────────────
@@ -554,6 +569,36 @@ export default function App() {
   const rank = getRank();
   const nextRank = getNextRank();
   const currentDayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+
+  // ── Pillar calculations (auto from stats) ──
+  const getPillarValues = () => {
+    const boosts = state.pillarBoosts || {};
+    // TITAN: PR count + max tier usage
+    const prCount = Object.keys(state.personalRecords || {}).length;
+    const titanBase = Math.min(100, prCount * 12 + (state.selectedTier === "maximum" ? 20 : state.selectedTier === "optimal" ? 10 : 0) + (state.totalWorkouts || 0) * 0.5);
+    // PHANTOM: workout frequency & total
+    const phantomBase = Math.min(100, (state.totalWorkouts || 0) * 1.5 + ((state.weekHistory || []).length * 3));
+    // FORGE: streak & consistency
+    const forgeBase = Math.min(100, (state.streak || 0) * 5 + ((state.weekHistory || []).length * 2) + (state.totalWorkouts || 0) * 0.3);
+    // AEGIS: nutrition, sleep, water balance
+    const pPct = state.weight > 0 ? Math.min(100, ((state.protein?.[d] || 0) / (state.weight * 1.8)) * 100) : 0;
+    const wPct = Math.min(100, ((state.water?.[d] || 0) / (state.weight > 0 ? Math.round(state.weight / 8) : 8)) * 100);
+    const sPct = Math.min(100, ((state.sleep?.[d] || 0) / state.sleepGoal) * 100);
+    const aegisBase = Math.min(100, (pPct + wPct + sPct) / 3 + (state.weight > 0 && state.height > 0 ? 15 : 0));
+    // ZENITH: XP, rank, achievements
+    const achieveCount = ACHIEVEMENTS.filter(a => a.check(state)).length;
+    const zenithBase = Math.min(100, (state.xp || 0) * 0.02 + achieveCount * 5 + RANKS.findIndex(r => r.name === rank.name) * 4);
+
+    return {
+      titan:   Math.min(100, Math.round(titanBase + (boosts.titan || 0))),
+      phantom: Math.min(100, Math.round(phantomBase + (boosts.phantom || 0))),
+      forge:   Math.min(100, Math.round(forgeBase + (boosts.forge || 0))),
+      aegis:   Math.min(100, Math.round(aegisBase + (boosts.aegis || 0))),
+      zenith:  Math.min(100, Math.round(zenithBase + (boosts.zenith || 0))),
+    };
+  };
+  const pillarValues = getPillarValues();
+  const dominantPillar = PILLARS.reduce((best, p) => pillarValues[p.id] > pillarValues[best.id] ? p : best, PILLARS[0]);
 
   if (!isDbLoaded) {
     return (
@@ -1623,12 +1668,231 @@ export default function App() {
         />
       )}
 
+      {/* ═══════ PROFILE TAB ═══════ */}
+      {tab === "profile" && (
+        <div style={styles.page}>
+          <div style={{ ...styles.header, paddingBottom: 12 }}>
+            <div>
+              <div style={styles.headerLabel}>AGENT FILE</div>
+              <h1
+                style={{
+                  ...styles.headerTitle,
+                  background: `linear-gradient(135deg, ${dominantPillar.color}, #fff)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                PROFILE
+              </h1>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: 28, marginBottom: -2 }}>{dominantPillar.icon}</div>
+              <div style={{ fontSize: 8, color: dominantPillar.color, fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>{dominantPillar.name}</div>
+            </div>
+          </div>
+
+          <div style={{ padding: "0 20px 120px" }}>
+            {/* Identity Card */}
+            <div style={{ ...styles.trackerCard, position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: -60, right: -60, width: 120, height: 120, background: dominantPillar.color, filter: 'blur(80px)', opacity: 0.12, borderRadius: '50%' }} />
+              <div style={{ ...styles.trackerTitle, marginBottom: 16, letterSpacing: 2 }}>🪪 IDENTITY</div>
+              
+              <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+                <div style={{ flex: 2 }}>
+                  <div style={{ fontSize: 10, color: '#888', marginBottom: 4, fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>NAMA</div>
+                  <input 
+                    type="text" 
+                    value={state.profileName || ''} 
+                    onChange={(e) => update(s => ({...s, profileName: e.target.value}))}
+                    placeholder="Nama lengkap..." 
+                    style={styles.inputField}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 10, color: '#888', marginBottom: 4, fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>USIA</div>
+                  <input 
+                    type="number" 
+                    value={state.profileAge || ''} 
+                    onChange={(e) => update(s => ({...s, profileAge: e.target.value}))}
+                    placeholder="0" 
+                    style={styles.inputField}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 10, color: '#888', marginBottom: 4, fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>CODENAME</div>
+                <input 
+                  type="text" 
+                  value={state.profileNickname || ''} 
+                  onChange={(e) => update(s => ({...s, profileNickname: e.target.value}))}
+                  placeholder="Nama panggilan / callsign..."
+                  style={styles.inputField}
+                />
+              </div>
+
+              <div>
+                <div style={{ fontSize: 10, color: '#888', marginBottom: 4, fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>BIO</div>
+                <textarea 
+                  value={state.profileBio || ''} 
+                  onChange={(e) => update(s => ({...s, profileBio: e.target.value}))}
+                  placeholder="Motto atau bio singkat..."
+                  rows={2}
+                  style={{ ...styles.inputField, resize: 'vertical', fontFamily: "'Outfit', sans-serif" }}
+                />
+              </div>
+
+              {/* Summary stats */}
+              <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                <div style={{ flex: 1, background: '#1a1a28', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: rank.color, fontFamily: "'Outfit'" }}>{rank.icon}</div>
+                  <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", marginTop: 2 }}>{rank.name}</div>
+                </div>
+                <div style={{ flex: 1, background: '#1a1a28', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: '#FF6B35', fontFamily: "'Outfit'" }}>{state.totalWorkouts || 0}</div>
+                  <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", marginTop: 2 }}>WORKOUTS</div>
+                </div>
+                <div style={{ flex: 1, background: '#1a1a28', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: '#f59e0b', fontFamily: "'Outfit'" }}>{state.streak || 0}</div>
+                  <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", marginTop: 2 }}>STREAK</div>
+                </div>
+                <div style={{ flex: 1, background: '#1a1a28', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: '#3b82f6', fontFamily: "'Outfit'" }}>{state.xp || 0}</div>
+                  <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", marginTop: 2 }}>XP</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pillar Radar Chart */}
+            <div style={{ ...styles.trackerCard, position: 'relative', overflow: 'hidden' }}>
+              <div style={{ ...styles.trackerTitle, marginBottom: 6, letterSpacing: 2 }}>⚡ PILLAR ANALYSIS</div>
+              <div style={{ fontSize: 10, color: '#666', marginBottom: 16, fontFamily: "'JetBrains Mono'" }}>
+                Dominant: <span style={{ color: dominantPillar.color, fontWeight: 700 }}>{dominantPillar.name}</span> — {dominantPillar.desc}
+              </div>
+
+              {/* SVG Pentagon Radar Chart */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+                <svg viewBox="0 0 300 280" width="280" height="260">
+                  {/* Background pentagons */}
+                  {[0.2, 0.4, 0.6, 0.8, 1.0].map((scale, si) => {
+                    const points = PILLARS.map((_, i) => {
+                      const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+                      const r = 110 * scale;
+                      return `${150 + r * Math.cos(angle)},${140 + r * Math.sin(angle)}`;
+                    }).join(' ');
+                    return <polygon key={si} points={points} fill="none" stroke="#1a1a28" strokeWidth={1} />;
+                  })}
+                  {/* Axis lines */}
+                  {PILLARS.map((_, i) => {
+                    const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+                    return <line key={i} x1="150" y1="140" x2={150 + 110 * Math.cos(angle)} y2={140 + 110 * Math.sin(angle)} stroke="#1a1a2888" strokeWidth={0.5} />;
+                  })}
+                  {/* Data polygon */}
+                  {(() => {
+                    const pts = PILLARS.map((p, i) => {
+                      const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+                      const r = (pillarValues[p.id] / 100) * 110;
+                      return `${150 + r * Math.cos(angle)},${140 + r * Math.sin(angle)}`;
+                    }).join(' ');
+                    return (
+                      <>
+                        <polygon points={pts} fill={`${dominantPillar.color}18`} stroke={dominantPillar.color} strokeWidth={2} />
+                        {PILLARS.map((p, i) => {
+                          const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+                          const r = (pillarValues[p.id] / 100) * 110;
+                          return <circle key={i} cx={150 + r * Math.cos(angle)} cy={140 + r * Math.sin(angle)} r={4} fill={p.color} stroke="#0a0a0f" strokeWidth={2} />;
+                        })}
+                      </>
+                    );
+                  })()}
+                  {/* Labels */}
+                  {PILLARS.map((p, i) => {
+                    const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+                    const r = 130;
+                    const x = 150 + r * Math.cos(angle);
+                    const y = 140 + r * Math.sin(angle);
+                    return (
+                      <g key={i}>
+                        <text x={x} y={y - 6} textAnchor="middle" fill={p.color} fontSize="10" fontWeight="700" fontFamily="'JetBrains Mono'">{p.name}</text>
+                        <text x={x} y={y + 8} textAnchor="middle" fill="#888" fontSize="11" fontWeight="800" fontFamily="'Outfit'">{pillarValues[p.id]}</text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              </div>
+
+              {/* Overall Pillar Score */}
+              {(() => {
+                const avg = Math.round(PILLARS.reduce((s, p) => s + pillarValues[p.id], 0) / 5);
+                const scoreColor = avg >= 70 ? '#2EC4B6' : avg >= 40 ? '#fbbf24' : '#ef4444';
+                return (
+                  <div style={{ textAlign: 'center', marginBottom: 8 }}>
+                    <div style={{ fontSize: 10, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginBottom: 4 }}>OVERALL POWER</div>
+                    <div style={{ fontSize: 36, fontWeight: 900, color: scoreColor, fontFamily: "'Outfit'" }}>{avg}</div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Individual Pillar Cards */}
+            <div style={{ ...styles.trackerCard }}>
+              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>🧬 PILLAR BREAKDOWN</div>
+              {PILLARS.map(p => {
+                const val = pillarValues[p.id];
+                const isDominant = p.id === dominantPillar.id;
+                return (
+                  <div key={p.id} style={{
+                    padding: '14px 16px', marginBottom: 8, borderRadius: 14,
+                    background: isDominant ? `${p.color}10` : '#111118',
+                    border: `1px solid ${isDominant ? `${p.color}44` : '#1a1a28'}`,
+                    transition: 'all 0.3s ease',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 20 }}>{p.icon}</span>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: p.color, fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>
+                            {p.name}
+                            {isDominant && <span style={{ fontSize: 8, background: `${p.color}22`, color: p.color, padding: '2px 6px', borderRadius: 4, marginLeft: 8, fontWeight: 600, border: `1px solid ${p.color}33` }}>DOMINANT</span>}
+                          </div>
+                          <div style={{ fontSize: 9, color: '#888' }}>{p.desc}</div>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 20, fontWeight: 900, color: p.color, fontFamily: "'Outfit'" }}>{val}</div>
+                    </div>
+                    <div style={{ ...styles.barTrack, height: 6, borderRadius: 3 }}>
+                      <div style={{ height: '100%', width: `${val}%`, background: `linear-gradient(90deg, ${p.color}88, ${p.color})`, borderRadius: 3, transition: 'width 0.6s ease', boxShadow: `0 0 8px ${p.color}44` }} />
+                    </div>
+                    <div style={{ fontSize: 8, color: '#666', marginTop: 6, fontFamily: "'JetBrains Mono'" }}>{p.stat}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Pillar Info */}
+            <div style={{ ...styles.trackerCard, background: '#0d0d14', border: '1px solid #1a1a28' }}>
+              <div style={{ ...styles.trackerTitle, marginBottom: 10, letterSpacing: 2 }}>ℹ️ TENTANG PILLAR</div>
+              <div style={{ fontSize: 11, color: '#888', lineHeight: 1.7 }}>
+                <p style={{ margin: '0 0 8px' }}>Setiap gym warrior memiliki <strong style={{ color: '#ddd' }}>5 Pillar</strong> yang menentukan gaya dan kekuatan mereka:</p>
+                <p style={{ margin: '0 0 4px' }}><span style={{ color: '#ef4444' }}>🗿 TITAN</span> — Kekuatan pure, angkat berat, PR records</p>
+                <p style={{ margin: '0 0 4px' }}><span style={{ color: '#3b82f6' }}>👻 PHANTOM</span> — Volume latihan, total workout, frekuensi</p>
+                <p style={{ margin: '0 0 4px' }}><span style={{ color: '#f59e0b' }}>🔥 FORGE</span> — Streak, disiplin, konsistensi harian</p>
+                <p style={{ margin: '0 0 4px' }}><span style={{ color: '#2EC4B6' }}>🛡️ AEGIS</span> — Nutrisi, tidur, hidrasi, recovery</p>
+                <p style={{ margin: '0 0 4px' }}><span style={{ color: '#a855f7' }}>🧠 ZENITH</span> — XP, rank progress, achievement mastery</p>
+                <p style={{ margin: '10px 0 0', fontSize: 10, color: '#555' }}>Pillar dihitung otomatis dari aktivitas kamu. Terus latihan untuk meningkatkan semua Pillar!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ═══════ BOTTOM NAV ═══════ */}
       <div style={styles.bottomNav}>
         <NavBtn icon="🏋️" label="Workout" active={tab === "workout"} onClick={() => setTab("workout")} color="#FF6B35" />
         <NavBtn icon="🥗" label="Fuel" active={tab === "nutrition"} onClick={() => setTab("nutrition")} color="#2EC4B6" />
         <NavBtn icon="🏆" label="Rank" active={tab === "rank"} onClick={() => setTab("rank")} color={rank.color} />
         <NavBtn icon="📏" label="Stats" active={tab === "stats"} onClick={() => setTab("stats")} color="#FF6B35" />
+        <NavBtn icon="👤" label="Profile" active={tab === "profile"} onClick={() => setTab("profile")} color={dominantPillar.color} />
       </div>
     </div>
   );
