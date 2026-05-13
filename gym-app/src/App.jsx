@@ -870,6 +870,10 @@ export default function App() {
                         🔗 CONNECT SPOTIFY
                       </button>
                       <div style={{ fontSize: 9, color: '#555', textAlign: 'center', marginTop: 8, fontFamily: "'JetBrains Mono'" }}>Login untuk kontrol musik langsung dari sini</div>
+                      <div style={{ fontSize: 8, color: '#444', textAlign: 'center', marginTop: 6, fontFamily: "'JetBrains Mono'", wordBreak: 'break-all', background: '#0d0d14', padding: '6px 8px', borderRadius: 6 }}>
+                        Redirect URI (copy ke Spotify Dashboard):<br/>
+                        <span style={{ color: '#1DB954', userSelect: 'all' }}>{getSpotifyRedirect()}</span>
+                      </div>
                     </>
                   ) : (
                     <>
