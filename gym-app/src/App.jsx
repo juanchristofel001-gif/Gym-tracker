@@ -740,7 +740,7 @@ export default function App() {
             )}
 
             {/* Spotify Mini Player */}
-            <div style={{ ...styles.trackerCard, padding: 0, overflow: 'hidden', marginTop: 16, border: state.showSpotify ? '1px solid #1DB954' : '1px solid #1a1a28' }}>
+            <div style={{ ...styles.trackerCard, padding: 0, overflow: 'hidden', marginTop: 16, border: state.showSpotify ? '1px solid #1DB95433' : '1px solid #1a1a28' }}>
               <button onClick={() => update(s => ({ ...s, showSpotify: !s.showSpotify }))}
                 style={{ width: '100%', padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -750,12 +750,7 @@ export default function App() {
                     {state.showSpotify && (
                       <div style={{ display: 'flex', gap: 2, height: 8, alignItems: 'flex-end', marginTop: 2 }}>
                         {[1, 2, 3, 4, 5, 6].map(i => (
-                          <div key={i} style={{ 
-                            width: 2, 
-                            backgroundColor: '#1DB954', 
-                            borderRadius: 1,
-                            animation: `holo-flicker ${0.4 + (i * 0.1)}s infinite alternate ease-in-out` 
-                          }} />
+                          <div key={i} style={{ width: 2, backgroundColor: '#1DB954', borderRadius: 1, animation: `holo-flicker ${0.4 + (i * 0.1)}s infinite alternate ease-in-out` }} />
                         ))}
                       </div>
                     )}
@@ -765,17 +760,24 @@ export default function App() {
               </button>
               {state.showSpotify && (
                 <div style={{ padding: '0 12px 12px' }}>
+                  {/* Open in Spotify App */}
+                  <a href={`https://open.spotify.com/playlist/${state.spotifyPlaylistId || '37i9dQZF1DX76Wlfdnj7AP'}`}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '12px', background: '#1DB954', borderRadius: 50, textDecoration: 'none', marginBottom: 10, fontWeight: 700, fontSize: 13, color: '#000', fontFamily: "'JetBrains Mono'", letterSpacing: 0.5 }}>
+                    ▶ OPEN IN SPOTIFY
+                  </a>
+                  {/* Compact embed for preview */}
                   <iframe
-                    style={{ borderRadius: 12, border: 'none', width: '100%', height: 152 }}
+                    style={{ borderRadius: 12, border: 'none', width: '100%', height: 80 }}
                     src={`https://open.spotify.com/embed/playlist/${state.spotifyPlaylistId || '37i9dQZF1DX76Wlfdnj7AP'}?utm_source=generator&theme=0`}
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                     loading="lazy"
                   />
                   <button onClick={() => {
-                    const url = window.prompt("Paste Spotify Playlist URL:", "");
+                    const url = window.prompt("Paste Spotify playlist/album/track URL:", "");
                     if (url) {
-                      const match = url.match(/playlist\/([a-zA-Z0-9]+)/);
-                      if (match) { update(s => ({ ...s, spotifyPlaylistId: match[1] })); showToast("Playlist updated!"); }
+                      const match = url.match(/(playlist|album|track)\/([a-zA-Z0-9]+)/);
+                      if (match) { update(s => ({ ...s, spotifyPlaylistId: match[2], spotifyType: match[1] })); showToast("Updated!"); }
                       else showToast("URL tidak valid!");
                     }
                   }} style={{ width: '100%', marginTop: 8, padding: '8px', background: '#161622', border: '1px solid #1a1a28', borderRadius: 8, color: '#888', fontSize: 10, fontFamily: "'JetBrains Mono'", cursor: 'pointer' }}>
