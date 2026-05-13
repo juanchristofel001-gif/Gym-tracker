@@ -198,14 +198,69 @@ const ACHIEVEMENTS = [
   { id: "max_mode",      icon: "👑", name: "Maximum Effort",     desc: "Pilih tier MAXIMUM",             check: s => s.selectedTier === "maximum",       category: "misc" },
 ];
 
-// ──────────────── PILLARS (like Ejen Ali) ────────────────
+// ──────────────── PILLARS (Ejen Ali style) ────────────────
 const PILLARS = [
-  { id: "titan",   name: "TITAN",   desc: "Raw Strength & Power",       color: "#ef4444", icon: "🗿", stat: "Kekuatan mentah, angkatan berat" },
-  { id: "phantom", name: "PHANTOM", desc: "Speed, Agility & Endurance",  color: "#3b82f6", icon: "👻", stat: "Kecepatan, daya tahan, agility" },
-  { id: "forge",   name: "FORGE",   desc: "Discipline & Consistency",   color: "#f59e0b", icon: "🔥", stat: "Kedisiplinan, streak, konsistensi" },
-  { id: "aegis",   name: "AEGIS",   desc: "Recovery & Defense",         color: "#2EC4B6", icon: "🛡️", stat: "Nutrisi, tidur, hidrasi" },
-  { id: "zenith",  name: "ZENITH",  desc: "Mind & Mastery",             color: "#a855f7", icon: "🧠", stat: "XP, rank, achievement progress" },
+  { id: "combat", name: "COMBAT", desc: "Strength & Power",            color: "#ef4444", stat: "Kekuatan, angkat berat, PR records" },
+  { id: "neuro",  name: "NEURO",  desc: "Mind & Strategy",             color: "#eab308", stat: "Teknik, XP, achievement mastery" },
+  { id: "inviso", name: "INVISO", desc: "Stealth & Endurance",         color: "#94a3b8", stat: "Konsistensi, streak, disiplin" },
+  { id: "techno", name: "TECHNO", desc: "Tech & Recovery",             color: "#3b82f6", stat: "Nutrisi, tidur, hidrasi, data" },
 ];
+
+// Custom SVG icons matching Ejen Ali pillar symbols
+function PillarIcon({ pillarId, size = 28, color }) {
+  const s = size;
+  const c = color || PILLARS.find(p => p.id === pillarId)?.color || '#fff';
+  if (pillarId === "combat") {
+    // Red pentagon with swirl/spiral eye inside
+    return (
+      <svg width={s} height={s} viewBox="0 0 40 40" fill="none">
+        <polygon points="20,2 38,14 32,36 8,36 2,14" fill={`${c}22`} stroke={c} strokeWidth="2.5"/>
+        <circle cx="20" cy="20" r="7" fill="none" stroke={c} strokeWidth="2"/>
+        <path d="M20 13 C24 15, 27 19, 25 23 C23 27, 17 27, 15 23 C13 19, 16 15, 20 13Z" fill={c} opacity="0.7"/>
+        <circle cx="20" cy="20" r="2.5" fill="#0a0a0f"/>
+      </svg>
+    );
+  }
+  if (pillarId === "neuro") {
+    // Yellow hexagon with atom/brain network nodes
+    return (
+      <svg width={s} height={s} viewBox="0 0 40 40" fill="none">
+        <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill={`${c}22`} stroke={c} strokeWidth="2.5"/>
+        <circle cx="20" cy="14" r="2" fill={c}/>
+        <circle cx="13" cy="24" r="2" fill={c}/>
+        <circle cx="27" cy="24" r="2" fill={c}/>
+        <circle cx="20" cy="20" r="2.5" fill={c}/>
+        <line x1="20" y1="14" x2="20" y2="20" stroke={c} strokeWidth="1.5"/>
+        <line x1="13" y1="24" x2="20" y2="20" stroke={c} strokeWidth="1.5"/>
+        <line x1="27" y1="24" x2="20" y2="20" stroke={c} strokeWidth="1.5"/>
+        <line x1="13" y1="24" x2="20" y2="14" stroke={c} strokeWidth="1" opacity="0.4"/>
+        <line x1="27" y1="24" x2="20" y2="14" stroke={c} strokeWidth="1" opacity="0.4"/>
+        <line x1="13" y1="24" x2="27" y2="24" stroke={c} strokeWidth="1" opacity="0.4"/>
+      </svg>
+    );
+  }
+  if (pillarId === "inviso") {
+    // Dark circle with mask/stealth face
+    return (
+      <svg width={s} height={s} viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="17" fill={`${c}22`} stroke={c} strokeWidth="2.5"/>
+        <ellipse cx="13" cy="18" rx="4" ry="2.5" fill={c} opacity="0.85"/>
+        <ellipse cx="27" cy="18" rx="4" ry="2.5" fill={c} opacity="0.85"/>
+        <circle cx="13" cy="18" r="1.5" fill="#0a0a0f"/>
+        <circle cx="27" cy="18" r="1.5" fill="#0a0a0f"/>
+        <path d="M14 26 Q20 30 26 26" stroke={c} strokeWidth="1.5" fill="none" opacity="0.5"/>
+        <line x1="9" y1="18" x2="31" y2="18" stroke={c} strokeWidth="1" opacity="0.2"/>
+      </svg>
+    );
+  }
+  // techno: Blue shield with lightning bolt
+  return (
+    <svg width={s} height={s} viewBox="0 0 40 40" fill="none">
+      <path d="M6,6 H34 V6 Q34,34 20,38 Q6,34 6,6 Z" fill={`${c}22`} stroke={c} strokeWidth="2.5" strokeLinejoin="round"/>
+      <path d="M22 10 L17 20 H23 L18 30" stroke={c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    </svg>
+  );
+}
 
 const defaultState = {
   checkedItems: {},
@@ -236,7 +291,7 @@ const defaultState = {
   profileAge: "",
   profileNickname: "",
   profileBio: "",
-  pillarBoosts: { titan: 0, phantom: 0, forge: 0, aegis: 0, zenith: 0 },
+  pillarBoosts: { combat: 0, neuro: 0, inviso: 0, techno: 0 },
 };
 
 // ──────────────── APP ────────────────
@@ -573,28 +628,25 @@ export default function App() {
   // ── Pillar calculations (auto from stats) ──
   const getPillarValues = () => {
     const boosts = state.pillarBoosts || {};
-    // TITAN: PR count + max tier usage
+    // COMBAT: Strength, PR count, heavy lifting, max tier
     const prCount = Object.keys(state.personalRecords || {}).length;
-    const titanBase = Math.min(100, prCount * 12 + (state.selectedTier === "maximum" ? 20 : state.selectedTier === "optimal" ? 10 : 0) + (state.totalWorkouts || 0) * 0.5);
-    // PHANTOM: workout frequency & total
-    const phantomBase = Math.min(100, (state.totalWorkouts || 0) * 1.5 + ((state.weekHistory || []).length * 3));
-    // FORGE: streak & consistency
-    const forgeBase = Math.min(100, (state.streak || 0) * 5 + ((state.weekHistory || []).length * 2) + (state.totalWorkouts || 0) * 0.3);
-    // AEGIS: nutrition, sleep, water balance
+    const combatBase = Math.min(100, prCount * 12 + (state.selectedTier === "maximum" ? 25 : state.selectedTier === "optimal" ? 12 : 0) + (state.totalWorkouts || 0) * 0.6);
+    // NEURO: Mind, technique, XP, rank, achievements
+    const achieveCount = ACHIEVEMENTS.filter(a => a.check(state)).length;
+    const neuroBase = Math.min(100, (state.xp || 0) * 0.025 + achieveCount * 5 + RANKS.findIndex(r => r.name === rank.name) * 5 + (state.totalWorkouts || 0) * 0.3);
+    // INVISO: Stealth, consistency, streak, discipline
+    const invisoBase = Math.min(100, (state.streak || 0) * 5 + ((state.weekHistory || []).length * 2.5) + (state.totalWorkouts || 0) * 0.4);
+    // TECHNO: Recovery, nutrition, sleep, water, data tracking
     const pPct = state.weight > 0 ? Math.min(100, ((state.protein?.[d] || 0) / (state.weight * 1.8)) * 100) : 0;
     const wPct = Math.min(100, ((state.water?.[d] || 0) / (state.weight > 0 ? Math.round(state.weight / 8) : 8)) * 100);
     const sPct = Math.min(100, ((state.sleep?.[d] || 0) / state.sleepGoal) * 100);
-    const aegisBase = Math.min(100, (pPct + wPct + sPct) / 3 + (state.weight > 0 && state.height > 0 ? 15 : 0));
-    // ZENITH: XP, rank, achievements
-    const achieveCount = ACHIEVEMENTS.filter(a => a.check(state)).length;
-    const zenithBase = Math.min(100, (state.xp || 0) * 0.02 + achieveCount * 5 + RANKS.findIndex(r => r.name === rank.name) * 4);
+    const technoBase = Math.min(100, (pPct + wPct + sPct) / 3 + (state.weight > 0 && state.height > 0 ? 15 : 0) + ((state.weightHistory || []).length * 3));
 
     return {
-      titan:   Math.min(100, Math.round(titanBase + (boosts.titan || 0))),
-      phantom: Math.min(100, Math.round(phantomBase + (boosts.phantom || 0))),
-      forge:   Math.min(100, Math.round(forgeBase + (boosts.forge || 0))),
-      aegis:   Math.min(100, Math.round(aegisBase + (boosts.aegis || 0))),
-      zenith:  Math.min(100, Math.round(zenithBase + (boosts.zenith || 0))),
+      combat: Math.min(100, Math.round(combatBase + (boosts.combat || 0))),
+      neuro:  Math.min(100, Math.round(neuroBase + (boosts.neuro || 0))),
+      inviso: Math.min(100, Math.round(invisoBase + (boosts.inviso || 0))),
+      techno: Math.min(100, Math.round(technoBase + (boosts.techno || 0))),
     };
   };
   const pillarValues = getPillarValues();
@@ -1686,8 +1738,8 @@ export default function App() {
               </h1>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 28, marginBottom: -2 }}>{dominantPillar.icon}</div>
-              <div style={{ fontSize: 8, color: dominantPillar.color, fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>{dominantPillar.name}</div>
+              <PillarIcon pillarId={dominantPillar.id} size={32} />
+              <div style={{ fontSize: 8, color: dominantPillar.color, fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginTop: 2 }}>{dominantPillar.name}</div>
             </div>
           </div>
 
@@ -1773,10 +1825,10 @@ export default function App() {
               {/* SVG Pentagon Radar Chart */}
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
                 <svg viewBox="0 0 300 280" width="280" height="260">
-                  {/* Background pentagons */}
+                  {/* Background diamonds */}
                   {[0.2, 0.4, 0.6, 0.8, 1.0].map((scale, si) => {
                     const points = PILLARS.map((_, i) => {
-                      const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+                      const angle = (Math.PI * 2 * i) / 4 - Math.PI / 2;
                       const r = 110 * scale;
                       return `${150 + r * Math.cos(angle)},${140 + r * Math.sin(angle)}`;
                     }).join(' ');
@@ -1784,13 +1836,13 @@ export default function App() {
                   })}
                   {/* Axis lines */}
                   {PILLARS.map((_, i) => {
-                    const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+                    const angle = (Math.PI * 2 * i) / 4 - Math.PI / 2;
                     return <line key={i} x1="150" y1="140" x2={150 + 110 * Math.cos(angle)} y2={140 + 110 * Math.sin(angle)} stroke="#1a1a2888" strokeWidth={0.5} />;
                   })}
                   {/* Data polygon */}
                   {(() => {
                     const pts = PILLARS.map((p, i) => {
-                      const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+                      const angle = (Math.PI * 2 * i) / 4 - Math.PI / 2;
                       const r = (pillarValues[p.id] / 100) * 110;
                       return `${150 + r * Math.cos(angle)},${140 + r * Math.sin(angle)}`;
                     }).join(' ');
@@ -1798,7 +1850,7 @@ export default function App() {
                       <>
                         <polygon points={pts} fill={`${dominantPillar.color}18`} stroke={dominantPillar.color} strokeWidth={2} />
                         {PILLARS.map((p, i) => {
-                          const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+                          const angle = (Math.PI * 2 * i) / 4 - Math.PI / 2;
                           const r = (pillarValues[p.id] / 100) * 110;
                           return <circle key={i} cx={150 + r * Math.cos(angle)} cy={140 + r * Math.sin(angle)} r={4} fill={p.color} stroke="#0a0a0f" strokeWidth={2} />;
                         })}
@@ -1807,7 +1859,7 @@ export default function App() {
                   })()}
                   {/* Labels */}
                   {PILLARS.map((p, i) => {
-                    const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+                    const angle = (Math.PI * 2 * i) / 4 - Math.PI / 2;
                     const r = 130;
                     const x = 150 + r * Math.cos(angle);
                     const y = 140 + r * Math.sin(angle);
@@ -1823,7 +1875,7 @@ export default function App() {
 
               {/* Overall Pillar Score */}
               {(() => {
-                const avg = Math.round(PILLARS.reduce((s, p) => s + pillarValues[p.id], 0) / 5);
+                const avg = Math.round(PILLARS.reduce((s, p) => s + pillarValues[p.id], 0) / 4);
                 const scoreColor = avg >= 70 ? '#2EC4B6' : avg >= 40 ? '#fbbf24' : '#ef4444';
                 return (
                   <div style={{ textAlign: 'center', marginBottom: 8 }}>
@@ -1849,7 +1901,7 @@ export default function App() {
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span style={{ fontSize: 20 }}>{p.icon}</span>
+                        <PillarIcon pillarId={p.id} size={28} />
                         <div>
                           <div style={{ fontSize: 13, fontWeight: 700, color: p.color, fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>
                             {p.name}
@@ -1873,12 +1925,15 @@ export default function App() {
             <div style={{ ...styles.trackerCard, background: '#0d0d14', border: '1px solid #1a1a28' }}>
               <div style={{ ...styles.trackerTitle, marginBottom: 10, letterSpacing: 2 }}>ℹ️ TENTANG PILLAR</div>
               <div style={{ fontSize: 11, color: '#888', lineHeight: 1.7 }}>
-                <p style={{ margin: '0 0 8px' }}>Setiap gym warrior memiliki <strong style={{ color: '#ddd' }}>5 Pillar</strong> yang menentukan gaya dan kekuatan mereka:</p>
-                <p style={{ margin: '0 0 4px' }}><span style={{ color: '#ef4444' }}>🗿 TITAN</span> — Kekuatan pure, angkat berat, PR records</p>
-                <p style={{ margin: '0 0 4px' }}><span style={{ color: '#3b82f6' }}>👻 PHANTOM</span> — Volume latihan, total workout, frekuensi</p>
-                <p style={{ margin: '0 0 4px' }}><span style={{ color: '#f59e0b' }}>🔥 FORGE</span> — Streak, disiplin, konsistensi harian</p>
-                <p style={{ margin: '0 0 4px' }}><span style={{ color: '#2EC4B6' }}>🛡️ AEGIS</span> — Nutrisi, tidur, hidrasi, recovery</p>
-                <p style={{ margin: '0 0 4px' }}><span style={{ color: '#a855f7' }}>🧠 ZENITH</span> — XP, rank progress, achievement mastery</p>
+                <p style={{ margin: '0 0 8px' }}>Setiap agent memiliki <strong style={{ color: '#ddd' }}>4 Pillar</strong> yang menentukan gaya dan kekuatan mereka:</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {PILLARS.map(p => (
+                    <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <PillarIcon pillarId={p.id} size={20} />
+                      <span><span style={{ color: p.color, fontWeight: 700 }}>{p.name}</span> — {p.stat}</span>
+                    </div>
+                  ))}
+                </div>
                 <p style={{ margin: '10px 0 0', fontSize: 10, color: '#555' }}>Pillar dihitung otomatis dari aktivitas kamu. Terus latihan untuk meningkatkan semua Pillar!</p>
               </div>
             </div>
