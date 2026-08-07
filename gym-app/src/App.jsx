@@ -233,91 +233,7 @@ const defaultState = {
   foodLog: {}, // { "2026-08-07": [{ id, name, raw, cal, protein, carbs, fat, time }] }
 };
 
-// ──────────────── FOOD DATABASE ────────────────
-// cal/protein/carbs/fat per 1 unit default
-const FOOD_DB = [
-  // ── Nasi & Karbohidrat ──
-  { name:"Nasi putih",      aliases:["nasi","nasi putih","white rice"], emoji:"🍚", unit:"piring", cal:242, protein:4,  carbs:54, fat:0.4 },
-  { name:"Nasi merah",      aliases:["nasi merah","brown rice"],        emoji:"🍚", unit:"piring", cal:218, protein:5,  carbs:46, fat:1.6 },
-  { name:"Nasi goreng",     aliases:["nasi goreng","fried rice"],        emoji:"🍳", unit:"piring", cal:350, protein:8,  carbs:58, fat:10  },
-  { name:"Mie goreng",      aliases:["mie goreng","indomie","mie instan"], emoji:"🍜", unit:"bungkus",cal:380, protein:8,  carbs:54, fat:14  },
-  { name:"Mie rebus",       aliases:["mie rebus","mie kuah"],           emoji:"🍜", unit:"bungkus",cal:290, protein:7,  carbs:48, fat:8   },
-  { name:"Roti tawar",      aliases:["roti","roti tawar","bread"],       emoji:"🍞", unit:"lembar", cal:67,  protein:2,  carbs:13, fat:1   },
-  { name:"Kentang rebus",   aliases:["kentang","potato"],               emoji:"🥔", unit:"buah",   cal:77,  protein:2,  carbs:17, fat:0.1 },
-  { name:"Ubi jalar",       aliases:["ubi","sweet potato"],             emoji:"🍠", unit:"buah",   cal:103, protein:2,  carbs:24, fat:0.1 },
-  { name:"Oatmeal",         aliases:["oat","oatmeal","oat meal"],       emoji:"🥣", unit:"porsi",  cal:150, protein:5,  carbs:27, fat:3   },
-  // ── Protein Hewani ──
-  { name:"Dada ayam",       aliases:["dada ayam","ayam dada","chicken breast"],  emoji:"🍗", unit:"potong", cal:165, protein:31, carbs:0,  fat:3.6 },
-  { name:"Ayam goreng",     aliases:["ayam goreng","fried chicken"],     emoji:"🍗", unit:"potong", cal:246, protein:23, carbs:8,  fat:14  },
-  { name:"Ayam bakar",      aliases:["ayam bakar","grilled chicken"],    emoji:"🍗", unit:"potong", cal:185, protein:28, carbs:2,  fat:6   },
-  { name:"Telur rebus",     aliases:["telur","egg","boiled egg"],        emoji:"🥚", unit:"butir",  cal:77,  protein:6,  carbs:0.6,fat:5   },
-  { name:"Telur dadar",     aliases:["telur dadar","omelet"],           emoji:"🍳", unit:"butir",  cal:90,  protein:6,  carbs:0.4,fat:7   },
-  { name:"Ikan goreng",     aliases:["ikan goreng","fried fish"],        emoji:"🐟", unit:"potong", cal:200, protein:22, carbs:5,  fat:10  },
-  { name:"Ikan bakar",      aliases:["ikan bakar","grilled fish"],       emoji:"🐟", unit:"potong", cal:145, protein:24, carbs:0,  fat:4   },
-  { name:"Salmon",          aliases:["salmon"],                          emoji:"🥩", unit:"potong", cal:208, protein:28, carbs:0,  fat:10  },
-  { name:"Tuna kaleng",     aliases:["tuna","canned tuna"],             emoji:"🥫", unit:"kaleng", cal:150, protein:33, carbs:0,  fat:1   },
-  { name:"Daging sapi",     aliases:["daging","beef","sapi"],           emoji:"🥩", unit:"potong", cal:215, protein:26, carbs:0,  fat:12  },
-  { name:"Tempe goreng",    aliases:["tempe","tempeh"],                  emoji:"🧆", unit:"potong", cal:180, protein:11, carbs:10, fat:9   },
-  { name:"Tahu goreng",     aliases:["tahu","tofu"],                     emoji:"️",  unit:"potong", cal:90,  protein:6,  carbs:3,  fat:5   },
-  // ── Protein Supplement ──
-  { name:"Whey protein",    aliases:["whey","protein shake","shake"],   emoji:"🥤", unit:"scoop",  cal:120, protein:25, carbs:3,  fat:1.5 },
-  { name:"Susu sapi",       aliases:["susu","milk"],                     emoji:"🥛", unit:"gelas",  cal:149, protein:8,  carbs:11, fat:8   },
-  { name:"Susu skim",       aliases:["susu skim","skim milk"],          emoji:"🥛", unit:"gelas",  cal:86,  protein:8,  carbs:12, fat:0.4 },
-  { name:"Greek yogurt",    aliases:["yogurt","greek yogurt"],          emoji:"🥣", unit:"cup",    cal:100, protein:17, carbs:6,  fat:0.7 },
-  { name:"Keju",            aliases:["keju","cheese"],                  emoji:"🧀", unit:"lembar", cal:113, protein:7,  carbs:0.4,fat:9   },
-  // ── Sayur & Buah ──
-  { name:"Sayur tumis",     aliases:["sayur","vegetables","tumis"],     emoji:"🥦", unit:"porsi",  cal:50,  protein:2,  carbs:6,  fat:2   },
-  { name:"Salad",           aliases:["salad"],                           emoji:"🥗", unit:"porsi",  cal:30,  protein:1,  carbs:5,  fat:0.5 },
-  { name:"Pisang",          aliases:["pisang","banana"],                emoji:"🍌", unit:"buah",   cal:89,  protein:1,  carbs:23, fat:0.3 },
-  { name:"Apel",            aliases:["apel","apple"],                   emoji:"🍎", unit:"buah",   cal:72,  protein:0.4,carbs:19, fat:0.2 },
-  { name:"Jeruk",           aliases:["jeruk","orange"],                 emoji:"🍊", unit:"buah",   cal:62,  protein:1,  carbs:15, fat:0.2 },
-  { name:"Alpukat",         aliases:["alpukat","avocado"],              emoji:"🥑", unit:"buah",   cal:240, protein:3,  carbs:13, fat:22  },
-  // ── Jajanan & Fast Food ──
-  { name:"Bakso",           aliases:["bakso","meatball"],               emoji:"🍝", unit:"porsi",  cal:250, protein:14, carbs:28, fat:8   },
-  { name:"Soto ayam",       aliases:["soto"],                            emoji:"🍲", unit:"mangkok",cal:180, protein:15, carbs:14, fat:7   },
-  { name:"Gado-gado",       aliases:["gado"],                            emoji:"🥗", unit:"porsi",  cal:320, protein:12, carbs:30, fat:16  },
-  { name:"Rendang",         aliases:["rendang"],                         emoji:"🥩", unit:"potong", cal:320, protein:28, carbs:4,  fat:20  },
-  { name:"Burger",          aliases:["burger","hamburger"],             emoji:"🍔", unit:"buah",   cal:450, protein:22, carbs:40, fat:20  },
-  { name:"Pizza",           aliases:["pizza"],                           emoji:"🍕", unit:"slice",  cal:285, protein:12, carbs:36, fat:10  },
-  { name:"Kentang goreng",  aliases:["kentang goreng","french fries"],  emoji:"🍟", unit:"porsi",  cal:312, protein:4,  carbs:41, fat:15  },
-];
 
-// Fuzzy estimasi dari nama makanan → nutrisi
-function estimateNutrition(query) {
-  const q = query.toLowerCase().trim();
-  // coba extract jumlah (angka di awal/akhir)
-  const numMatch = q.match(/(\d+(?:\.\d+)?)/);
-  const qty = numMatch ? parseFloat(numMatch[1]) : 1;
-  const nameOnly = q.replace(/\d+(?:\.\d+)?/g, '').replace(/(piring|butir|potong|bungkus|lembar|gelas|buah|porsi|cup|scoop|kaleng|mangkok|slice)/g,'').trim();
-  const words = nameOnly.split(/\s+/).filter(w => w.length > 2);
-  
-  // Cari di database
-  let best = null;
-  let bestScore = 0;
-  for (const food of FOOD_DB) {
-    for (const alias of food.aliases) {
-      // 1. Exact Substring Match (Highest priority)
-      if (nameOnly.includes(alias) || alias.includes(nameOnly)) {
-        const score = 100 + alias.length;
-        if (score > bestScore) { best = food; bestScore = score; }
-      }
-      
-      // 2. Word Intersection Match (Lower priority)
-      const aliasWords = alias.split(/\s+/);
-      let matchCount = 0;
-      for (const w of words) {
-        if (aliasWords.includes(w)) matchCount++;
-      }
-      if (matchCount > 0) {
-        const score = matchCount * 10;
-        if (score > bestScore) { best = food; bestScore = score; }
-      }
-    }
-  }
-  if (best) {
-    return { name: best.name, emoji: best.emoji, cal: Math.round(best.cal * qty), protein: Math.round(best.protein * qty * 10) / 10, carbs: Math.round(best.carbs * qty * 10) / 10, fat: Math.round(best.fat * qty * 10) / 10, found: true };
-  }
-  return null; // not found → caller will use API
 }
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ APP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -1762,7 +1678,7 @@ export default function App() {
             {/* Personal Records Summary */}
             {Object.keys(state.personalRecords || {}).length > 0 && (
               <div style={styles.trackerCard}>
-                <div style={{ ...styles.trackerTitle, marginBottom: 12, letterSpacing: 2 }}>ðŸ† PERSONAL RECORDS</div>
+                <div style={{ ...styles.trackerTitle, marginBottom: 12, letterSpacing: 2 }}>🏆 PERSONAL RECORDS</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {Object.entries(state.personalRecords).slice(0, 5).map(([ex, val]) => (
                     <div key={ex} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#2a2320', borderRadius: 10, border: '1px solid #222' }}>
@@ -1802,60 +1718,53 @@ function FuelTab({
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!query.trim()) return;
+    if (!apiKey) {
+      showToast("Tolong masukkan Gemini API Key dulu ya!");
+      setShowApiKeySetup(true);
+      return;
+    }
 
     setIsSearching(true);
-    let result = estimateNutrition(query);
+    let result = null;
 
-    if (!result) {
-      // Fallback API to Google Gemini AI
-      try {
-        let apiKey = localStorage.getItem("gemini_api_key");
-        if (!apiKey) {
-          apiKey = window.prompt("Untuk mencari makanan di luar database, masukkan API Key Gemini kamu (gratis dari Google AI Studio):");
-          if (apiKey) {
-            localStorage.setItem("gemini_api_key", apiKey.trim());
-          } else {
-            setIsSearching(false);
-            return;
-          }
+    try {
+      const promptText = `Berapa kalori, protein, carbs, dan fat dari: "${query}"? Berikan porsi standar jika tidak disebutkan secara eksplisit. Kembalikan STRICTLY dalam format JSON saja tanpa formatting markdown apa pun (jangan gunakan \`\`\`json): {"name":"Nama Makanan","cal":number,"protein":number,"carbs":number,"fat":number,"emoji":"🍔"}`;
+      
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }]
+        })
+      });
+      
+      const data = await response.json();
+      if (data.error) {
+        if (data.error.code === 400 || data.error.code === 403) {
+          localStorage.removeItem("gemini_api_key");
+          setApiKey("");
+          setShowApiKeySetup(true);
+          showToast("API Key salah/invalid. Tolong masukkan lagi.");
+        } else {
+          showToast("Error API: " + data.error.message);
         }
-        
-        const promptText = `Berapa kalori, protein, carbs, dan fat dari: "${query}"? Berikan porsi standar jika tidak disebutkan. Kembalikan STRICTLY dalam format JSON saja tanpa formatting markdown apa pun (tanpa \`\`\`json): {"name":"Nama Makanan","cal":number,"protein":number,"carbs":number,"fat":number,"emoji":"🍔"}`;
-        
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }]
-          })
-        });
-        
-        const data = await response.json();
-        if (data.error) {
-          if (data.error.code === 400 || data.error.code === 403) {
-            localStorage.removeItem("gemini_api_key");
-            showToast("API Key salah/invalid. Coba lagi.");
-          } else {
-            showToast("Error API: " + data.error.message);
-          }
-        } else if (data.candidates && data.candidates[0].content.parts[0].text) {
-          const textRes = data.candidates[0].content.parts[0].text;
-          const jsonStr = textRes.replace(/```json/g, '').replace(/```/g, '').trim();
-          const parsed = JSON.parse(jsonStr);
-          result = {
-            name: parsed.name || query,
-            emoji: parsed.emoji || "🍽️",
-            cal: Math.round(parsed.cal || 0),
-            protein: Math.round((parsed.protein || 0) * 10) / 10,
-            carbs: Math.round((parsed.carbs || 0) * 10) / 10,
-            fat: Math.round((parsed.fat || 0) * 10) / 10,
-            found: true
-          };
-        }
-      } catch (err) {
-        console.error("AI API Error", err);
-        showToast("Gagal mengambil data dari AI.");
+      } else if (data.candidates && data.candidates[0].content.parts[0].text) {
+        const textRes = data.candidates[0].content.parts[0].text;
+        const jsonStr = textRes.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(jsonStr);
+        result = {
+          name: parsed.name || query,
+          emoji: parsed.emoji || "🍽️",
+          cal: Math.round(parsed.cal || 0),
+          protein: Math.round((parsed.protein || 0) * 10) / 10,
+          carbs: Math.round((parsed.carbs || 0) * 10) / 10,
+          fat: Math.round((parsed.fat || 0) * 10) / 10,
+          found: true
+        };
       }
+    } catch (err) {
+      console.error("AI API Error", err);
+      showToast("Gagal mengambil data dari AI.");
     }
 
     if (result && result.found) {
@@ -1872,7 +1781,7 @@ function FuelTab({
       showToast(`+${result.cal} kcal dari ${result.name}`);
       setQuery("");
     } else {
-      showToast("Gagal menemukan makanan. Coba kata lain.");
+      showToast("Gagal menemukan makanan. Coba spesifikkan lagi.");
     }
     setIsSearching(false);
   };
@@ -1925,33 +1834,66 @@ function FuelTab({
           </div>
         </div>
 
-        {/* Input Food */}
-        <div style={{ marginBottom: 20 }}>
-          <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8 }}>
-            <input 
-              type="text" 
-              value={query} 
-              onChange={(e) => setQuery(e.target.value)} 
-              placeholder="Misal: 1 piring nasi goreng" 
-              style={{ flex: 1, ...styles.inputField }} 
-              disabled={isSearching}
-            />
-            <button type="submit" disabled={isSearching} style={{ background: '#c9a96e', color: '#16120f', border: 'none', borderRadius: 12, padding: '0 16px', fontWeight: 'bold', fontFamily: "'Outfit'", cursor: 'pointer' }}>
-              {isSearching ? '...' : '+ ADD'}
-            </button>
-          </form>
-          <div style={{ fontSize: 10, color: '#7a6a5a', marginTop: 8, display: 'flex', gap: 4, alignItems: 'center' }}>
-            <span>⚡ Quick Add:</span>
-            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', flex: 1, paddingBottom: 4 }}>
-              {MEAL_PRESETS.map(m => (
-                <button key={m.name} onClick={() => { setQuery(m.query); setTimeout(() => handleSearch({preventDefault:()=>{}}), 50); }} 
-                  style={{ background: '#1f1a16', border: '1px solid #2e2720', borderRadius: 12, padding: '4px 8px', fontSize: 11, color: '#e8ddd0', whiteSpace: 'nowrap', cursor: 'pointer' }}>
-                  {m.emoji} {m.name}
-                </button>
-              ))}
+        {/* API Key Setup */}
+        {showApiKeySetup && (
+          <div style={{ background: '#1f1a16', border: '1px solid #c9a96e', borderRadius: 16, padding: 16, marginBottom: 20 }}>
+            <h3 style={{ fontSize: 14, color: '#e8ddd0', marginBottom: 8 }}>100% AI Food Tracker 🤖</h3>
+            <p style={{ fontSize: 11, color: '#9a8a7a', marginBottom: 12, lineHeight: 1.5 }}>
+              Karena kamu ingin AI mengurus semuanya, silakan tempelkan <b>Gemini API Key</b>-mu di bawah ini. Tenang, kuncinya hanya disimpan di perangkatmu (Local Storage). Dapatkan gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: '#c9a96e' }}>Google AI Studio</a>.
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input 
+                type="text" 
+                value={apiKey} 
+                onChange={(e) => setApiKey(e.target.value)} 
+                placeholder="AIzaSy..." 
+                style={{ flex: 1, ...styles.inputField }} 
+              />
+              <button onClick={() => {
+                if (apiKey.trim()) {
+                  localStorage.setItem("gemini_api_key", apiKey.trim());
+                  setShowApiKeySetup(false);
+                  showToast("API Key tersimpan! Silakan coba cari makanan.");
+                }
+              }} style={{ background: '#c9a96e', color: '#16120f', border: 'none', borderRadius: 12, padding: '0 16px', fontWeight: 'bold', fontFamily: "'Outfit'", cursor: 'pointer' }}>
+                SAVE
+              </button>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Input Food */}
+        {!showApiKeySetup && (
+          <div style={{ marginBottom: 20 }}>
+            <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8 }}>
+              <input 
+                type="text" 
+                value={query} 
+                onChange={(e) => setQuery(e.target.value)} 
+                placeholder="Misal: 1 piring nasi padang komplit" 
+                style={{ flex: 1, ...styles.inputField }} 
+                disabled={isSearching}
+              />
+              <button type="submit" disabled={isSearching} style={{ background: '#c9a96e', color: '#16120f', border: 'none', borderRadius: 12, padding: '0 16px', fontWeight: 'bold', fontFamily: "'Outfit'", cursor: 'pointer' }}>
+                {isSearching ? '...' : '+ ADD'}
+              </button>
+            </form>
+            <div style={{ fontSize: 10, color: '#7a6a5a', marginTop: 8, display: 'flex', gap: 4, alignItems: 'center' }}>
+              <span>⚡ Quick Add:</span>
+              <div style={{ display: 'flex', gap: 6, overflowX: 'auto', flex: 1, paddingBottom: 4 }}>
+                {MEAL_PRESETS.map(m => (
+                  <button key={m.name} onClick={() => { setQuery(m.query); setTimeout(() => handleSearch({preventDefault:()=>{}}), 50); }} 
+                    style={{ background: '#1f1a16', border: '1px solid #2e2720', borderRadius: 12, padding: '4px 8px', fontSize: 11, color: '#e8ddd0', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                    {m.emoji} {m.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{ fontSize: 10, textAlign: 'center', marginTop: 8 }}>
+              <button onClick={() => setShowApiKeySetup(true)} style={{ background: 'none', border: 'none', color: '#7a6a5a', textDecoration: 'underline', cursor: 'pointer' }}>Ubah Gemini API Key</button>
+            </div>
+          </div>
+        )}
 
         {/* Food Log Cards */}
         <h3 style={{ fontSize: 14, color: '#e8ddd0', marginBottom: 12 }}>Hari Ini</h3>
