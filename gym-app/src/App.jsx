@@ -240,7 +240,7 @@ const FOOD_DB = [
   { name:"Nasi putih",      aliases:["nasi","nasi putih","white rice"], emoji:"🍚", unit:"piring", cal:242, protein:4,  carbs:54, fat:0.4 },
   { name:"Nasi merah",      aliases:["nasi merah","brown rice"],        emoji:"🍚", unit:"piring", cal:218, protein:5,  carbs:46, fat:1.6 },
   { name:"Nasi goreng",     aliases:["nasi goreng","fried rice"],        emoji:"🍳", unit:"piring", cal:350, protein:8,  carbs:58, fat:10  },
-  { name:"Mie goreng",      aliases:["mie goreng","indomie"],           emoji:"🍜", unit:"bungkus",cal:380, protein:8,  carbs:54, fat:14  },
+  { name:"Mie goreng",      aliases:["mie goreng","indomie","mie instan"], emoji:"🍜", unit:"bungkus",cal:380, protein:8,  carbs:54, fat:14  },
   { name:"Mie rebus",       aliases:["mie rebus","mie kuah"],           emoji:"🍜", unit:"bungkus",cal:290, protein:7,  carbs:48, fat:8   },
   { name:"Roti tawar",      aliases:["roti","roti tawar","bread"],       emoji:"🍞", unit:"lembar", cal:67,  protein:2,  carbs:13, fat:1   },
   { name:"Kentang rebus",   aliases:["kentang","potato"],               emoji:"🥔", unit:"buah",   cal:77,  protein:2,  carbs:17, fat:0.1 },
@@ -289,14 +289,27 @@ function estimateNutrition(query) {
   const numMatch = q.match(/(\d+(?:\.\d+)?)/);
   const qty = numMatch ? parseFloat(numMatch[1]) : 1;
   const nameOnly = q.replace(/\d+(?:\.\d+)?/g, '').replace(/(piring|butir|potong|bungkus|lembar|gelas|buah|porsi|cup|scoop|kaleng|mangkok|slice)/g,'').trim();
+  const words = nameOnly.split(/\s+/).filter(w => w.length > 2);
   
   // Cari di database
   let best = null;
   let bestScore = 0;
   for (const food of FOOD_DB) {
     for (const alias of food.aliases) {
+      // 1. Exact Substring Match (Highest priority)
       if (nameOnly.includes(alias) || alias.includes(nameOnly)) {
-        const score = alias.length;
+        const score = 100 + alias.length;
+        if (score > bestScore) { best = food; bestScore = score; }
+      }
+      
+      // 2. Word Intersection Match (Lower priority)
+      const aliasWords = alias.split(/\s+/);
+      let matchCount = 0;
+      for (const w of words) {
+        if (aliasWords.includes(w)) matchCount++;
+      }
+      if (matchCount > 0) {
+        const score = matchCount * 10;
         if (score > bestScore) { best = food; bestScore = score; }
       }
     }
@@ -1794,33 +1807,54 @@ function FuelTab({
     let result = estimateNutrition(query);
 
     if (!result) {
-      // Fallback API to Nutritionix (Free endpoint)
+      // Fallback API to Google Gemini AI
       try {
-        const response = await fetch("https://trackapi.nutritionix.com/v2/natural/nutrients", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-app-id": "YOUR_NUTRITIONIX_APP_ID", // TODO: Replace with real key
-            "x-app-key": "YOUR_NUTRITIONIX_APP_KEY" // TODO: Replace with real key
-          },
-          body: JSON.stringify({ query: query })
-        });
-        const data = await response.json();
+        let apiKey = localStorage.getItem("gemini_api_key");
+        if (!apiKey) {
+          apiKey = window.prompt("Untuk mencari makanan di luar database, masukkan API Key Gemini kamu (gratis dari Google AI Studio):");
+          if (apiKey) {
+            localStorage.setItem("gemini_api_key", apiKey.trim());
+          } else {
+            setIsSearching(false);
+            return;
+          }
+        }
         
-        if (data.foods && data.foods.length > 0) {
-          const food = data.foods[0];
+        const promptText = `Berapa kalori, protein, carbs, dan fat dari: "${query}"? Berikan porsi standar jika tidak disebutkan. Kembalikan STRICTLY dalam format JSON saja tanpa formatting markdown apa pun (tanpa \`\`\`json): {"name":"Nama Makanan","cal":number,"protein":number,"carbs":number,"fat":number,"emoji":"🍔"}`;
+        
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }]
+          })
+        });
+        
+        const data = await response.json();
+        if (data.error) {
+          if (data.error.code === 400 || data.error.code === 403) {
+            localStorage.removeItem("gemini_api_key");
+            showToast("API Key salah/invalid. Coba lagi.");
+          } else {
+            showToast("Error API: " + data.error.message);
+          }
+        } else if (data.candidates && data.candidates[0].content.parts[0].text) {
+          const textRes = data.candidates[0].content.parts[0].text;
+          const jsonStr = textRes.replace(/```json/g, '').replace(/```/g, '').trim();
+          const parsed = JSON.parse(jsonStr);
           result = {
-            name: food.food_name,
-            emoji: "🍽️",
-            cal: Math.round(food.nf_calories),
-            protein: Math.round(food.nf_protein * 10) / 10,
-            carbs: Math.round(food.nf_total_carbohydrate * 10) / 10,
-            fat: Math.round(food.nf_total_fat * 10) / 10,
+            name: parsed.name || query,
+            emoji: parsed.emoji || "🍽️",
+            cal: Math.round(parsed.cal || 0),
+            protein: Math.round((parsed.protein || 0) * 10) / 10,
+            carbs: Math.round((parsed.carbs || 0) * 10) / 10,
+            fat: Math.round((parsed.fat || 0) * 10) / 10,
             found: true
           };
         }
       } catch (err) {
-        console.error("API Error", err);
+        console.error("AI API Error", err);
+        showToast("Gagal mengambil data dari AI.");
       }
     }
 
