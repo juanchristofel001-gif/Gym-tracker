@@ -233,9 +233,6 @@ const defaultState = {
   foodLog: {}, // { "2026-08-07": [{ id, name, raw, cal, protein, carbs, fat, time }] }
 };
 
-
-}
-
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ APP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function App() {
   const [state, setState] = useState(defaultState);
