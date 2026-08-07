@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback, useMemo, Component } from "react";
+﻿import React, { useState, useEffect, useCallback, useMemo, Component } from "react";
 import { get as idbGet, set as idbSet } from "idb-keyval";
 
-// ──────────────── STORAGE HELPER ────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ STORAGE HELPER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const storage = {
   async get(key) {
     try {
@@ -20,7 +20,7 @@ const storage = {
   },
 };
 
-// ──────────────── DATA ────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ DATA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const WEEK_DAYS = [
   { id: 0, day: "Senin", shortDay: "SEN" },
   { id: 1, day: "Selasa", shortDay: "SEL" },
@@ -33,7 +33,7 @@ const WEEK_DAYS = [
 
 const WORKOUT_LIBRARY = {
   pull: {
-    id: "pull", title: "PULL", subtitle: "Punggung & Bisep", emoji: "🔙", color: "#FF6B35",
+    id: "pull", title: "PULL", subtitle: "Punggung & Bisep", emoji: "ðŸ”™", color: "#c9a96e",
     exercises: {
       minimum: { label: "Minimum", totalSets: "9 Set", items: ["Lat Pulldown (3x12)", "Chest-Supported Row (3x12)", "Machine Bicep Curl (3x15)"] },
       optimal: { label: "Optimal", totalSets: "15 Set", items: ["Lat Pulldown (3x12)", "Chest-Supported Row (3x12)", "Seated Cable Row (3x12)", "Face Pulls (3x15)", "Seated DB Hammer Curl (3x12)"] },
@@ -41,7 +41,7 @@ const WORKOUT_LIBRARY = {
     },
   },
   push: {
-    id: "push", title: "PUSH", subtitle: "Dada, Bahu, Trisep", emoji: "💪", color: "#E63946",
+    id: "push", title: "PUSH", subtitle: "Dada, Bahu, Trisep", emoji: "ðŸ’ª", color: "#E63946",
     exercises: {
       minimum: { label: "Minimum", totalSets: "9 Set", items: ["Seated Machine Chest Press (3x12)", "Seated Machine Shoulder Press (3x12)", "Triceps Cable Pushdown (3x15)"] },
       optimal: { label: "Optimal", totalSets: "15 Set", items: ["Machine Chest Press (3x12)", "Incline Machine Press (3x12)", "Pec Deck Fly (3x15)", "Seated Shoulder Press (3x12)", "Triceps Pushdown (3x15)"] },
@@ -49,7 +49,7 @@ const WORKOUT_LIBRARY = {
     },
   },
   legs: {
-    id: "legs", title: "LEGS & LISS", subtitle: "Kaki & Kardio", emoji: "🦵", color: "#2EC4B6",
+    id: "legs", title: "LEGS & LISS", subtitle: "Kaki & Kardio", emoji: "ðŸ¦µ", color: "#88b4a0",
     exercises: {
       minimum: { label: "Minimum", totalSets: "6 Set + 15m", items: ["Leg Extension (3x15)", "Seated Leg Curl (3x15)", "Jalan Treadmill 15 Menit"] },
       optimal: { label: "Optimal", totalSets: "9 Set + 30m", items: ["Leg Extension (3x15)", "Seated Leg Curl (3x15)", "Seated Calf Raise (3x20)", "Jalan Treadmill 30 Menit"] },
@@ -57,7 +57,7 @@ const WORKOUT_LIBRARY = {
     },
   },
   upper: {
-    id: "upper", title: "UPPER MIX", subtitle: "Dada, Punggung, Bahu", emoji: "🎯", color: "#9B5DE5",
+    id: "upper", title: "UPPER MIX", subtitle: "Dada, Punggung, Bahu", emoji: "ðŸŽ¯", color: "#9B5DE5",
     exercises: {
       minimum: { label: "Minimum", totalSets: "9 Set", items: ["Lat Pulldown (3x12)", "Machine Chest Press (3x12)", "Seated Lateral Raise - DB ringan (3x15)"] },
       optimal: { label: "Optimal", totalSets: "15 Set", items: ["Lat Pulldown (3x12)", "Chest-Supported Row (3x12)", "Incline Machine Press (3x12)", "Pec Deck Fly (3x15)", "Seated Lateral Raise (3x15)"] },
@@ -65,7 +65,7 @@ const WORKOUT_LIBRARY = {
     },
   },
   fatburn: {
-    id: "fatburn", title: "FAT BURN", subtitle: "LISS Recovery", emoji: "🔥", color: "#F77F00",
+    id: "fatburn", title: "FAT BURN", subtitle: "LISS Recovery", emoji: "ðŸ”¥", color: "#F77F00",
     exercises: {
       minimum: { label: "Minimum", totalSets: "20 Min", items: ["Sepeda Statis Recumbent 20 Menit"] },
       optimal: { label: "Optimal", totalSets: "40 Min", items: ["Jalan Treadmill (Incline 3-5%, 4-5 km/jam) 40 Menit"] },
@@ -73,7 +73,7 @@ const WORKOUT_LIBRARY = {
     },
   },
   rest: {
-    id: "rest", title: "REST DAY", subtitle: "Pemulihan Tubuh", emoji: "🧘", color: "#64748b",
+    id: "rest", title: "REST DAY", subtitle: "Pemulihan Tubuh", emoji: "ðŸ§˜", color: "#64748b",
     exercises: {
       minimum: { label: "Minimum", totalSets: "Rest", items: ["Selesai Istirahat"] },
       optimal: { label: "Optimal", totalSets: "Rest + Stretch", items: ["Selesai Istirahat", "Peregangan Ringan 10 Menit"] },
@@ -83,39 +83,39 @@ const WORKOUT_LIBRARY = {
 };
 
 const TIER_CFG = {
-  minimum: { label: "MIN", border: "#64748b", icon: "⚡", xp: 2 },
-  optimal: { label: "OPT", border: "#3b82f6", icon: "🚀", xp: 4 },
-  maximum: { label: "MAX", border: "#a855f7", icon: "👑", xp: 7 },
+  minimum: { label: "MIN", border: "#88897a", icon: "âš¡", xp: 2 },
+  optimal: { label: "OPT", border: "#c9a96e", icon: "ðŸš€", xp: 4 },
+  maximum: { label: "MAX", border: "#b08a5e", icon: "ðŸ‘‘", xp: 7 },
 };
 
-// Realistic gym progression: ~3-5 XP/day avg → months per rank, years to top
+// Realistic gym progression: ~3-5 XP/day avg â†’ months per rank, years to top
 const RANKS = [
-  { name: "Couch Potato",    icon: "🥔", minXP: 0,      color: "#6b7280" },
-  { name: "First Step",      icon: "👟", minXP: 30,     color: "#94a3b8" },
-  { name: "Gym Rookie",      icon: "🌱", minXP: 80,     color: "#78a55a" },
-  { name: "Iron Initiate",   icon: "⚙️", minXP: 180,    color: "#a8a29e" },
-  { name: "Bronze Grinder",  icon: "🥉", minXP: 350,    color: "#cd7f32" },
-  { name: "Steel Will",      icon: "🛡️", minXP: 600,    color: "#71717a" },
-  { name: "Silver Fury",     icon: "🥈", minXP: 1000,   color: "#c0c0c0" },
-  { name: "Iron Wolf",       icon: "🐺", minXP: 1600,   color: "#8b9dc3" },
-  { name: "Gold Warrior",    icon: "🥇", minXP: 2500,   color: "#ffd700" },
-  { name: "Platinum Beast",  icon: "💎", minXP: 4000,   color: "#00d4ff" },
-  { name: "Diamond Core",    icon: "💠", minXP: 6000,   color: "#b45fff" },
-  { name: "Obsidian Titan",  icon: "🗿", minXP: 9000,   color: "#1e1b4b" },
-  { name: "Phoenix Rising",  icon: "🔥", minXP: 13000,  color: "#ef4444" },
-  { name: "Shadow Olympian", icon: "⚡", minXP: 18000,  color: "#6366f1" },
-  { name: "Crimson Emperor", icon: "👑", minXP: 25000,  color: "#dc2626" },
-  { name: "Astral Demigod",  icon: "🌟", minXP: 35000,  color: "#f59e0b" },
-  { name: "Void Sovereign",  icon: "🌀", minXP: 50000,  color: "#7c3aed" },
-  { name: "Eternal Apex",    icon: "♾️", minXP: 75000,  color: "#14b8a6" },
-  { name: "Mythic Legend",   icon: "🔱", minXP: 110000, color: "#ff4500" },
-  { name: "G.O.A.T.",        icon: "🐐", minXP: 160000, color: "#fbbf24" },
+  { name: "Couch Potato",    icon: "ðŸ¥”", minXP: 0,      color: "#6b7280" },
+  { name: "First Step",      icon: "ðŸ‘Ÿ", minXP: 30,     color: "#94a3b8" },
+  { name: "Gym Rookie",      icon: "ðŸŒ±", minXP: 80,     color: "#78a55a" },
+  { name: "Iron Initiate",   icon: "âš™ï¸", minXP: 180,    color: "#a8a29e" },
+  { name: "Bronze Grinder",  icon: "ðŸ¥‰", minXP: 350,    color: "#cd7f32" },
+  { name: "Steel Will",      icon: "ðŸ›¡ï¸", minXP: 600,    color: "#71717a" },
+  { name: "Silver Fury",     icon: "ðŸ¥ˆ", minXP: 1000,   color: "#c0c0c0" },
+  { name: "Iron Wolf",       icon: "ðŸº", minXP: 1600,   color: "#8b9dc3" },
+  { name: "Gold Warrior",    icon: "ðŸ¥‡", minXP: 2500,   color: "#ffd700" },
+  { name: "Platinum Beast",  icon: "ðŸ’Ž", minXP: 4000,   color: "#00d4ff" },
+  { name: "Diamond Core",    icon: "ðŸ’ ", minXP: 6000,   color: "#b45fff" },
+  { name: "Obsidian Titan",  icon: "ðŸ—¿", minXP: 9000,   color: "#1e1b4b" },
+  { name: "Phoenix Rising",  icon: "ðŸ”¥", minXP: 13000,  color: "#ef4444" },
+  { name: "Shadow Olympian", icon: "âš¡", minXP: 18000,  color: "#6366f1" },
+  { name: "Crimson Emperor", icon: "ðŸ‘‘", minXP: 25000,  color: "#dc2626" },
+  { name: "Astral Demigod",  icon: "ðŸŒŸ", minXP: 35000,  color: "#f59e0b" },
+  { name: "Void Sovereign",  icon: "ðŸŒ€", minXP: 50000,  color: "#7c3aed" },
+  { name: "Eternal Apex",    icon: "â™¾ï¸", minXP: 75000,  color: "#14b8a6" },
+  { name: "Mythic Legend",   icon: "ðŸ”±", minXP: 110000, color: "#ff4500" },
+  { name: "G.O.A.T.",        icon: "ðŸ", minXP: 160000, color: "#fbbf24" },
 ];
 
 const STORAGE_KEY = "gym-app-v2";
 const today = () => new Date().toISOString().slice(0, 10);
 
-// ──────────────── SPOTIFY PKCE AUTH ────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ SPOTIFY PKCE AUTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const SPOTIFY_CLIENT_ID = '34e9165d4b534bb0b13e3b0a78a69563';
 const SPOTIFY_SCOPES = 'user-read-currently-playing user-read-playback-state user-modify-playback-state';
 const getSpotifyRedirect = () => 'https://gym-tracker-pearl-nine.vercel.app/';
@@ -170,97 +170,35 @@ const EXERCISE_LIBRARY = [
   "Dumbbell Press", "Lateral Raise", "Leg Extension", "Leg Curl"
 ];
 
-// ──────────────── ACHIEVEMENTS ────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ACHIEVEMENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ACHIEVEMENTS = [
   // Workout milestones
-  { id: "first_blood",   icon: "🩸", name: "First Blood",        desc: "Selesaikan workout pertama",     check: s => (s.totalWorkouts || 0) >= 1,   category: "workout" },
-  { id: "getting_warm",  icon: "🌡️", name: "Getting Warm",       desc: "Selesaikan 10 workouts",         check: s => (s.totalWorkouts || 0) >= 10,  category: "workout" },
-  { id: "iron_habit",    icon: "⚒️", name: "Iron Habit",         desc: "Selesaikan 50 workouts",         check: s => (s.totalWorkouts || 0) >= 50,  category: "workout" },
-  { id: "centurion",     icon: "🏛️", name: "Centurion",          desc: "Selesaikan 100 workouts",        check: s => (s.totalWorkouts || 0) >= 100, category: "workout" },
-  { id: "spartan",       icon: "⚔️", name: "Spartan 300",        desc: "Selesaikan 300 workouts",        check: s => (s.totalWorkouts || 0) >= 300, category: "workout" },
-  { id: "titan_grind",   icon: "🗿", name: "Titan Grind",        desc: "Selesaikan 1000 workouts",       check: s => (s.totalWorkouts || 0) >= 1000,category: "workout" },
+  { id: "first_blood",   icon: "ðŸ©¸", name: "First Blood",        desc: "Selesaikan workout pertama",     check: s => (s.totalWorkouts || 0) >= 1,   category: "workout" },
+  { id: "getting_warm",  icon: "ðŸŒ¡ï¸", name: "Getting Warm",       desc: "Selesaikan 10 workouts",         check: s => (s.totalWorkouts || 0) >= 10,  category: "workout" },
+  { id: "iron_habit",    icon: "âš’ï¸", name: "Iron Habit",         desc: "Selesaikan 50 workouts",         check: s => (s.totalWorkouts || 0) >= 50,  category: "workout" },
+  { id: "centurion",     icon: "ðŸ›ï¸", name: "Centurion",          desc: "Selesaikan 100 workouts",        check: s => (s.totalWorkouts || 0) >= 100, category: "workout" },
+  { id: "spartan",       icon: "âš”ï¸", name: "Spartan 300",        desc: "Selesaikan 300 workouts",        check: s => (s.totalWorkouts || 0) >= 300, category: "workout" },
+  { id: "titan_grind",   icon: "ðŸ—¿", name: "Titan Grind",        desc: "Selesaikan 1000 workouts",       check: s => (s.totalWorkouts || 0) >= 1000,category: "workout" },
   // Streak milestones
-  { id: "on_fire",       icon: "🔥", name: "On Fire",            desc: "Streak 3 hari berturut-turut",   check: s => (s.streak || 0) >= 3,          category: "streak" },
-  { id: "iron_week",     icon: "📅", name: "Iron Week",          desc: "Streak 7 hari berturut-turut",   check: s => (s.streak || 0) >= 7,          category: "streak" },
-  { id: "unstoppable",   icon: "🚂", name: "Unstoppable",        desc: "Streak 14 hari berturut-turut",  check: s => (s.streak || 0) >= 14,         category: "streak" },
-  { id: "machine",       icon: "🤖", name: "Machine",            desc: "Streak 30 hari berturut-turut",  check: s => (s.streak || 0) >= 30,         category: "streak" },
-  { id: "no_days_off",   icon: "♾️", name: "No Days Off",        desc: "Streak 100 hari berturut-turut", check: s => (s.streak || 0) >= 100,        category: "streak" },
+  { id: "on_fire",       icon: "ðŸ”¥", name: "On Fire",            desc: "Streak 3 hari berturut-turut",   check: s => (s.streak || 0) >= 3,          category: "streak" },
+  { id: "iron_week",     icon: "ðŸ“…", name: "Iron Week",          desc: "Streak 7 hari berturut-turut",   check: s => (s.streak || 0) >= 7,          category: "streak" },
+  { id: "unstoppable",   icon: "ðŸš‚", name: "Unstoppable",        desc: "Streak 14 hari berturut-turut",  check: s => (s.streak || 0) >= 14,         category: "streak" },
+  { id: "machine",       icon: "ðŸ¤–", name: "Machine",            desc: "Streak 30 hari berturut-turut",  check: s => (s.streak || 0) >= 30,         category: "streak" },
+  { id: "no_days_off",   icon: "â™¾ï¸", name: "No Days Off",        desc: "Streak 100 hari berturut-turut", check: s => (s.streak || 0) >= 100,        category: "streak" },
   // Week milestones
-  { id: "month_one",     icon: "📆", name: "Month One",          desc: "Selesaikan 4 minggu",            check: s => (s.weekHistory || []).length >= 4,  category: "milestone" },
-  { id: "quarter_beast", icon: "🦁", name: "Quarter Beast",      desc: "Selesaikan 12 minggu (3 bulan)", check: s => (s.weekHistory || []).length >= 12, category: "milestone" },
-  { id: "half_year",     icon: "🌗", name: "Half-Year Hero",     desc: "Selesaikan 26 minggu (6 bulan)", check: s => (s.weekHistory || []).length >= 26, category: "milestone" },
-  { id: "year_of_steel", icon: "🏆", name: "Year of Steel",      desc: "Selesaikan 52 minggu (1 tahun)", check: s => (s.weekHistory || []).length >= 52, category: "milestone" },
+  { id: "month_one",     icon: "ðŸ“†", name: "Month One",          desc: "Selesaikan 4 minggu",            check: s => (s.weekHistory || []).length >= 4,  category: "milestone" },
+  { id: "quarter_beast", icon: "ðŸ¦", name: "Quarter Beast",      desc: "Selesaikan 12 minggu (3 bulan)", check: s => (s.weekHistory || []).length >= 12, category: "milestone" },
+  { id: "half_year",     icon: "ðŸŒ—", name: "Half-Year Hero",     desc: "Selesaikan 26 minggu (6 bulan)", check: s => (s.weekHistory || []).length >= 26, category: "milestone" },
+  { id: "year_of_steel", icon: "ðŸ†", name: "Year of Steel",      desc: "Selesaikan 52 minggu (1 tahun)", check: s => (s.weekHistory || []).length >= 52, category: "milestone" },
   // Misc
-  { id: "know_thyself",  icon: "🪞", name: "Know Thyself",       desc: "Isi berat dan tinggi badan",     check: s => s.weight > 0 && s.height > 0,      category: "misc" },
-  { id: "record_setter", icon: "📝", name: "Record Setter",      desc: "Catat PR pertamamu",             check: s => Object.keys(s.personalRecords || {}).length >= 1, category: "misc" },
-  { id: "pr_collector",  icon: "🎯", name: "PR Collector",       desc: "Catat 5 Personal Records",       check: s => Object.keys(s.personalRecords || {}).length >= 5, category: "misc" },
-  { id: "scale_master",  icon: "⚖️", name: "Scale Master",       desc: "Log berat badan 7 kali",         check: s => (s.weightHistory || []).length >= 7, category: "misc" },
-  { id: "max_mode",      icon: "👑", name: "Maximum Effort",     desc: "Pilih tier MAXIMUM",             check: s => s.selectedTier === "maximum",       category: "misc" },
+  { id: "know_thyself",  icon: "ðŸªž", name: "Know Thyself",       desc: "Isi berat dan tinggi badan",     check: s => s.weight > 0 && s.height > 0,      category: "misc" },
+  { id: "record_setter", icon: "ðŸ“", name: "Record Setter",      desc: "Catat PR pertamamu",             check: s => Object.keys(s.personalRecords || {}).length >= 1, category: "misc" },
+  { id: "pr_collector",  icon: "ðŸŽ¯", name: "PR Collector",       desc: "Catat 5 Personal Records",       check: s => Object.keys(s.personalRecords || {}).length >= 5, category: "misc" },
+  { id: "scale_master",  icon: "âš–ï¸", name: "Scale Master",       desc: "Log berat badan 7 kali",         check: s => (s.weightHistory || []).length >= 7, category: "misc" },
+  { id: "max_mode",      icon: "ðŸ‘‘", name: "Maximum Effort",     desc: "Pilih tier MAXIMUM",             check: s => s.selectedTier === "maximum",       category: "misc" },
 ];
 
-// ──────────────── PILLARS (Ejen Ali style) ────────────────
-const PILLARS = [
-  { id: "combat", name: "COMBAT", desc: "Strength & Power",            color: "#ef4444", stat: "Kekuatan, angkat berat, PR records" },
-  { id: "neuro",  name: "NEURO",  desc: "Mind & Strategy",             color: "#eab308", stat: "Teknik, XP, achievement mastery" },
-  { id: "inviso", name: "INVISO", desc: "Stealth & Endurance",         color: "#94a3b8", stat: "Konsistensi, streak, disiplin" },
-  { id: "techno", name: "TECHNO", desc: "Tech & Recovery",             color: "#3b82f6", stat: "Nutrisi, tidur, hidrasi, data" },
-];
 
-// Custom SVG icons matching Ejen Ali pillar symbols
-function PillarIcon({ pillarId, size = 28, color }) {
-  const s = size;
-  const c = color || PILLARS.find(p => p.id === pillarId)?.color || '#fff';
-  if (pillarId === "combat") {
-    // Red pentagon with swirl/spiral eye inside
-    return (
-      <svg width={s} height={s} viewBox="0 0 40 40" fill="none">
-        <polygon points="20,2 38,14 32,36 8,36 2,14" fill={`${c}22`} stroke={c} strokeWidth="2.5"/>
-        <circle cx="20" cy="20" r="7" fill="none" stroke={c} strokeWidth="2"/>
-        <path d="M20 13 C24 15, 27 19, 25 23 C23 27, 17 27, 15 23 C13 19, 16 15, 20 13Z" fill={c} opacity="0.7"/>
-        <circle cx="20" cy="20" r="2.5" fill="#0a0a0f"/>
-      </svg>
-    );
-  }
-  if (pillarId === "neuro") {
-    // Yellow hexagon with atom/brain network nodes
-    return (
-      <svg width={s} height={s} viewBox="0 0 40 40" fill="none">
-        <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill={`${c}22`} stroke={c} strokeWidth="2.5"/>
-        <circle cx="20" cy="14" r="2" fill={c}/>
-        <circle cx="13" cy="24" r="2" fill={c}/>
-        <circle cx="27" cy="24" r="2" fill={c}/>
-        <circle cx="20" cy="20" r="2.5" fill={c}/>
-        <line x1="20" y1="14" x2="20" y2="20" stroke={c} strokeWidth="1.5"/>
-        <line x1="13" y1="24" x2="20" y2="20" stroke={c} strokeWidth="1.5"/>
-        <line x1="27" y1="24" x2="20" y2="20" stroke={c} strokeWidth="1.5"/>
-        <line x1="13" y1="24" x2="20" y2="14" stroke={c} strokeWidth="1" opacity="0.4"/>
-        <line x1="27" y1="24" x2="20" y2="14" stroke={c} strokeWidth="1" opacity="0.4"/>
-        <line x1="13" y1="24" x2="27" y2="24" stroke={c} strokeWidth="1" opacity="0.4"/>
-      </svg>
-    );
-  }
-  if (pillarId === "inviso") {
-    // Dark circle with mask/stealth face
-    return (
-      <svg width={s} height={s} viewBox="0 0 40 40" fill="none">
-        <circle cx="20" cy="20" r="17" fill={`${c}22`} stroke={c} strokeWidth="2.5"/>
-        <ellipse cx="13" cy="18" rx="4" ry="2.5" fill={c} opacity="0.85"/>
-        <ellipse cx="27" cy="18" rx="4" ry="2.5" fill={c} opacity="0.85"/>
-        <circle cx="13" cy="18" r="1.5" fill="#0a0a0f"/>
-        <circle cx="27" cy="18" r="1.5" fill="#0a0a0f"/>
-        <path d="M14 26 Q20 30 26 26" stroke={c} strokeWidth="1.5" fill="none" opacity="0.5"/>
-        <line x1="9" y1="18" x2="31" y2="18" stroke={c} strokeWidth="1" opacity="0.2"/>
-      </svg>
-    );
-  }
-  // techno: Blue shield with lightning bolt
-  return (
-    <svg width={s} height={s} viewBox="0 0 40 40" fill="none">
-      <path d="M6,6 H34 V6 Q34,34 20,38 Q6,34 6,6 Z" fill={`${c}22`} stroke={c} strokeWidth="2.5" strokeLinejoin="round"/>
-      <path d="M22 10 L17 20 H23 L18 30" stroke={c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    </svg>
-  );
-}
 
 const defaultState = {
   checkedItems: {},
@@ -291,10 +229,9 @@ const defaultState = {
   profileAge: "",
   profileNickname: "",
   profileBio: "",
-  pillarBoosts: { combat: 0, neuro: 0, inviso: 0, techno: 0 },
 };
 
-// ──────────────── APP ────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ APP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function App() {
   const [state, setState] = useState(defaultState);
   const [isDbLoaded, setIsDbLoaded] = useState(false);
@@ -323,7 +260,7 @@ export default function App() {
   const [exerciseDb, setExerciseDb] = useState([]);
   const [editingRoutine, setEditingRoutine] = useState(null); // e.g. "pull"
   
-  // ── Spotify state ──
+  // â”€â”€ Spotify state â”€â”€
   const [spToken, setSpToken] = useState(localStorage.getItem('sp_token') || null);
   const [spRefreshToken, setSpRefreshToken] = useState(localStorage.getItem('sp_refresh') || null);
   const [spNowPlaying, setSpNowPlaying] = useState(null);
@@ -396,7 +333,7 @@ export default function App() {
       if (mounted) {
         if (saved) {
           let s = { ...defaultState, ...saved };
-          // ── Auto week reset based on calendar ──
+          // â”€â”€ Auto week reset based on calendar â”€â”€
           const thisWeek = getWeekId();
           if (s.currentWeekId && s.currentWeekId !== thisWeek) {
             // New week detected! Save old week to history
@@ -489,7 +426,7 @@ export default function App() {
     setTimeout(() => setToast(null), 2200);
   };
 
-  // ── Workout logic ──
+  // â”€â”€ Workout logic â”€â”€
   const getRoutineExercises = (routineId, tier, s = state) => {
     const custom = s.customRoutines?.[routineId];
     if (custom && custom.length > 0) {
@@ -527,7 +464,7 @@ export default function App() {
               next.streak = s.lastWorkoutDate === yStr ? (s.streak || 0) + 1 : 1;
             }
             next.lastWorkoutDate = d;
-            showToast(`+${earnedXP} XP — ${WORKOUT_LIBRARY[routineId].title} complete!`);
+            showToast(`+${earnedXP} XP â€” ${WORKOUT_LIBRARY[routineId].title} complete!`);
           }
         } else {
           const wasAllDone = exItems.every((_, i) => !!s.checkedItems[`${dayId}-${tier}-${i}`]);
@@ -573,7 +510,7 @@ export default function App() {
     showToast("Week reset!");
   };
 
-  // ── Rank logic ──
+  // â”€â”€ Rank logic â”€â”€
   const getRank = () => {
     let rank = RANKS[0];
     for (const r of RANKS) {
@@ -593,7 +530,7 @@ export default function App() {
     return Math.min(100, Math.round(((state.xp - cur.minXP) / (next.minXP - cur.minXP)) * 100));
   };
 
-  // ── Daily trackers ──
+  // â”€â”€ Daily trackers â”€â”€
   const d = today();
   const proteinToday = state.protein?.[d] || 0;
   const waterToday = state.water?.[d] || 0;
@@ -625,39 +562,14 @@ export default function App() {
   const nextRank = getNextRank();
   const currentDayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
-  // ── Pillar calculations (auto from stats) ──
-  const getPillarValues = () => {
-    const boosts = state.pillarBoosts || {};
-    // COMBAT: Strength, PR count, heavy lifting, max tier
-    const prCount = Object.keys(state.personalRecords || {}).length;
-    const combatBase = Math.min(100, prCount * 12 + (state.selectedTier === "maximum" ? 25 : state.selectedTier === "optimal" ? 12 : 0) + (state.totalWorkouts || 0) * 0.6);
-    // NEURO: Mind, technique, XP, rank, achievements
-    const achieveCount = ACHIEVEMENTS.filter(a => a.check(state)).length;
-    const neuroBase = Math.min(100, (state.xp || 0) * 0.025 + achieveCount * 5 + RANKS.findIndex(r => r.name === rank.name) * 5 + (state.totalWorkouts || 0) * 0.3);
-    // INVISO: Stealth, consistency, streak, discipline
-    const invisoBase = Math.min(100, (state.streak || 0) * 5 + ((state.weekHistory || []).length * 2.5) + (state.totalWorkouts || 0) * 0.4);
-    // TECHNO: Recovery, nutrition, sleep, water, data tracking
-    const pPct = state.weight > 0 ? Math.min(100, ((state.protein?.[d] || 0) / (state.weight * 1.8)) * 100) : 0;
-    const wPct = Math.min(100, ((state.water?.[d] || 0) / (state.weight > 0 ? Math.round(state.weight / 8) : 8)) * 100);
-    const sPct = Math.min(100, ((state.sleep?.[d] || 0) / state.sleepGoal) * 100);
-    const technoBase = Math.min(100, (pPct + wPct + sPct) / 3 + (state.weight > 0 && state.height > 0 ? 15 : 0) + ((state.weightHistory || []).length * 3));
 
-    return {
-      combat: Math.min(100, Math.round(combatBase + (boosts.combat || 0))),
-      neuro:  Math.min(100, Math.round(neuroBase + (boosts.neuro || 0))),
-      inviso: Math.min(100, Math.round(invisoBase + (boosts.inviso || 0))),
-      techno: Math.min(100, Math.round(technoBase + (boosts.techno || 0))),
-    };
-  };
-  const pillarValues = getPillarValues();
-  const dominantPillar = PILLARS.reduce((best, p) => pillarValues[p.id] > pillarValues[best.id] ? p : best, PILLARS[0]);
 
   if (!isDbLoaded) {
     return (
-      <div style={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#0b0b12" }}>
+      <div style={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#16120f" }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 40, marginBottom: 16 }}>🔋</div>
-          <div style={{ color: "#2EC4B6", fontFamily: "'JetBrains Mono'", letterSpacing: 2, fontSize: 14 }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>ðŸ”‹</div>
+          <div style={{ color: "#88b4a0", fontFamily: "'JetBrains Mono'", letterSpacing: 2, fontSize: 14 }}>
             LOADING DATABASE...
           </div>
         </div>
@@ -683,7 +595,7 @@ export default function App() {
       {/* Toast */}
       {toast && <div style={styles.toast}>{toast}</div>}
 
-      {/* ═══════ WORKOUT TAB ═══════ */}
+      {/* â•â•â•â•â•â•â• WORKOUT TAB â•â•â•â•â•â•â• */}
       {tab === "workout" && (
         <div style={styles.page}>
           <div style={styles.header}>
@@ -704,7 +616,7 @@ export default function App() {
                 <span style={{ ...styles.rankBadgeText, color: rank.color }}>{rank.name}</span>
               </div>
               <button onClick={resetWeek} style={styles.resetBtn}>
-                ↺
+                â†º
               </button>
             </div>
           </div>
@@ -741,20 +653,20 @@ export default function App() {
                   key={day.id}
                   onClick={() => {
                     if (isFuture) {
-                      showToast("Belum waktunya! Sabar ya 💪");
+                      showToast("Belum waktunya! Sabar ya ðŸ’ª");
                     } else {
                       setActiveDay(i);
                     }
                   }}
                   style={{
                     ...styles.dayPill,
-                    background: act ? `${dayRoutine.color}14` : done ? "#0d1a0d" : "#111118",
-                    borderColor: act ? dayRoutine.color : done ? "#2EC4B633" : "#1a1a28",
+                    background: act ? `${dayRoutine.color}14` : done ? "#0d1a0d" : "#1f1a16",
+                    borderColor: act ? dayRoutine.color : done ? "#88b4a033" : "#2a2320",
                     opacity: isFuture ? 0.4 : 1,
                     cursor: isFuture ? "not-allowed" : "pointer"
                   }}
                 >
-                  {done && <span style={styles.doneCheck}>✓</span>}
+                  {done && <span style={styles.doneCheck}>âœ“</span>}
                   <span style={{ fontSize: 16 }}>{dayRoutine.emoji}</span>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <span style={{ ...styles.dayPillLabel, color: act ? dayRoutine.color : "#555" }}>{day.shortDay}</span>
@@ -765,7 +677,7 @@ export default function App() {
                       style={{
                         ...styles.miniBarFill,
                         width: `${prog}%`,
-                        background: done ? "#2EC4B6" : dayRoutine.color,
+                        background: done ? "#88b4a0" : dayRoutine.color,
                       }}
                     />
                   </div>
@@ -785,13 +697,13 @@ export default function App() {
                 onClick={() => setEditingRoutine(currentWorkout.id)} 
                 style={{ background: "transparent", border: `1px solid ${currentWorkout.color}55`, color: currentWorkout.color, padding: "4px 12px", borderRadius: 8, fontSize: 12, cursor: "pointer", fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}
               >
-                ✏️ CUSTOM
+                âœï¸ CUSTOM
               </button>
               <button 
                 onClick={() => setIsEditingSchedule(true)} 
                 style={{ background: "transparent", border: `1px solid ${currentWorkout.color}55`, color: currentWorkout.color, padding: "4px 12px", borderRadius: 8, fontSize: 12, cursor: "pointer", fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}
               >
-                🔄 GANTI
+                ðŸ”„ GANTI
               </button>
             </div>
           </div>
@@ -804,8 +716,8 @@ export default function App() {
                 onClick={() => update((s) => ({ ...s, selectedTier: key }))}
                 style={{
                   ...styles.tierBtn,
-                  background: state.selectedTier === key ? `${cfg.border}15` : "#111118",
-                  borderColor: state.selectedTier === key ? cfg.border : "#1a1a28",
+                  background: state.selectedTier === key ? `${cfg.border}15` : "#1f1a16",
+                  borderColor: state.selectedTier === key ? cfg.border : "#2a2320",
                 }}
               >
                 <span style={{ fontSize: 14 }}>{cfg.icon}</span>
@@ -835,7 +747,7 @@ export default function App() {
             <div
               style={{
                 ...styles.statVal,
-                color: getDayProgress(activeDay) === 100 ? "#2EC4B6" : currentWorkout.color,
+                color: getDayProgress(activeDay) === 100 ? "#88b4a0" : currentWorkout.color,
                 fontFamily: "'JetBrains Mono'",
                 fontSize: 14,
                 fontWeight: 700,
@@ -856,8 +768,8 @@ export default function App() {
                   onClick={() => toggleItem(activeDay, state.selectedTier, idx)}
                   style={{
                     ...styles.exBtn,
-                    background: checked ? `${currentWorkout.color}08` : "#111118",
-                    borderColor: checked ? `${currentWorkout.color}33` : "#1a1a28",
+                    background: checked ? `${currentWorkout.color}08` : "#1f1a16",
+                    borderColor: checked ? `${currentWorkout.color}33` : "#2a2320",
                   }}
                 >
                   <div
@@ -883,7 +795,7 @@ export default function App() {
                     }}
                   >
                     {ex.images && ex.images.length > 0 && (
-                      <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', background: '#1a1a28', flexShrink: 0 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', background: '#2a2320', flexShrink: 0 }}>
                         <img 
                           src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${ex.images[0]}`} 
                           alt={ex.name} 
@@ -924,7 +836,7 @@ export default function App() {
                   background: `${currentWorkout.color}08`,
                 }}
               >
-                <div style={{ fontSize: 32 }}>🎉</div>
+                <div style={{ fontSize: 32 }}>ðŸŽ‰</div>
                 <div style={{ fontSize: 16, fontWeight: 700, color: currentWorkout.color }}>
                   {currentWorkout.day} Complete!
                 </div>
@@ -935,11 +847,11 @@ export default function App() {
             )}
 
             {/* Spotify Connected Player */}
-            <div style={{ ...styles.trackerCard, padding: 0, overflow: 'hidden', marginTop: 16, border: spToken ? '1px solid #1DB95433' : '1px solid #1a1a28' }}>
+            <div style={{ ...styles.trackerCard, padding: 0, overflow: 'hidden', marginTop: 16, border: spToken ? '1px solid #1DB95433' : '1px solid #2a2320' }}>
               <button onClick={() => update(s => ({ ...s, showSpotify: !s.showSpotify }))}
                 style={{ width: '100%', padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 20 }}>🎵</span>
+                  <span style={{ fontSize: 20 }}>ðŸŽµ</span>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: '#1DB954', fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>
                       {spToken ? (spNowPlaying ? 'NOW PLAYING' : 'SPOTIFY CONNECTED') : 'GYM MUSIC'}
@@ -956,7 +868,7 @@ export default function App() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {spToken && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#1DB954', boxShadow: '0 0 6px #1DB954' }} />}
-                  <span style={{ fontSize: 12, color: '#666', transform: state.showSpotify ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+                  <span style={{ fontSize: 12, color: '#666', transform: state.showSpotify ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>â–¼</span>
                 </div>
               </button>
               {state.showSpotify && (
@@ -964,7 +876,7 @@ export default function App() {
                   {!spToken ? (
                     <>
                       <button onClick={spotifyLogin} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '14px', background: '#1DB954', borderRadius: 50, border: 'none', fontWeight: 700, fontSize: 14, color: '#000', fontFamily: "'JetBrains Mono'", cursor: 'pointer', letterSpacing: 0.5 }}>
-                        🔗 CONNECT SPOTIFY
+                        ðŸ”— CONNECT SPOTIFY
                       </button>
                       <div style={{ fontSize: 9, color: '#555', textAlign: 'center', marginTop: 8, fontFamily: "'JetBrains Mono'" }}>Login untuk kontrol musik langsung dari sini</div>
                     </>
@@ -983,15 +895,15 @@ export default function App() {
                         </div>
                       ) : (
                         <div style={{ textAlign: 'center', padding: '12px 0', color: '#555', fontSize: 11 }}>
-                          Tidak ada lagu diputar — buka Spotify dan play sesuatu!
+                          Tidak ada lagu diputar â€” buka Spotify dan play sesuatu!
                         </div>
                       )}
                       <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 8 }}>
-                        <button onClick={() => spControl('prev')} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#aaa', padding: 8 }}>⏮</button>
+                        <button onClick={() => spControl('prev')} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#aaa', padding: 8 }}>â®</button>
                         <button onClick={() => spControl(spNowPlaying?.isPlaying ? 'pause' : 'play')} style={{ background: '#1DB954', border: 'none', width: 44, height: 44, borderRadius: '50%', fontSize: 18, cursor: 'pointer', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {spNowPlaying?.isPlaying ? '⏸' : '▶'}
+                          {spNowPlaying?.isPlaying ? 'â¸' : 'â–¶'}
                         </button>
-                        <button onClick={() => spControl('next')} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#aaa', padding: 8 }}>⏭</button>
+                        <button onClick={() => spControl('next')} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#aaa', padding: 8 }}>â­</button>
                       </div>
                       <button onClick={spotifyLogout} style={{ width: '100%', padding: '6px', background: 'none', border: '1px solid #333', borderRadius: 8, color: '#555', fontSize: 9, fontFamily: "'JetBrains Mono'", cursor: 'pointer' }}>
                         DISCONNECT
@@ -1005,28 +917,28 @@ export default function App() {
         </div>
       )}
 
-      {/* ═══════ NUTRITION TAB ═══════ */}
+      {/* â•â•â•â•â•â•â• NUTRITION TAB â•â•â•â•â•â•â• */}
       {tab === "nutrition" && (() => {
         const pPct = Math.min(100, (proteinToday / autoProteinGoal) * 100);
         const wPct = Math.min(100, (waterToday / autoWaterGoal) * 100);
         const sPct = Math.min(100, (sleepToday / state.sleepGoal) * 100);
         const cPct = Math.min(100, (caloriesToday / autoCalorieGoal) * 100);
         const fuelScore = Math.round((pPct + wPct + sPct + cPct) / 4);
-        const fuelColor = fuelScore >= 80 ? '#2EC4B6' : fuelScore >= 50 ? '#fbbf24' : '#ef4444';
+        const fuelColor = fuelScore >= 80 ? '#88b4a0' : fuelScore >= 50 ? '#fbbf24' : '#ef4444';
         const MEAL_PRESETS = [
-          { name: "Whey Shake", protein: 25, cal: 120, icon: "🥤" },
-          { name: "Dada Ayam", protein: 31, cal: 165, icon: "🍗" },
-          { name: "Telur 2 butir", protein: 12, cal: 140, icon: "🥚" },
-          { name: "Nasi + Lauk", protein: 15, cal: 450, icon: "🍚" },
-          { name: "Oatmeal", protein: 5, cal: 150, icon: "🥣" },
-          { name: "Susu", protein: 8, cal: 120, icon: "🥛" },
+          { name: "Whey Shake", protein: 25, cal: 120, icon: "ðŸ¥¤" },
+          { name: "Dada Ayam", protein: 31, cal: 165, icon: "ðŸ—" },
+          { name: "Telur 2 butir", protein: 12, cal: 140, icon: "ðŸ¥š" },
+          { name: "Nasi + Lauk", protein: 15, cal: 450, icon: "ðŸš" },
+          { name: "Oatmeal", protein: 5, cal: 150, icon: "ðŸ¥£" },
+          { name: "Susu", protein: 8, cal: 120, icon: "ðŸ¥›" },
         ];
         return (
         <div style={styles.page}>
           <div style={{ ...styles.header, paddingBottom: 12 }}>
             <div>
               <div style={styles.headerLabel}>DAILY TRACKER</div>
-              <h1 style={{ ...styles.headerTitle, background: "linear-gradient(135deg, #2EC4B6, #fff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>FUEL</h1>
+              <h1 style={{ ...styles.headerTitle, background: "linear-gradient(135deg, #88b4a0, #fff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>FUEL</h1>
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 32, fontWeight: 900, color: fuelColor, fontFamily: "'Outfit'", lineHeight: 1 }}>{fuelScore}</div>
@@ -1037,16 +949,16 @@ export default function App() {
           <div style={{ padding: "0 20px 120px" }}>
             {/* Auto-calc notice */}
             {state.weight > 0 && (
-              <div style={{ background: '#161622', borderRadius: 12, padding: '10px 14px', marginBottom: 16, border: '1px solid #1a1a28', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 14 }}>⚡</span>
+              <div style={{ background: '#251f1a', borderRadius: 12, padding: '10px 14px', marginBottom: 16, border: '1px solid #2a2320', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 14 }}>âš¡</span>
                 <span style={{ fontSize: 10, color: '#888', fontFamily: "'JetBrains Mono'" }}>
-                  Target otomatis dari berat {state.weight}kg — Protein: {autoProteinGoal}g · Kalori: {autoCalorieGoal} · Air: {autoWaterGoal} gelas
+                  Target otomatis dari berat {state.weight}kg â€” Protein: {autoProteinGoal}g Â· Kalori: {autoCalorieGoal} Â· Air: {autoWaterGoal} gelas
                 </span>
               </div>
             )}
             {!state.weight && (
-              <div style={{ background: '#1a1a28', borderRadius: 12, padding: '12px 14px', marginBottom: 16, border: '1px solid #333', textAlign: 'center' }}>
-                <span style={{ fontSize: 11, color: '#fbbf24' }}>⚠️ Isi berat badan di tab Stats untuk target otomatis</span>
+              <div style={{ background: '#2a2320', borderRadius: 12, padding: '12px 14px', marginBottom: 16, border: '1px solid #333', textAlign: 'center' }}>
+                <span style={{ fontSize: 11, color: '#fbbf24' }}>âš ï¸ Isi berat badan di tab Stats untuk target otomatis</span>
               </div>
             )}
 
@@ -1054,41 +966,41 @@ export default function App() {
             <div style={{ ...styles.trackerCard, display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{ position: 'relative', width: 80, height: 80 }}>
                 <svg viewBox="0 0 36 36" width="80" height="80">
-                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#1a1a28" strokeWidth="3" />
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#2a2320" strokeWidth="3" />
                   <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke={fuelColor} strokeWidth="3" strokeDasharray={`${fuelScore}, 100`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 0.6s ease' }} />
                 </svg>
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 900, color: fuelColor, fontFamily: "'Outfit'" }}>{fuelScore}</div>
               </div>
               <div style={{ flex: 1 }}>
-                <SummaryRow label="Protein" value={`${proteinToday}/${autoProteinGoal}g`} pct={pPct} color="#FF6B35" />
+                <SummaryRow label="Protein" value={`${proteinToday}/${autoProteinGoal}g`} pct={pPct} color="#c9a96e" />
                 <SummaryRow label="Kalori" value={`${caloriesToday}/${autoCalorieGoal}`} pct={cPct} color="#f59e0b" />
                 <SummaryRow label="Air" value={`${waterToday}/${autoWaterGoal}`} pct={wPct} color="#3b82f6" />
-                <SummaryRow label="Tidur" value={`${sleepToday}/${state.sleepGoal}h`} pct={sPct} color="#2EC4B6" />
+                <SummaryRow label="Tidur" value={`${sleepToday}/${state.sleepGoal}h`} pct={sPct} color="#88b4a0" />
               </div>
             </div>
 
             {/* Meal Presets */}
             <div style={styles.trackerCard}>
-              <div style={{ ...styles.trackerTitle, marginBottom: 12, letterSpacing: 2 }}>🍽️ QUICK ADD</div>
+              <div style={{ ...styles.trackerTitle, marginBottom: 12, letterSpacing: 2 }}>ðŸ½ï¸ QUICK ADD</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
                 {MEAL_PRESETS.map(m => (
                   <button key={m.name} onClick={() => { addProtein(m.protein); addCalories(m.cal); showToast(`+${m.protein}g protein, +${m.cal} kcal`); }}
-                    style={{ background: '#161622', border: '1px solid #1a1a28', borderRadius: 12, padding: '12px 6px', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}>
+                    style={{ background: '#251f1a', border: '1px solid #2a2320', borderRadius: 12, padding: '12px 6px', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}>
                     <div style={{ fontSize: 24 }}>{m.icon}</div>
                     <div style={{ fontSize: 9, color: '#ddd', fontWeight: 600, marginTop: 4 }}>{m.name}</div>
-                    <div style={{ fontSize: 8, color: '#888', fontFamily: "'JetBrains Mono'", marginTop: 2 }}>{m.protein}g · {m.cal}kcal</div>
+                    <div style={{ fontSize: 8, color: '#888', fontFamily: "'JetBrains Mono'", marginTop: 2 }}>{m.protein}g Â· {m.cal}kcal</div>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Calorie Card */}
-            <TrackerCard title="CALORIES" icon="🔥" value={caloriesToday} goal={autoCalorieGoal} unit="kcal" color="#f59e0b"
+            <TrackerCard title="CALORIES" icon="ðŸ”¥" value={caloriesToday} goal={autoCalorieGoal} unit="kcal" color="#f59e0b"
               onAdd={(a) => addCalories(a)} buttons={[100, 200, 300, 500]} canSubtract
               onEditGoal={() => {}} isEditing={false} goalValue={autoCalorieGoal} onSetGoal={() => {}} />
 
             {/* Protein Card */}
-            <TrackerCard title="PROTEIN" icon="🥩" value={proteinToday} goal={autoProteinGoal} unit="g" color="#FF6B35"
+            <TrackerCard title="PROTEIN" icon="ðŸ¥©" value={proteinToday} goal={autoProteinGoal} unit="g" color="#c9a96e"
               onAdd={(a) => addProtein(a)} buttons={[10, 20, 30, 50]} canSubtract
               onEditGoal={() => {}} isEditing={false} goalValue={autoProteinGoal} onSetGoal={() => {}} />
 
@@ -1097,10 +1009,10 @@ export default function App() {
               <div style={{ position: 'absolute', top: -50, right: -50, width: 100, height: 100, background: '#3b82f6', filter: 'blur(60px)', opacity: 0.15, borderRadius: '50%' }} />
               <div style={styles.trackerHeader}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ fontSize: 24, background: `#3b82f615`, padding: 8, borderRadius: 12 }}>💧</div>
+                  <div style={{ fontSize: 24, background: `#3b82f615`, padding: 8, borderRadius: 12 }}>ðŸ’§</div>
                   <span style={{ ...styles.trackerTitle, fontSize: 16 }}>HYDRATION</span>
                 </div>
-                <div style={{ ...styles.goalEditBtn, background: '#1a1a28', border: '1px solid #333' }}>
+                <div style={{ ...styles.goalEditBtn, background: '#2a2320', border: '1px solid #333' }}>
                   {waterToday}/{autoWaterGoal}
                   <span style={{ fontSize: 10, color: '#888', marginLeft: 4 }}>gelas</span>
                 </div>
@@ -1112,7 +1024,7 @@ export default function App() {
                     return (
                       <button key={i} onClick={() => update((s) => ({ ...s, water: { ...s.water, [d]: isFilled ? i : i + 1 } }))}
                         style={{ width: 32, height: 40, borderRadius: '12px 12px 16px 16px', border: `1px solid ${isFilled ? '#3b82f6' : '#222'}`,
-                          background: isFilled ? 'linear-gradient(180deg, #60a5fa, #3b82f6)' : '#111118',
+                          background: isFilled ? 'linear-gradient(180deg, #60a5fa, #3b82f6)' : '#1f1a16',
                           boxShadow: isFilled ? '0 4px 12px rgba(59, 130, 246, 0.4), inset 0 2px 4px rgba(255,255,255,0.3)' : 'none',
                           cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: isFilled ? 'scale(1.05) translateY(-2px)' : 'scale(1)' }} />
                     );
@@ -1120,7 +1032,7 @@ export default function App() {
                 </div>
                 <div style={{ fontSize: 40, fontWeight: 900, color: '#3b82f6', fontFamily: "'Outfit'", textShadow: '0 0 20px rgba(59, 130, 246, 0.4)', marginLeft: 16 }}>{waterToday}</div>
               </div>
-              <div style={{ ...styles.barTrack, height: 4, borderRadius: 4, background: '#111118', marginTop: 16 }}>
+              <div style={{ ...styles.barTrack, height: 4, borderRadius: 4, background: '#1f1a16', marginTop: 16 }}>
                 <div style={{ ...styles.barFill, height: '100%', width: `${Math.min(100, (waterToday / autoWaterGoal) * 100)}%`, background: "linear-gradient(90deg, #3b82f6, #60a5fa)", boxShadow: "0 0 10px #3b82f688" }} />
               </div>
             </div>
@@ -1130,21 +1042,21 @@ export default function App() {
               <div style={{ position: 'absolute', top: -50, right: -50, width: 100, height: 100, background: '#9b5de5', filter: 'blur(60px)', opacity: 0.15, borderRadius: '50%' }} />
               <div style={styles.trackerHeader}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ fontSize: 24, background: `#9b5de515`, padding: 8, borderRadius: 12 }}>😴</div>
+                  <div style={{ fontSize: 24, background: `#9b5de515`, padding: 8, borderRadius: 12 }}>ðŸ˜´</div>
                   <span style={{ ...styles.trackerTitle, fontSize: 16 }}>REST</span>
                 </div>
-                <div style={{ ...styles.goalEditBtn, background: '#1a1a28', border: '1px solid #333' }}>Goal: {state.sleepGoal}h</div>
+                <div style={{ ...styles.goalEditBtn, background: '#2a2320', border: '1px solid #333' }}>Goal: {state.sleepGoal}h</div>
               </div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, marginTop: 24, marginBottom: 20 }}>
-                <button onClick={() => setSleep(Math.max(0, sleepToday - 0.5))} style={{ ...styles.circleBtn, width: 48, height: 48, fontSize: 24, background: '#111118', border: '1px solid #333', color: '#888' }}>−</button>
+                <button onClick={() => setSleep(Math.max(0, sleepToday - 0.5))} style={{ ...styles.circleBtn, width: 48, height: 48, fontSize: 24, background: '#1f1a16', border: '1px solid #333', color: '#888' }}>âˆ’</button>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{ fontSize: 64, lineHeight: 0.9, fontWeight: 900, color: sleepToday >= state.sleepGoal ? "#2EC4B6" : sleepToday >= state.sleepGoal * 0.75 ? "#fbbf24" : "#ef4444", fontFamily: "'Outfit'" }}>{sleepToday}</div>
+                  <div style={{ fontSize: 64, lineHeight: 0.9, fontWeight: 900, color: sleepToday >= state.sleepGoal ? "#88b4a0" : sleepToday >= state.sleepGoal * 0.75 ? "#fbbf24" : "#ef4444", fontFamily: "'Outfit'" }}>{sleepToday}</div>
                   <div style={{ fontSize: 12, color: "#666", fontFamily: "'JetBrains Mono'", letterSpacing: 2, marginTop: 8, fontWeight: 600 }}>HOURS</div>
                 </div>
-                <button onClick={() => setSleep(Math.min(14, sleepToday + 0.5))} style={{ ...styles.circleBtn, width: 48, height: 48, fontSize: 24, background: '#111118', border: '1px solid #333', color: '#888' }}>+</button>
+                <button onClick={() => setSleep(Math.min(14, sleepToday + 0.5))} style={{ ...styles.circleBtn, width: 48, height: 48, fontSize: 24, background: '#1f1a16', border: '1px solid #333', color: '#888' }}>+</button>
               </div>
-              <div style={{ ...styles.barTrack, height: 6, borderRadius: 6, background: '#111118' }}>
-                <div style={{ ...styles.barFill, height: '100%', width: `${sPct}%`, background: sleepToday >= state.sleepGoal ? "linear-gradient(90deg, #2EC4B6, #6ee7b7)" : "linear-gradient(90deg, #ef4444, #fbbf24)", boxShadow: `0 0 12px ${sleepToday >= state.sleepGoal ? '#2EC4B6' : '#fbbf24'}88`, borderRadius: 6 }} />
+              <div style={{ ...styles.barTrack, height: 6, borderRadius: 6, background: '#1f1a16' }}>
+                <div style={{ ...styles.barFill, height: '100%', width: `${sPct}%`, background: sleepToday >= state.sleepGoal ? "linear-gradient(90deg, #88b4a0, #6ee7b7)" : "linear-gradient(90deg, #ef4444, #fbbf24)", boxShadow: `0 0 12px ${sleepToday >= state.sleepGoal ? '#88b4a0' : '#fbbf24'}88`, borderRadius: 6 }} />
               </div>
             </div>
           </div>
@@ -1152,7 +1064,7 @@ export default function App() {
         );
       })()}
 
-      {/* ═══════ RANK TAB ═══════ */}
+      {/* â•â•â•â•â•â•â• RANK TAB â•â•â•â•â•â•â• */}
       {tab === "rank" && (
         <div style={styles.page}>
           <div style={{ ...styles.header, paddingBottom: 12 }}>
@@ -1207,16 +1119,16 @@ export default function App() {
 
             {/* Stats grid */}
             <div style={styles.statsGrid}>
-              <StatBox icon="🏋️" label="Workouts" value={state.totalWorkouts || 0} />
-              <StatBox icon="🔥" label="Streak" value={`${state.streak || 0}d`} />
-              <StatBox icon="⚡" label="Total XP" value={state.xp || 0} />
-              <StatBox icon="📅" label="Weeks" value={(state.weekHistory || []).length} />
+              <StatBox icon="ðŸ‹ï¸" label="Workouts" value={state.totalWorkouts || 0} />
+              <StatBox icon="ðŸ”¥" label="Streak" value={`${state.streak || 0}d`} />
+              <StatBox icon="âš¡" label="Total XP" value={state.xp || 0} />
+              <StatBox icon="ðŸ“…" label="Weeks" value={(state.weekHistory || []).length} />
             </div>
 
-            {/* ═══════ ACHIEVEMENTS ═══════ */}
+            {/* â•â•â•â•â•â•â• ACHIEVEMENTS â•â•â•â•â•â•â• */}
             <div style={styles.trackerCard}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <div style={{ ...styles.trackerTitle, letterSpacing: 2, marginBottom: 0 }}>🏅 ACHIEVEMENTS</div>
+                <div style={{ ...styles.trackerTitle, letterSpacing: 2, marginBottom: 0 }}>ðŸ… ACHIEVEMENTS</div>
                 <span style={{ fontSize: 11, color: '#888', fontFamily: "'JetBrains Mono'" }}>
                   {ACHIEVEMENTS.filter(a => a.check(state)).length}/{ACHIEVEMENTS.length}
                 </span>
@@ -1228,7 +1140,7 @@ export default function App() {
                   ...styles.barFill,
                   height: 6,
                   width: `${(ACHIEVEMENTS.filter(a => a.check(state)).length / ACHIEVEMENTS.length) * 100}%`,
-                  background: 'linear-gradient(90deg, #FF6B35, #fbbf24)',
+                  background: 'linear-gradient(90deg, #c9a96e, #fbbf24)',
                   borderRadius: 3,
                 }} />
               </div>
@@ -1241,8 +1153,8 @@ export default function App() {
                     <div key={a.id} style={{
                       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
                       padding: '12px 4px', borderRadius: 12,
-                      background: unlocked ? '#161622' : '#0d0d14',
-                      border: unlocked ? '1px solid #333' : '1px solid #1a1a28',
+                      background: unlocked ? '#251f1a' : '#16120f',
+                      border: unlocked ? '1px solid #333' : '1px solid #2a2320',
                       opacity: unlocked ? 1 : 0.4,
                       transition: 'all 0.3s ease',
                     }}>
@@ -1261,13 +1173,13 @@ export default function App() {
                   <div style={{ fontSize: 10, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginBottom: 8 }}>UNLOCKED</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {ACHIEVEMENTS.filter(a => a.check(state)).map(a => (
-                      <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: '#161622', borderRadius: 8, border: '1px solid #2a2a3a' }}>
+                      <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: '#251f1a', borderRadius: 8, border: '1px solid #2a2a3a' }}>
                         <span style={{ fontSize: 20 }}>{a.icon}</span>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: 12, fontWeight: 600, color: '#eee' }}>{a.name}</div>
                           <div style={{ fontSize: 9, color: '#888', fontFamily: "'JetBrains Mono'" }}>{a.desc}</div>
                         </div>
-                        <span style={{ fontSize: 10, color: '#2EC4B6' }}>✓</span>
+                        <span style={{ fontSize: 10, color: '#88b4a0' }}>âœ“</span>
                       </div>
                     ))}
                   </div>
@@ -1280,13 +1192,13 @@ export default function App() {
                   <div style={{ fontSize: 10, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginBottom: 8 }}>NEXT TO UNLOCK</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {ACHIEVEMENTS.filter(a => !a.check(state)).slice(0, 3).map(a => (
-                      <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: '#0d0d14', borderRadius: 8, border: '1px solid #1a1a28', opacity: 0.6 }}>
+                      <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: '#16120f', borderRadius: 8, border: '1px solid #2a2320', opacity: 0.6 }}>
                         <span style={{ fontSize: 20, filter: 'grayscale(1)' }}>{a.icon}</span>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: 12, fontWeight: 600, color: '#888' }}>{a.name}</div>
                           <div style={{ fontSize: 9, color: '#555', fontFamily: "'JetBrains Mono'" }}>{a.desc}</div>
                         </div>
-                        <span style={{ fontSize: 10, color: '#555' }}>🔒</span>
+                        <span style={{ fontSize: 10, color: '#555' }}>ðŸ”’</span>
                       </div>
                     ))}
                   </div>
@@ -1296,7 +1208,7 @@ export default function App() {
 
             {/* Rank ladder */}
             <div style={styles.trackerCard}>
-              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>🏆 RANK LADDER</div>
+              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>ðŸ† RANK LADDER</div>
               {RANKS.map((r, i) => {
                 const unlocked = (state.xp || 0) >= r.minXP;
                 const isCurrent = r.name === rank.name;
@@ -1308,7 +1220,7 @@ export default function App() {
                       alignItems: "center",
                       gap: 12,
                       padding: "10px 0",
-                      borderBottom: i < RANKS.length - 1 ? "1px solid #1a1a28" : "none",
+                      borderBottom: i < RANKS.length - 1 ? "1px solid #2a2320" : "none",
                       opacity: unlocked ? 1 : 0.35,
                     }}
                   >
@@ -1341,7 +1253,7 @@ export default function App() {
                         NOW
                       </span>
                     )}
-                    {unlocked && !isCurrent && <span style={{ fontSize: 10, color: "#2EC4B6" }}>✓</span>}
+                    {unlocked && !isCurrent && <span style={{ fontSize: 10, color: "#88b4a0" }}>âœ“</span>}
                   </div>
                 );
               })}
@@ -1350,7 +1262,7 @@ export default function App() {
             {/* History */}
             {(state.weekHistory || []).length > 0 && (
               <div style={styles.trackerCard}>
-                <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>📊 HISTORY</div>
+                <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>ðŸ“Š HISTORY</div>
                 {state.weekHistory.map((h, i) => (
                   <div
                     key={i}
@@ -1359,7 +1271,7 @@ export default function App() {
                       justifyContent: "space-between",
                       alignItems: "center",
                       padding: "10px 0",
-                      borderBottom: i < state.weekHistory.length - 1 ? "1px solid #1a1a28" : "none",
+                      borderBottom: i < state.weekHistory.length - 1 ? "1px solid #2a2320" : "none",
                     }}
                   >
                     <div>
@@ -1370,7 +1282,7 @@ export default function App() {
                       style={{
                         fontSize: 13,
                         fontFamily: "'JetBrains Mono'",
-                        color: h.completedDays === h.totalDays ? "#2EC4B6" : "#888",
+                        color: h.completedDays === h.totalDays ? "#88b4a0" : "#888",
                       }}
                     >
                       {h.completedDays}/{h.totalDays}
@@ -1383,7 +1295,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ═══════ STATS TAB ═══════ */}
+      {/* â•â•â•â•â•â•â• STATS TAB â•â•â•â•â•â•â• */}
       {tab === "stats" && (
         <div style={styles.page}>
           <div style={{ ...styles.header, paddingBottom: 12 }}>
@@ -1392,7 +1304,7 @@ export default function App() {
               <h1
                 style={{
                   ...styles.headerTitle,
-                  background: "linear-gradient(135deg, #FF6B35, #fff)",
+                  background: "linear-gradient(135deg, #c9a96e, #fff)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
@@ -1412,7 +1324,7 @@ export default function App() {
 
             {/* Vitals Card */}
             <div style={styles.trackerCard}>
-              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>⚖️ BASIC VITALS</div>
+              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>âš–ï¸ BASIC VITALS</div>
               
               <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
                 <div style={{ flex: 1 }}>
@@ -1437,9 +1349,9 @@ export default function App() {
                 </div>
               </div>
 
-              <div style={{ background: '#1a1a28', borderRadius: 12, padding: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ background: '#2a2320', borderRadius: 12, padding: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: 14, fontWeight: 600, color: '#ddd' }}>Your BMI</span>
-                <span style={{ fontSize: 24, fontWeight: 800, color: '#FF6B35', fontFamily: "'Outfit'" }}>
+                <span style={{ fontSize: 24, fontWeight: 800, color: '#c9a96e', fontFamily: "'Outfit'" }}>
                   {state.weight && state.height ? Math.round(state.weight / Math.pow(state.height / 100, 2)) : '-'}
                 </span>
               </div>
@@ -1447,13 +1359,13 @@ export default function App() {
 
             {/* Personal Records Card */}
             <div style={styles.trackerCard}>
-              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>🏆 PERSONAL RECORDS</div>
+              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>ðŸ† PERSONAL RECORDS</div>
               
               <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
                 <select 
                   value={newPrExercise} 
                   onChange={(e) => setNewPrExercise(e.target.value)}
-                  style={{ ...styles.inputField, flex: '1 1 100%', background: '#1a1a28', color: '#eee' }}
+                  style={{ ...styles.inputField, flex: '1 1 100%', background: '#2a2320', color: '#eee' }}
                 >
                   <option value="">Select Exercise...</option>
                   {EXERCISE_LIBRARY.map(ex => <option key={ex} value={ex}>{ex}</option>)}
@@ -1476,7 +1388,7 @@ export default function App() {
                   <button 
                     onClick={handleAddPR}
                     style={{ 
-                      background: '#FF6B35', 
+                      background: '#c9a96e', 
                       border: 'none', 
                       borderRadius: 10, 
                       padding: '0 16px', 
@@ -1493,9 +1405,9 @@ export default function App() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {Object.entries(state.personalRecords || {}).map(([ex, data]) => (
-                  <div key={ex} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#161622', padding: '12px 16px', borderRadius: 12, border: '1px solid #1a1a28' }}>
+                  <div key={ex} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#251f1a', padding: '12px 16px', borderRadius: 12, border: '1px solid #2a2320' }}>
                     <span style={{ fontSize: 14, fontWeight: 500, color: '#ddd' }}>{ex}</span>
-                    <span style={{ fontSize: 16, fontWeight: 700, color: '#FF6B35', fontFamily: "'JetBrains Mono'" }}>{data.weight}kg <span style={{fontSize: 12, color: '#888'}}>x {data.reps}</span></span>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: '#c9a96e', fontFamily: "'JetBrains Mono'" }}>{data.weight}kg <span style={{fontSize: 12, color: '#888'}}>x {data.reps}</span></span>
                   </div>
                 ))}
                 {Object.keys(state.personalRecords || {}).length === 0 && (
@@ -1504,31 +1416,31 @@ export default function App() {
               </div>
             </div>
 
-            {/* ═══════ PROGRESS OVERVIEW ═══════ */}
+            {/* â•â•â•â•â•â•â• PROGRESS OVERVIEW â•â•â•â•â•â•â• */}
             <div style={styles.trackerCard}>
-              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>📊 PROGRESS OVERVIEW</div>
+              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>ðŸ“Š PROGRESS OVERVIEW</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 8 }}>
-                <div style={{ background: '#161622', borderRadius: 12, padding: '14px 8px', textAlign: 'center', border: '1px solid #1a1a28' }}>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: '#FF6B35', fontFamily: "'Outfit'" }}>{state.totalWorkouts || 0}</div>
+                <div style={{ background: '#251f1a', borderRadius: 12, padding: '14px 8px', textAlign: 'center', border: '1px solid #2a2320' }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: '#c9a96e', fontFamily: "'Outfit'" }}>{state.totalWorkouts || 0}</div>
                   <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginTop: 2 }}>WORKOUTS</div>
                 </div>
-                <div style={{ background: '#161622', borderRadius: 12, padding: '14px 8px', textAlign: 'center', border: '1px solid #1a1a28' }}>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: '#2EC4B6', fontFamily: "'Outfit'" }}>{state.streak || 0}</div>
+                <div style={{ background: '#251f1a', borderRadius: 12, padding: '14px 8px', textAlign: 'center', border: '1px solid #2a2320' }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: '#88b4a0', fontFamily: "'Outfit'" }}>{state.streak || 0}</div>
                   <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginTop: 2 }}>STREAK</div>
                 </div>
-                <div style={{ background: '#161622', borderRadius: 12, padding: '14px 8px', textAlign: 'center', border: '1px solid #1a1a28' }}>
+                <div style={{ background: '#251f1a', borderRadius: 12, padding: '14px 8px', textAlign: 'center', border: '1px solid #2a2320' }}>
                   <div style={{ fontSize: 22, fontWeight: 800, color: rank.color, fontFamily: "'Outfit'" }}>{state.xp || 0}</div>
                   <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginTop: 2 }}>TOTAL XP</div>
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <div style={{ background: '#161622', borderRadius: 12, padding: '14px 12px', textAlign: 'center', border: '1px solid #1a1a28' }}>
+                <div style={{ background: '#251f1a', borderRadius: 12, padding: '14px 12px', textAlign: 'center', border: '1px solid #2a2320' }}>
                   <div style={{ fontSize: 18, fontWeight: 800, color: '#ddd', fontFamily: "'Outfit'" }}>
                     {(state.weekHistory || []).length}
                   </div>
                   <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginTop: 2 }}>WEEKS COMPLETED</div>
                 </div>
-                <div style={{ background: '#161622', borderRadius: 12, padding: '14px 12px', textAlign: 'center', border: '1px solid #1a1a28' }}>
+                <div style={{ background: '#251f1a', borderRadius: 12, padding: '14px 12px', textAlign: 'center', border: '1px solid #2a2320' }}>
                   <div style={{ fontSize: 18, fontWeight: 800, color: '#ddd', fontFamily: "'Outfit'" }}>
                     {(state.weekHistory || []).length > 0
                       ? Math.round((state.weekHistory || []).reduce((a, h) => a + h.completedDays, 0) / (state.weekHistory || []).length * 10) / 10
@@ -1540,14 +1452,14 @@ export default function App() {
               </div>
             </div>
 
-            {/* ═══════ WEEK HISTORY CHART ═══════ */}
+            {/* â•â•â•â•â•â•â• WEEK HISTORY CHART â•â•â•â•â•â•â• */}
             {(state.weekHistory || []).length > 0 && (
               <div style={styles.trackerCard}>
-                <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>📅 WEEKLY HISTORY</div>
+                <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>ðŸ“… WEEKLY HISTORY</div>
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 120, marginBottom: 12 }}>
                   {(state.weekHistory || []).slice(0, 12).reverse().map((h, i) => {
                     const pct = Math.round((h.completedDays / h.totalDays) * 100);
-                    const barColor = pct === 100 ? '#2EC4B6' : pct >= 70 ? '#FF6B35' : '#555';
+                    const barColor = pct === 100 ? '#88b4a0' : pct >= 70 ? '#c9a96e' : '#555';
                     return (
                       <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                         <div style={{ fontSize: 8, color: '#888', fontFamily: "'JetBrains Mono'" }}>{h.completedDays}</div>
@@ -1571,14 +1483,14 @@ export default function App() {
                   <div style={{ fontSize: 10, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginBottom: 8 }}>ALL RECORDS</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 200, overflowY: 'auto' }}>
                     {(state.weekHistory || []).map((h, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#161622', borderRadius: 8, border: '1px solid #1a1a28' }}>
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#251f1a', borderRadius: 8, border: '1px solid #2a2320' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span style={{ fontSize: 14 }}>{h.completedDays === h.totalDays ? '✅' : h.completedDays >= 5 ? '🟡' : '🔴'}</span>
+                          <span style={{ fontSize: 14 }}>{h.completedDays === h.totalDays ? 'âœ…' : h.completedDays >= 5 ? 'ðŸŸ¡' : 'ðŸ”´'}</span>
                           <span style={{ fontSize: 11, color: '#aaa' }}>{h.date}</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <span style={{ fontSize: 8, color: '#555', fontFamily: "'JetBrains Mono'", textTransform: 'uppercase' }}>{h.tier}</span>
-                          <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "'JetBrains Mono'", color: h.completedDays === h.totalDays ? '#2EC4B6' : '#888' }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "'JetBrains Mono'", color: h.completedDays === h.totalDays ? '#88b4a0' : '#888' }}>
                             {h.completedDays}/{h.totalDays}
                           </span>
                         </div>
@@ -1589,9 +1501,9 @@ export default function App() {
               </div>
             )}
 
-            {/* ═══════ WEIGHT HISTORY ═══════ */}
+            {/* â•â•â•â•â•â•â• WEIGHT HISTORY â•â•â•â•â•â•â• */}
             <div style={styles.trackerCard}>
-              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>⚖️ WEIGHT LOG</div>
+              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>âš–ï¸ WEIGHT LOG</div>
               <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
                 <input 
                   type="number" 
@@ -1615,7 +1527,7 @@ export default function App() {
                     inp.value = '';
                     showToast(`Berat ${val}kg dicatat!`);
                   }}
-                  style={{ background: '#FF6B35', border: 'none', borderRadius: 10, padding: '0 16px', color: '#000', fontWeight: 700, fontFamily: "'JetBrains Mono'", cursor: 'pointer', fontSize: 11 }}
+                  style={{ background: '#c9a96e', border: 'none', borderRadius: 10, padding: '0 16px', color: '#000', fontWeight: 700, fontFamily: "'JetBrains Mono'", cursor: 'pointer', fontSize: 11 }}
                 >
                   LOG
                 </button>
@@ -1640,7 +1552,7 @@ export default function App() {
                               <div style={{ 
                                 width: '100%', maxWidth: 20, 
                                 height: `${Math.max(10, pct)}%`, 
-                                background: i === data.length - 1 ? '#FF6B35' : '#333',
+                                background: i === data.length - 1 ? '#c9a96e' : '#333',
                                 borderRadius: '3px 3px 0 0' 
                               }} />
                             </div>
@@ -1651,9 +1563,9 @@ export default function App() {
                   })()}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 150, overflowY: 'auto' }}>
                     {(state.weightHistory || []).map((w, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 12px', background: '#161622', borderRadius: 8, border: '1px solid #1a1a28' }}>
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 12px', background: '#251f1a', borderRadius: 8, border: '1px solid #2a2320' }}>
                         <span style={{ fontSize: 11, color: '#aaa' }}>{w.date}</span>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#FF6B35', fontFamily: "'JetBrains Mono'" }}>{w.value} kg</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#c9a96e', fontFamily: "'JetBrains Mono'" }}>{w.value} kg</span>
                       </div>
                     ))}
                   </div>
@@ -1666,10 +1578,10 @@ export default function App() {
           </div>
         </div>
       )}
-      {/* ═══════ EDIT SCHEDULE MODAL ═══════ */}
+      {/* â•â•â•â•â•â•â• EDIT SCHEDULE MODAL â•â•â•â•â•â•â• */}
       {isEditingSchedule && (
         <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20 }}>
-          <div style={{ backgroundColor: "#111118", padding: 24, borderRadius: 16, width: "100%", maxWidth: 360, border: "1px solid #333", maxHeight: "80vh", overflowY: "auto" }}>
+          <div style={{ backgroundColor: "#1f1a16", padding: 24, borderRadius: 16, width: "100%", maxWidth: 360, border: "1px solid #333", maxHeight: "80vh", overflowY: "auto" }}>
             <h3 style={{ margin: "0 0 16px", color: "#fff", fontSize: 18 }}>Ganti Latihan Hari {WEEK_DAYS[activeDay].day}</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {Object.values(WORKOUT_LIBRARY).map((routine) => (
@@ -1691,7 +1603,7 @@ export default function App() {
                     showToast(`Jadwal diubah ke ${routine.title}`);
                   }}
                   style={{
-                    background: currentRoutineId === routine.id ? `${routine.color}22` : "#1a1a28",
+                    background: currentRoutineId === routine.id ? `${routine.color}22` : "#2a2320",
                     border: `1px solid ${currentRoutineId === routine.id ? routine.color : "#333"}`,
                     padding: 12, borderRadius: 8, color: "#fff", textAlign: "left", display: "flex", gap: 12, alignItems: "center", cursor: "pointer"
                   }}
@@ -1709,7 +1621,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ═══════ ROUTINE EDITOR MODAL ═══════ */}
+      {/* â•â•â•â•â•â•â• ROUTINE EDITOR MODAL â•â•â•â•â•â•â• */}
       {editingRoutine && (
         <RoutineEditorModal 
           routineId={editingRoutine}
@@ -1720,16 +1632,16 @@ export default function App() {
         />
       )}
 
-      {/* ═══════ PROFILE TAB ═══════ */}
+      {/* â•â•â•â•â•â•â• PROFILE TAB â•â•â•â•â•â•â• */}
       {tab === "profile" && (
         <div style={styles.page}>
           <div style={{ ...styles.header, paddingBottom: 12 }}>
             <div>
-              <div style={styles.headerLabel}>AGENT FILE</div>
+              <div style={styles.headerLabel}>MY PROFILE</div>
               <h1
                 style={{
                   ...styles.headerTitle,
-                  background: `linear-gradient(135deg, ${dominantPillar.color}, #fff)`,
+                  background: "linear-gradient(135deg, #c9a96e, #fff)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
@@ -1737,17 +1649,13 @@ export default function App() {
                 PROFILE
               </h1>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <PillarIcon pillarId={dominantPillar.id} size={32} />
-              <div style={{ fontSize: 8, color: dominantPillar.color, fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginTop: 2 }}>{dominantPillar.name}</div>
-            </div>
+            <div style={{ fontSize: 32 }}>ðŸ‘¤</div>
           </div>
 
           <div style={{ padding: "0 20px 120px" }}>
             {/* Identity Card */}
             <div style={{ ...styles.trackerCard, position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: -60, right: -60, width: 120, height: 120, background: dominantPillar.color, filter: 'blur(80px)', opacity: 0.12, borderRadius: '50%' }} />
-              <div style={{ ...styles.trackerTitle, marginBottom: 16, letterSpacing: 2 }}>🪪 IDENTITY</div>
+              <div style={{ ...styles.trackerTitle, marginBottom: 16, letterSpacing: 2 }}>âœï¸ INFO DIRI</div>
               
               <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
                 <div style={{ flex: 2 }}>
@@ -1794,166 +1702,117 @@ export default function App() {
                 />
               </div>
 
-              {/* Summary stats */}
-              <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                <div style={{ flex: 1, background: '#1a1a28', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: rank.color, fontFamily: "'Outfit'" }}>{rank.icon}</div>
-                  <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", marginTop: 2 }}>{rank.name}</div>
-                </div>
-                <div style={{ flex: 1, background: '#1a1a28', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: '#FF6B35', fontFamily: "'Outfit'" }}>{state.totalWorkouts || 0}</div>
-                  <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", marginTop: 2 }}>WORKOUTS</div>
-                </div>
-                <div style={{ flex: 1, background: '#1a1a28', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: '#f59e0b', fontFamily: "'Outfit'" }}>{state.streak || 0}</div>
-                  <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", marginTop: 2 }}>STREAK</div>
-                </div>
-                <div style={{ flex: 1, background: '#1a1a28', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: '#3b82f6', fontFamily: "'Outfit'" }}>{state.xp || 0}</div>
-                  <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", marginTop: 2 }}>XP</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Pillar Radar Chart */}
-            <div style={{ ...styles.trackerCard, position: 'relative', overflow: 'hidden' }}>
-              <div style={{ ...styles.trackerTitle, marginBottom: 6, letterSpacing: 2 }}>⚡ PILLAR ANALYSIS</div>
-              <div style={{ fontSize: 10, color: '#666', marginBottom: 16, fontFamily: "'JetBrains Mono'" }}>
-                Dominant: <span style={{ color: dominantPillar.color, fontWeight: 700 }}>{dominantPillar.name}</span> — {dominantPillar.desc}
-              </div>
-
-              {/* SVG Pentagon Radar Chart */}
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-                <svg viewBox="0 0 300 280" width="280" height="260">
-                  {/* Background diamonds */}
-                  {[0.2, 0.4, 0.6, 0.8, 1.0].map((scale, si) => {
-                    const points = PILLARS.map((_, i) => {
-                      const angle = (Math.PI * 2 * i) / 4 - Math.PI / 2;
-                      const r = 110 * scale;
-                      return `${150 + r * Math.cos(angle)},${140 + r * Math.sin(angle)}`;
-                    }).join(' ');
-                    return <polygon key={si} points={points} fill="none" stroke="#1a1a28" strokeWidth={1} />;
-                  })}
-                  {/* Axis lines */}
-                  {PILLARS.map((_, i) => {
-                    const angle = (Math.PI * 2 * i) / 4 - Math.PI / 2;
-                    return <line key={i} x1="150" y1="140" x2={150 + 110 * Math.cos(angle)} y2={140 + 110 * Math.sin(angle)} stroke="#1a1a2888" strokeWidth={0.5} />;
-                  })}
-                  {/* Data polygon */}
-                  {(() => {
-                    const pts = PILLARS.map((p, i) => {
-                      const angle = (Math.PI * 2 * i) / 4 - Math.PI / 2;
-                      const r = (pillarValues[p.id] / 100) * 110;
-                      return `${150 + r * Math.cos(angle)},${140 + r * Math.sin(angle)}`;
-                    }).join(' ');
-                    return (
-                      <>
-                        <polygon points={pts} fill={`${dominantPillar.color}18`} stroke={dominantPillar.color} strokeWidth={2} />
-                        {PILLARS.map((p, i) => {
-                          const angle = (Math.PI * 2 * i) / 4 - Math.PI / 2;
-                          const r = (pillarValues[p.id] / 100) * 110;
-                          return <circle key={i} cx={150 + r * Math.cos(angle)} cy={140 + r * Math.sin(angle)} r={4} fill={p.color} stroke="#0a0a0f" strokeWidth={2} />;
-                        })}
-                      </>
-                    );
-                  })()}
-                  {/* Labels */}
-                  {PILLARS.map((p, i) => {
-                    const angle = (Math.PI * 2 * i) / 4 - Math.PI / 2;
-                    const r = 130;
-                    const x = 150 + r * Math.cos(angle);
-                    const y = 140 + r * Math.sin(angle);
-                    return (
-                      <g key={i}>
-                        <text x={x} y={y - 6} textAnchor="middle" fill={p.color} fontSize="10" fontWeight="700" fontFamily="'JetBrains Mono'">{p.name}</text>
-                        <text x={x} y={y + 8} textAnchor="middle" fill="#888" fontSize="11" fontWeight="800" fontFamily="'Outfit'">{pillarValues[p.id]}</text>
-                      </g>
-                    );
-                  })}
-                </svg>
-              </div>
-
-              {/* Overall Pillar Score */}
-              {(() => {
-                const avg = Math.round(PILLARS.reduce((s, p) => s + pillarValues[p.id], 0) / 4);
-                const scoreColor = avg >= 70 ? '#2EC4B6' : avg >= 40 ? '#fbbf24' : '#ef4444';
-                return (
-                  <div style={{ textAlign: 'center', marginBottom: 8 }}>
-                    <div style={{ fontSize: 10, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1, marginBottom: 4 }}>OVERALL POWER</div>
-                    <div style={{ fontSize: 36, fontWeight: 900, color: scoreColor, fontFamily: "'Outfit'" }}>{avg}</div>
+              {/* Quick Stats */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 16 }}>
+                <div style={{ background: '#2a2320', borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 22 }}>{rank.icon}</span>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: rank.color }}>{rank.name}</div>
+                    <div style={{ fontSize: 9, color: '#555', fontFamily: "'JetBrains Mono'" }}>CURRENT RANK</div>
                   </div>
-                );
-              })()}
+                </div>
+                <div style={{ background: '#2a2320', borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 22 }}>ðŸ‹ï¸</span>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#c9a96e' }}>{state.totalWorkouts || 0} sesi</div>
+                    <div style={{ fontSize: 9, color: '#555', fontFamily: "'JetBrains Mono'" }}>TOTAL WORKOUT</div>
+                  </div>
+                </div>
+                <div style={{ background: '#2a2320', borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 22 }}>ðŸ”¥</span>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#f59e0b' }}>{state.streak || 0} hari</div>
+                    <div style={{ fontSize: 9, color: '#555', fontFamily: "'JetBrains Mono'" }}>STREAK</div>
+                  </div>
+                </div>
+                <div style={{ background: '#2a2320', borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 22 }}>âš¡</span>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#a855f7' }}>{state.xp || 0} XP</div>
+                    <div style={{ fontSize: 9, color: '#555', fontFamily: "'JetBrains Mono'" }}>TOTAL XP</div>
+                  </div>
+                </div>
+                {state.weight > 0 && (
+                  <div style={{ background: '#2a2320', borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 22 }}>âš–ï¸</span>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#88b4a0' }}>{state.weight} kg</div>
+                      <div style={{ fontSize: 9, color: '#555', fontFamily: "'JetBrains Mono'" }}>BERAT BADAN</div>
+                    </div>
+                  </div>
+                )}
+                {state.weight > 0 && state.height > 0 && (
+                  <div style={{ background: '#2a2320', borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 22 }}>ðŸ“</span>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#c9a96e' }}>{Math.round(state.weight / Math.pow(state.height / 100, 2))}</div>
+                      <div style={{ fontSize: 9, color: '#555', fontFamily: "'JetBrains Mono'" }}>BMI</div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Individual Pillar Cards */}
-            <div style={{ ...styles.trackerCard }}>
-              <div style={{ ...styles.trackerTitle, marginBottom: 14, letterSpacing: 2 }}>🧬 PILLAR BREAKDOWN</div>
-              {PILLARS.map(p => {
-                const val = pillarValues[p.id];
-                const isDominant = p.id === dominantPillar.id;
-                return (
-                  <div key={p.id} style={{
-                    padding: '14px 16px', marginBottom: 8, borderRadius: 14,
-                    background: isDominant ? `${p.color}10` : '#111118',
-                    border: `1px solid ${isDominant ? `${p.color}44` : '#1a1a28'}`,
-                    transition: 'all 0.3s ease',
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <PillarIcon pillarId={p.id} size={28} />
-                        <div>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: p.color, fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>
-                            {p.name}
-                            {isDominant && <span style={{ fontSize: 8, background: `${p.color}22`, color: p.color, padding: '2px 6px', borderRadius: 4, marginLeft: 8, fontWeight: 600, border: `1px solid ${p.color}33` }}>DOMINANT</span>}
-                          </div>
-                          <div style={{ fontSize: 9, color: '#888' }}>{p.desc}</div>
-                        </div>
+            {/* Achievements Summary */}
+            {(() => {
+              const unlocked = ACHIEVEMENTS.filter(a => a.check(state)).length;
+              const total = ACHIEVEMENTS.length;
+              const pct = Math.round((unlocked / total) * 100);
+              return (
+                <div style={styles.trackerCard}>
+                  <div style={{ ...styles.trackerTitle, marginBottom: 12, letterSpacing: 2 }}>ðŸ… ACHIEVEMENTS</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontSize: 13, color: '#ddd' }}>{unlocked} / {total} unlocked</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: pct >= 70 ? '#88b4a0' : '#fbbf24', fontFamily: "'JetBrains Mono'" }}>{pct}%</span>
+                  </div>
+                  <div style={{ ...styles.barTrack, height: 8, borderRadius: 4 }}>
+                    <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #c9a96e, #fbbf24)', borderRadius: 4, transition: 'width 0.6s ease' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 14 }}>
+                    {ACHIEVEMENTS.filter(a => a.check(state)).slice(0, 8).map(a => (
+                      <div key={a.id} style={{ background: '#2a2320', border: '1px solid #333', borderRadius: 8, padding: '4px 10px', fontSize: 11, color: '#aaa' }}>
+                        {a.icon} {a.label}
                       </div>
-                      <div style={{ fontSize: 20, fontWeight: 900, color: p.color, fontFamily: "'Outfit'" }}>{val}</div>
-                    </div>
-                    <div style={{ ...styles.barTrack, height: 6, borderRadius: 3 }}>
-                      <div style={{ height: '100%', width: `${val}%`, background: `linear-gradient(90deg, ${p.color}88, ${p.color})`, borderRadius: 3, transition: 'width 0.6s ease', boxShadow: `0 0 8px ${p.color}44` }} />
-                    </div>
-                    <div style={{ fontSize: 8, color: '#666', marginTop: 6, fontFamily: "'JetBrains Mono'" }}>{p.stat}</div>
+                    ))}
+                    {unlocked > 8 && (
+                      <div style={{ background: '#2a2320', border: '1px solid #333', borderRadius: 8, padding: '4px 10px', fontSize: 11, color: '#555' }}>+{unlocked - 8} lagi</div>
+                    )}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })()}
 
-            {/* Pillar Info */}
-            <div style={{ ...styles.trackerCard, background: '#0d0d14', border: '1px solid #1a1a28' }}>
-              <div style={{ ...styles.trackerTitle, marginBottom: 10, letterSpacing: 2 }}>ℹ️ TENTANG PILLAR</div>
-              <div style={{ fontSize: 11, color: '#888', lineHeight: 1.7 }}>
-                <p style={{ margin: '0 0 8px' }}>Setiap agent memiliki <strong style={{ color: '#ddd' }}>4 Pillar</strong> yang menentukan gaya dan kekuatan mereka:</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {PILLARS.map(p => (
-                    <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <PillarIcon pillarId={p.id} size={20} />
-                      <span><span style={{ color: p.color, fontWeight: 700 }}>{p.name}</span> — {p.stat}</span>
+            {/* Personal Records Summary */}
+            {Object.keys(state.personalRecords || {}).length > 0 && (
+              <div style={styles.trackerCard}>
+                <div style={{ ...styles.trackerTitle, marginBottom: 12, letterSpacing: 2 }}>ðŸ† PERSONAL RECORDS</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {Object.entries(state.personalRecords).slice(0, 5).map(([ex, val]) => (
+                    <div key={ex} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#2a2320', borderRadius: 10, border: '1px solid #222' }}>
+                      <span style={{ fontSize: 12, color: '#ccc' }}>{ex}</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: '#c9a96e', fontFamily: "'JetBrains Mono'" }}>{val} kg</span>
                     </div>
                   ))}
                 </div>
-                <p style={{ margin: '10px 0 0', fontSize: 10, color: '#555' }}>Pillar dihitung otomatis dari aktivitas kamu. Terus latihan untuk meningkatkan semua Pillar!</p>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* ═══════ BOTTOM NAV ═══════ */}
+      {/* â•â•â•â•â•â•â• BOTTOM NAV â•â•â•â•â•â•â• */}
       <div style={styles.bottomNav}>
-        <NavBtn icon="🏋️" label="Workout" active={tab === "workout"} onClick={() => setTab("workout")} color="#FF6B35" />
-        <NavBtn icon="🥗" label="Fuel" active={tab === "nutrition"} onClick={() => setTab("nutrition")} color="#2EC4B6" />
-        <NavBtn icon="🏆" label="Rank" active={tab === "rank"} onClick={() => setTab("rank")} color={rank.color} />
-        <NavBtn icon="📏" label="Stats" active={tab === "stats"} onClick={() => setTab("stats")} color="#FF6B35" />
-        <NavBtn icon="👤" label="Profile" active={tab === "profile"} onClick={() => setTab("profile")} color={dominantPillar.color} />
+        <NavBtn icon="ðŸ‹ï¸" label="Workout" active={tab === "workout"} onClick={() => setTab("workout")} color="#c9a96e" />
+        <NavBtn icon="ðŸ¥—" label="Fuel" active={tab === "nutrition"} onClick={() => setTab("nutrition")} color="#88b4a0" />
+        <NavBtn icon="ðŸ†" label="Rank" active={tab === "rank"} onClick={() => setTab("rank")} color={rank.color} />
+        <NavBtn icon="ðŸ“" label="Stats" active={tab === "stats"} onClick={() => setTab("stats")} color="#c9a96e" />
+        <NavBtn icon="ðŸ‘¤" label="Profile" active={tab === "profile"} onClick={() => setTab("profile")} color="#c9a96e" />
       </div>
     </div>
   );
 }
 
-// ──────────────── SUB-COMPONENTS ────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ SUB-COMPONENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function NavBtn({ icon, label, active, onClick, color }) {
   return (
     <button
@@ -2002,7 +1861,7 @@ function TrackerCard({ title, icon, value, goal, unit, color, onAdd, buttons, ca
           <div style={{ fontSize: 24, background: `${color}15`, padding: 8, borderRadius: 12 }}>{icon}</div>
           <span style={{ ...styles.trackerTitle, fontSize: 16 }}>{title}</span>
         </div>
-        <button onClick={onEditGoal} style={{ ...styles.goalEditBtn, background: '#1a1a28', border: '1px solid #333' }}>
+        <button onClick={onEditGoal} style={{ ...styles.goalEditBtn, background: '#2a2320', border: '1px solid #333' }}>
           {value}/{goal}
           <span style={{ fontSize: 10, color: '#888', marginLeft: 4 }}>{unit}</span>
         </button>
@@ -2010,19 +1869,19 @@ function TrackerCard({ title, icon, value, goal, unit, color, onAdd, buttons, ca
       {isEditing && <GoalEditor current={goalValue} unit={unit} onSave={onSetGoal} />}
       
       <div style={{ display: "flex", alignItems: "flex-end", gap: 8, marginTop: 16, marginBottom: 16 }}>
-        <div style={{ fontSize: 56, lineHeight: 0.8, fontWeight: 900, color: pct >= 100 ? "#2EC4B6" : color, fontFamily: "'Outfit'", textShadow: `0 0 20px ${pct >= 100 ? "#2EC4B6" : color}44` }}>
+        <div style={{ fontSize: 56, lineHeight: 0.8, fontWeight: 900, color: pct >= 100 ? "#88b4a0" : color, fontFamily: "'Outfit'", textShadow: `0 0 20px ${pct >= 100 ? "#88b4a0" : color}44` }}>
           {value}
         </div>
         <span style={{ fontSize: 18, color: "#666", fontWeight: 600, paddingBottom: 4 }}>{unit}</span>
       </div>
       
-      <div style={{ ...styles.barTrack, height: 8, borderRadius: 8, background: '#111118', border: '1px solid #222' }}>
+      <div style={{ ...styles.barTrack, height: 8, borderRadius: 8, background: '#1f1a16', border: '1px solid #222' }}>
         <div style={{ ...styles.barFill, width: `${pct}%`, height: '100%', borderRadius: 8, background: `linear-gradient(90deg, ${color}, ${color}dd)`, boxShadow: `0 0 10px ${color}66` }} />
       </div>
       
       <div style={{ display: "flex", gap: 8, marginTop: 20, flexWrap: "wrap" }}>
         {canSubtract && (
-          <button onClick={() => onAdd(-10)} style={{ ...styles.addBtn, background: '#111118', borderColor: "#222", color: "#666", borderRadius: 20, padding: '8px 16px' }}>
+          <button onClick={() => onAdd(-10)} style={{ ...styles.addBtn, background: '#1f1a16', borderColor: "#222", color: "#666", borderRadius: 20, padding: '8px 16px' }}>
             -10
           </button>
         )}
@@ -2046,13 +1905,13 @@ function GoalEditor({ current, unit, step = 1, onSave }) {
         gap: 8,
         marginTop: 8,
         padding: "8px 12px",
-        background: "#0d0d14",
+        background: "#16120f",
         borderRadius: 10,
       }}
     >
       <span style={{ fontSize: 10, color: "#666", fontFamily: "'JetBrains Mono'" }}>GOAL:</span>
       <button onClick={() => setVal((v) => Math.max(step, v - step))} style={{ ...styles.circleBtn, width: 28, height: 28, fontSize: 14 }}>
-        −
+        âˆ’
       </button>
       <span style={{ fontSize: 16, fontWeight: 700, color: "#ddd", minWidth: 40, textAlign: "center" }}>{val}</span>
       <button onClick={() => setVal((v) => v + step)} style={{ ...styles.circleBtn, width: 28, height: 28, fontSize: 14 }}>
@@ -2063,7 +1922,7 @@ function GoalEditor({ current, unit, step = 1, onSave }) {
         onClick={() => onSave(val)}
         style={{
           marginLeft: "auto",
-          background: "#2EC4B6",
+          background: "#88b4a0",
           border: "none",
           borderRadius: 8,
           padding: "6px 14px",
@@ -2085,18 +1944,18 @@ function SummaryRow({ label, value, pct, color }) {
     <div style={{ marginBottom: 12 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
         <span style={{ fontSize: 12, color: "#888" }}>{label}</span>
-        <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono'", color: pct >= 100 ? "#2EC4B6" : "#aaa" }}>{value}</span>
+        <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono'", color: pct >= 100 ? "#88b4a0" : "#aaa" }}>{value}</span>
       </div>
-      <div style={{ height: 4, background: "#1a1a28", borderRadius: 4, overflow: "hidden" }}>
+      <div style={{ height: 4, background: "#2a2320", borderRadius: 4, overflow: "hidden" }}>
         <div
-          style={{ height: "100%", width: `${pct}%`, background: pct >= 100 ? "#2EC4B6" : color, borderRadius: 4, transition: "width 0.4s ease" }}
+          style={{ height: "100%", width: `${pct}%`, background: pct >= 100 ? "#88b4a0" : color, borderRadius: 4, transition: "width 0.4s ease" }}
         />
       </div>
     </div>
   );
 }
 
-// ──────────────── AVATAR COMPONENT ────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ AVATAR COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AvatarImage({ rankColor, weight, height }) {
   let bmi = 22; // default
   if (weight && height) {
@@ -2118,7 +1977,7 @@ function AvatarImage({ rankColor, weight, height }) {
   }
   
   return (
-    <div style={{ height: 350, width: "100%", position: "relative", marginBottom: 24, borderRadius: 24, overflow: "hidden", background: "#111118", border: `1px solid ${rankColor}44`, display: "flex", justifyContent: "center", alignItems: "center" }}>
+    <div style={{ height: 350, width: "100%", position: "relative", marginBottom: 24, borderRadius: 24, overflow: "hidden", background: "#1f1a16", border: `1px solid ${rankColor}44`, display: "flex", justifyContent: "center", alignItems: "center" }}>
       <style>
         {`
           @keyframes holo-flicker {
@@ -2226,10 +2085,10 @@ function StatBox({ icon, label, value }) {
   return (
     <div
       style={{
-        background: "#111118",
+        background: "#1f1a16",
         borderRadius: 14,
         padding: "16px 12px",
-        border: "1px solid #1a1a28",
+        border: "1px solid #2a2320",
         textAlign: "center",
       }}
     >
@@ -2307,7 +2166,7 @@ function RoutineEditorModal({ routineId, onClose, update, state, exerciseDb }) {
 
   return (
     <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.9)", zIndex: 1000, display: "flex", flexDirection: "column", padding: "40px 20px" }}>
-      <div style={{ background: "#111118", borderRadius: 24, padding: 24, flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", border: `1px solid ${workoutInfo.color}44` }}>
+      <div style={{ background: "#1f1a16", borderRadius: 24, padding: 24, flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", border: `1px solid ${workoutInfo.color}44` }}>
         <h2 style={{ color: workoutInfo.color, margin: "0 0 16px 0", fontSize: 24 }}>Custom: {workoutInfo.title}</h2>
         
         <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
@@ -2324,14 +2183,14 @@ function RoutineEditorModal({ routineId, onClose, update, state, exerciseDb }) {
                   const name = dbEx ? dbEx.name : exId;
                   const thumb = dbEx && dbEx.images && dbEx.images.length > 0 ? `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${dbEx.images[0]}` : null;
                   return (
-                    <div key={exId} style={{ display: "flex", alignItems: "center", gap: 12, background: "#1a1a28", padding: 8, borderRadius: 12 }}>
+                    <div key={exId} style={{ display: "flex", alignItems: "center", gap: 12, background: "#2a2320", padding: 8, borderRadius: 12 }}>
                       <div style={{ fontWeight: "bold", color: "#555", width: 20 }}>{idx + 1}.</div>
                       {thumb && <img src={thumb} style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />}
                       <div style={{ flex: 1, color: "#ddd", fontSize: 14, fontWeight: 500 }}>{name}</div>
                       <div style={{ display: "flex", gap: 4 }}>
-                        <button onClick={() => moveItem(idx, -1)} disabled={idx === 0} style={{ background: "#222", border: "none", color: idx === 0 ? "#444" : "#fff", padding: "6px 10px", borderRadius: 6 }}>↑</button>
-                        <button onClick={() => moveItem(idx, 1)} disabled={idx === customList.length - 1} style={{ background: "#222", border: "none", color: idx === customList.length - 1 ? "#444" : "#fff", padding: "6px 10px", borderRadius: 6 }}>↓</button>
-                        <button onClick={() => removeItem(exId)} style={{ background: "#4a1c1c", border: "none", color: "#ff6b6b", padding: "6px 10px", borderRadius: 6 }}>✕</button>
+                        <button onClick={() => moveItem(idx, -1)} disabled={idx === 0} style={{ background: "#222", border: "none", color: idx === 0 ? "#444" : "#fff", padding: "6px 10px", borderRadius: 6 }}>â†‘</button>
+                        <button onClick={() => moveItem(idx, 1)} disabled={idx === customList.length - 1} style={{ background: "#222", border: "none", color: idx === customList.length - 1 ? "#444" : "#fff", padding: "6px 10px", borderRadius: 6 }}>â†“</button>
+                        <button onClick={() => removeItem(exId)} style={{ background: "#4a1c1c", border: "none", color: "#ff6b6b", padding: "6px 10px", borderRadius: 6 }}>âœ•</button>
                       </div>
                     </div>
                   );
@@ -2350,16 +2209,16 @@ function RoutineEditorModal({ routineId, onClose, update, state, exerciseDb }) {
               placeholder="Cari gerakan (Inggris)..." 
               value={query}
               onChange={e => setQuery(e.target.value)}
-              style={{ width: "100%", padding: 12, borderRadius: 12, border: "1px solid #333", background: "#0b0b12", color: "#fff", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: 12, borderRadius: 12, border: "1px solid #333", background: "#16120f", color: "#fff", outline: "none", boxSizing: "border-box" }}
             />
-            <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8, marginTop: 8, background: "#0b0b12", padding: 8, borderRadius: 12 }}>
+            <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8, marginTop: 8, background: "#16120f", padding: 8, borderRadius: 12 }}>
               {searchResults.length === 0 ? (
                 <div style={{ color: "#555", fontSize: 13, textAlign: "center", padding: 12 }}>Tidak ditemukan</div>
               ) : searchResults.map(ex => {
                 const thumb = ex.images && ex.images.length > 0 ? `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${ex.images[0]}` : null;
                 const isAdded = customList.includes(ex.id);
                 return (
-                  <div key={ex.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 8, borderRadius: 8, background: "#1a1a28", border: `1px solid ${isAdded ? workoutInfo.color : "transparent"}` }}>
+                  <div key={ex.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 8, borderRadius: 8, background: "#2a2320", border: `1px solid ${isAdded ? workoutInfo.color : "transparent"}` }}>
                     {thumb && <img src={thumb} style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />}
                     <div style={{ flex: 1 }}>
                       <div style={{ color: "#fff", fontSize: 14, fontWeight: 500 }}>{ex.name}</div>
@@ -2389,13 +2248,13 @@ function RoutineEditorModal({ routineId, onClose, update, state, exerciseDb }) {
   );
 }
 
-// ──────────────── STYLES ────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ STYLES (Hospitality Warm) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const styles = {
   shell: {
-    background: "#0a0a0f",
+    background: "#16120f",
     minHeight: "100dvh",
     fontFamily: "'Outfit', sans-serif",
-    color: "#e8e8e8",
+    color: "#e8ddd0",
     maxWidth: 480,
     margin: "0 auto",
     position: "relative",
@@ -2417,26 +2276,26 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "flex-start",
   },
-  headerLabel: { fontFamily: "'JetBrains Mono'", fontSize: 9, color: "#444", letterSpacing: 3, marginBottom: 4 },
-  headerTitle: { fontSize: 28, fontWeight: 900, margin: 0, letterSpacing: -0.5 },
+  headerLabel: { fontFamily: "'Outfit'", fontSize: 10, color: "#7a6a5a", letterSpacing: 2, marginBottom: 4, fontWeight: 400 },
+  headerTitle: { fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: -0.5 },
   rankBadge: {
     display: "flex",
     alignItems: "center",
     gap: 5,
-    padding: "6px 10px",
-    borderRadius: 10,
-    border: "1.5px solid",
-    background: "#111118",
+    padding: "6px 12px",
+    borderRadius: 20,
+    border: "1px solid #2e2720",
+    background: "#1f1a16",
   },
-  rankBadgeText: { fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 600, letterSpacing: 1 },
+  rankBadgeText: { fontSize: 10, fontFamily: "'Outfit'", fontWeight: 600, letterSpacing: 0.5 },
   resetBtn: {
     background: "transparent",
-    border: "1px solid #222",
-    borderRadius: 10,
+    border: "1px solid #2e2720",
+    borderRadius: 20,
     width: 36,
     height: 36,
     fontSize: 16,
-    color: "#555",
+    color: "#7a6a5a",
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
@@ -2444,16 +2303,16 @@ const styles = {
   },
   weekBar: { padding: "10px 20px 0" },
   weekBarInner: { display: "flex", justifyContent: "space-between", marginBottom: 6 },
-  microLabel: { fontSize: 9, color: "#444", fontFamily: "'JetBrains Mono'", letterSpacing: 1.5 },
-  microVal: { fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 600 },
-  barTrack: { height: 4, background: "#151520", borderRadius: 4, overflow: "hidden" },
+  microLabel: { fontSize: 9, color: "#7a6a5a", fontFamily: "'Outfit'", letterSpacing: 1 },
+  microVal: { fontSize: 10, fontFamily: "'Outfit'", fontWeight: 600 },
+  barTrack: { height: 4, background: "#2a2320", borderRadius: 4, overflow: "hidden" },
   barFill: { height: "100%", borderRadius: 4, transition: "width 0.5s cubic-bezier(0.4,0,0.2,1)" },
   dayRow: { padding: "14px 20px", display: "flex", gap: 6, overflowX: "auto" },
   dayPill: {
     flex: "0 0 auto",
     minWidth: 58,
-    border: "1.5px solid",
-    borderRadius: 14,
+    border: "1px solid",
+    borderRadius: 16,
     padding: "10px 6px",
     cursor: "pointer",
     display: "flex",
@@ -2464,19 +2323,19 @@ const styles = {
     position: "relative",
     background: "none",
   },
-  doneCheck: { position: "absolute", top: 3, right: 5, fontSize: 8, color: "#2EC4B6" },
-  dayPillLabel: { fontSize: 9, fontFamily: "'JetBrains Mono'", letterSpacing: 0.5, fontWeight: 600 },
-  miniBar: { width: 24, height: 2, background: "#222", borderRadius: 2, overflow: "hidden" },
+  doneCheck: { position: "absolute", top: 3, right: 5, fontSize: 8, color: "#88b4a0" },
+  dayPillLabel: { fontSize: 9, fontFamily: "'Outfit'", letterSpacing: 0.5, fontWeight: 600 },
+  miniBar: { width: 24, height: 2, background: "#2e2720", borderRadius: 2, overflow: "hidden" },
   miniBarFill: { height: "100%", transition: "width 0.3s ease" },
   dayTitle: { padding: "0 20px 8px", display: "flex", alignItems: "baseline", gap: 10 },
   dayName: { fontSize: 22, fontWeight: 800, margin: 0 },
-  daySub: { fontSize: 12, color: "#555" },
+  daySub: { fontSize: 12, color: "#7a6a5a" },
   tierRow: { padding: "0 20px 12px", display: "flex", gap: 6 },
   tierBtn: {
     flex: 1,
     padding: "10px 0",
-    border: "1.5px solid",
-    borderRadius: 12,
+    border: "1px solid",
+    borderRadius: 16,
     cursor: "pointer",
     display: "flex",
     flexDirection: "column",
@@ -2485,19 +2344,19 @@ const styles = {
     transition: "all 0.25s",
     background: "none",
   },
-  tierLabel: { fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 600, letterSpacing: 2 },
+  tierLabel: { fontSize: 10, fontFamily: "'Outfit'", fontWeight: 600, letterSpacing: 1 },
   statsRow: {
     margin: "0 20px 10px",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    background: "#111118",
-    borderRadius: 10,
+    background: "#1f1a16",
+    borderRadius: 16,
     padding: "10px 14px",
-    border: "1px solid #1a1a28",
+    border: "1px solid #2e2720",
   },
   statChip: { display: "flex", alignItems: "center", gap: 6 },
-  statVal: { fontSize: 13, fontWeight: 600, color: "#888" },
+  statVal: { fontSize: 13, fontWeight: 600, color: "#7a6a5a" },
   exBtn: {
     width: "100%",
     display: "flex",
@@ -2506,7 +2365,7 @@ const styles = {
     padding: "14px 16px",
     marginBottom: 6,
     border: "1px solid",
-    borderRadius: 14,
+    borderRadius: 16,
     cursor: "pointer",
     transition: "all 0.25s",
     background: "none",
@@ -2522,43 +2381,43 @@ const styles = {
     justifyContent: "center",
     transition: "all 0.25s",
   },
-  completeCard: { textAlign: "center", marginTop: 16, padding: 24, borderRadius: 16, border: "1px solid" },
+  completeCard: { textAlign: "center", marginTop: 16, padding: 24, borderRadius: 20, border: "1px solid" },
   trackerCard: {
-    background: "#111118",
-    borderRadius: 16,
+    background: "#1f1a16",
+    borderRadius: 20,
     padding: 18,
-    border: "1px solid #1a1a28",
+    border: "1px solid #2e2720",
     marginBottom: 12,
   },
   trackerHeader: { display: "flex", justifyContent: "space-between", alignItems: "center" },
-  trackerTitle: { fontSize: 12, fontFamily: "'JetBrains Mono'", fontWeight: 600, letterSpacing: 1.5, color: "#888" },
+  trackerTitle: { fontSize: 11, fontFamily: "'Outfit'", fontWeight: 700, letterSpacing: 1, color: "#7a6a5a", textTransform: "uppercase" },
   goalEditBtn: {
-    background: "#0d0d14",
-    border: "1px solid #1a1a28",
-    borderRadius: 8,
+    background: "#16120f",
+    border: "1px solid #2e2720",
+    borderRadius: 10,
     padding: "4px 10px",
-    color: "#666",
+    color: "#7a6a5a",
     fontSize: 11,
-    fontFamily: "'JetBrains Mono'",
+    fontFamily: "'Outfit'",
     cursor: "pointer",
   },
   addBtn: {
     background: "transparent",
-    border: "1.5px solid",
-    borderRadius: 10,
+    border: "1px solid",
+    borderRadius: 16,
     padding: "8px 16px",
     cursor: "pointer",
     fontSize: 13,
     fontWeight: 600,
-    fontFamily: "'JetBrains Mono'",
+    fontFamily: "'Outfit'",
     transition: "all 0.2s",
   },
   waterRow: { display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12, marginBottom: 12 },
   waterDrop: {
     width: 38,
     height: 38,
-    borderRadius: 10,
-    border: "1.5px solid",
+    borderRadius: 12,
+    border: "1px solid",
     fontSize: 16,
     display: "flex",
     alignItems: "center",
@@ -2570,10 +2429,10 @@ const styles = {
   circleBtn: {
     width: 40,
     height: 40,
-    borderRadius: 12,
-    border: "1.5px solid #333",
-    background: "#111118",
-    color: "#aaa",
+    borderRadius: 14,
+    border: "1px solid #2e2720",
+    background: "#1f1a16",
+    color: "#9a8a7a",
     fontSize: 20,
     display: "flex",
     alignItems: "center",
@@ -2582,11 +2441,11 @@ const styles = {
     fontFamily: "'Outfit'",
   },
   inputField: {
-    background: "#1a1a28",
-    border: "1px solid #252535",
-    borderRadius: 10,
+    background: "#2a2320",
+    border: "1px solid #3a3028",
+    borderRadius: 12,
     padding: "10px 14px",
-    color: "#eee",
+    color: "#e8ddd0",
     fontSize: 14,
     fontFamily: "'Outfit'",
     width: "100%",
@@ -2594,10 +2453,10 @@ const styles = {
     outline: "none",
   },
   rankCard: {
-    background: "linear-gradient(135deg, #111118, #161622)",
-    borderRadius: 20,
+    background: "linear-gradient(135deg, #1f1a16, #251f1a)",
+    borderRadius: 24,
     padding: "28px 24px",
-    border: "1.5px solid",
+    border: "1px solid",
     textAlign: "center",
     marginBottom: 12,
     display: "flex",
@@ -2612,24 +2471,24 @@ const styles = {
     transform: "translateX(-50%)",
     width: "100%",
     maxWidth: 480,
-    background: "linear-gradient(to top, #0a0a0f 70%, #0a0a0fdd 85%, transparent)",
+    background: "linear-gradient(to top, #16120f 70%, #16120fdd 85%, transparent)",
     padding: "12px 20px max(env(safe-area-inset-bottom), 16px)",
     display: "flex",
-    borderTop: "1px solid #151520",
+    borderTop: "1px solid #2e2720",
   },
   toast: {
     position: "fixed",
     top: "max(env(safe-area-inset-top), 20px)",
     left: "50%",
     transform: "translateX(-50%)",
-    background: "#1a1a2e",
-    border: "1px solid #2EC4B633",
-    borderRadius: 12,
+    background: "#251f1a",
+    border: "1px solid #c9a96e44",
+    borderRadius: 16,
     padding: "10px 20px",
-    color: "#2EC4B6",
+    color: "#c9a96e",
     fontSize: 13,
     fontWeight: 600,
-    fontFamily: "'JetBrains Mono'",
+    fontFamily: "'Outfit'",
     zIndex: 999,
     whiteSpace: "nowrap",
     animation: "toastIn 0.3s ease",
@@ -2648,3 +2507,4 @@ if (!document.querySelector("[data-gym-styles]")) {
   styleSheet.setAttribute("data-gym-styles", "");
   document.head.appendChild(styleSheet);
 }
+
