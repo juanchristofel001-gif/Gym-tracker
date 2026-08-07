@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useMemo, Component } from "react";
+import React, { useState, useEffect, useCallback, useMemo, Component } from "react";
 import { get as idbGet, set as idbSet } from "idb-keyval";
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ STORAGE HELPER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -229,7 +229,83 @@ const defaultState = {
   profileAge: "",
   profileNickname: "",
   profileBio: "",
+  // Food diary
+  foodLog: {}, // { "2026-08-07": [{ id, name, raw, cal, protein, carbs, fat, time }] }
 };
+
+// ──────────────── FOOD DATABASE ────────────────
+// cal/protein/carbs/fat per 1 unit default
+const FOOD_DB = [
+  // ── Nasi & Karbohidrat ──
+  { name:"Nasi putih",      aliases:["nasi","nasi putih","white rice"], emoji:"🍚", unit:"piring", cal:242, protein:4,  carbs:54, fat:0.4 },
+  { name:"Nasi merah",      aliases:["nasi merah","brown rice"],        emoji:"🍚", unit:"piring", cal:218, protein:5,  carbs:46, fat:1.6 },
+  { name:"Nasi goreng",     aliases:["nasi goreng","fried rice"],        emoji:"🍳", unit:"piring", cal:350, protein:8,  carbs:58, fat:10  },
+  { name:"Mie goreng",      aliases:["mie goreng","indomie"],           emoji:"🍜", unit:"bungkus",cal:380, protein:8,  carbs:54, fat:14  },
+  { name:"Mie rebus",       aliases:["mie rebus","mie kuah"],           emoji:"🍜", unit:"bungkus",cal:290, protein:7,  carbs:48, fat:8   },
+  { name:"Roti tawar",      aliases:["roti","roti tawar","bread"],       emoji:"🍞", unit:"lembar", cal:67,  protein:2,  carbs:13, fat:1   },
+  { name:"Kentang rebus",   aliases:["kentang","potato"],               emoji:"🥔", unit:"buah",   cal:77,  protein:2,  carbs:17, fat:0.1 },
+  { name:"Ubi jalar",       aliases:["ubi","sweet potato"],             emoji:"🍠", unit:"buah",   cal:103, protein:2,  carbs:24, fat:0.1 },
+  { name:"Oatmeal",         aliases:["oat","oatmeal","oat meal"],       emoji:"🥣", unit:"porsi",  cal:150, protein:5,  carbs:27, fat:3   },
+  // ── Protein Hewani ──
+  { name:"Dada ayam",       aliases:["dada ayam","ayam dada","chicken breast"],  emoji:"🍗", unit:"potong", cal:165, protein:31, carbs:0,  fat:3.6 },
+  { name:"Ayam goreng",     aliases:["ayam goreng","fried chicken"],     emoji:"🍗", unit:"potong", cal:246, protein:23, carbs:8,  fat:14  },
+  { name:"Ayam bakar",      aliases:["ayam bakar","grilled chicken"],    emoji:"🍗", unit:"potong", cal:185, protein:28, carbs:2,  fat:6   },
+  { name:"Telur rebus",     aliases:["telur","egg","boiled egg"],        emoji:"🥚", unit:"butir",  cal:77,  protein:6,  carbs:0.6,fat:5   },
+  { name:"Telur dadar",     aliases:["telur dadar","omelet"],           emoji:"🍳", unit:"butir",  cal:90,  protein:6,  carbs:0.4,fat:7   },
+  { name:"Ikan goreng",     aliases:["ikan goreng","fried fish"],        emoji:"🐟", unit:"potong", cal:200, protein:22, carbs:5,  fat:10  },
+  { name:"Ikan bakar",      aliases:["ikan bakar","grilled fish"],       emoji:"🐟", unit:"potong", cal:145, protein:24, carbs:0,  fat:4   },
+  { name:"Salmon",          aliases:["salmon"],                          emoji:"🥩", unit:"potong", cal:208, protein:28, carbs:0,  fat:10  },
+  { name:"Tuna kaleng",     aliases:["tuna","canned tuna"],             emoji:"🥫", unit:"kaleng", cal:150, protein:33, carbs:0,  fat:1   },
+  { name:"Daging sapi",     aliases:["daging","beef","sapi"],           emoji:"🥩", unit:"potong", cal:215, protein:26, carbs:0,  fat:12  },
+  { name:"Tempe goreng",    aliases:["tempe","tempeh"],                  emoji:"🧆", unit:"potong", cal:180, protein:11, carbs:10, fat:9   },
+  { name:"Tahu goreng",     aliases:["tahu","tofu"],                     emoji:"️",  unit:"potong", cal:90,  protein:6,  carbs:3,  fat:5   },
+  // ── Protein Supplement ──
+  { name:"Whey protein",    aliases:["whey","protein shake","shake"],   emoji:"🥤", unit:"scoop",  cal:120, protein:25, carbs:3,  fat:1.5 },
+  { name:"Susu sapi",       aliases:["susu","milk"],                     emoji:"🥛", unit:"gelas",  cal:149, protein:8,  carbs:11, fat:8   },
+  { name:"Susu skim",       aliases:["susu skim","skim milk"],          emoji:"🥛", unit:"gelas",  cal:86,  protein:8,  carbs:12, fat:0.4 },
+  { name:"Greek yogurt",    aliases:["yogurt","greek yogurt"],          emoji:"🥣", unit:"cup",    cal:100, protein:17, carbs:6,  fat:0.7 },
+  { name:"Keju",            aliases:["keju","cheese"],                  emoji:"🧀", unit:"lembar", cal:113, protein:7,  carbs:0.4,fat:9   },
+  // ── Sayur & Buah ──
+  { name:"Sayur tumis",     aliases:["sayur","vegetables","tumis"],     emoji:"🥦", unit:"porsi",  cal:50,  protein:2,  carbs:6,  fat:2   },
+  { name:"Salad",           aliases:["salad"],                           emoji:"🥗", unit:"porsi",  cal:30,  protein:1,  carbs:5,  fat:0.5 },
+  { name:"Pisang",          aliases:["pisang","banana"],                emoji:"🍌", unit:"buah",   cal:89,  protein:1,  carbs:23, fat:0.3 },
+  { name:"Apel",            aliases:["apel","apple"],                   emoji:"🍎", unit:"buah",   cal:72,  protein:0.4,carbs:19, fat:0.2 },
+  { name:"Jeruk",           aliases:["jeruk","orange"],                 emoji:"🍊", unit:"buah",   cal:62,  protein:1,  carbs:15, fat:0.2 },
+  { name:"Alpukat",         aliases:["alpukat","avocado"],              emoji:"🥑", unit:"buah",   cal:240, protein:3,  carbs:13, fat:22  },
+  // ── Jajanan & Fast Food ──
+  { name:"Bakso",           aliases:["bakso","meatball"],               emoji:"🍝", unit:"porsi",  cal:250, protein:14, carbs:28, fat:8   },
+  { name:"Soto ayam",       aliases:["soto"],                            emoji:"🍲", unit:"mangkok",cal:180, protein:15, carbs:14, fat:7   },
+  { name:"Gado-gado",       aliases:["gado"],                            emoji:"🥗", unit:"porsi",  cal:320, protein:12, carbs:30, fat:16  },
+  { name:"Rendang",         aliases:["rendang"],                         emoji:"🥩", unit:"potong", cal:320, protein:28, carbs:4,  fat:20  },
+  { name:"Burger",          aliases:["burger","hamburger"],             emoji:"🍔", unit:"buah",   cal:450, protein:22, carbs:40, fat:20  },
+  { name:"Pizza",           aliases:["pizza"],                           emoji:"🍕", unit:"slice",  cal:285, protein:12, carbs:36, fat:10  },
+  { name:"Kentang goreng",  aliases:["kentang goreng","french fries"],  emoji:"🍟", unit:"porsi",  cal:312, protein:4,  carbs:41, fat:15  },
+];
+
+// Fuzzy estimasi dari nama makanan → nutrisi
+function estimateNutrition(query) {
+  const q = query.toLowerCase().trim();
+  // coba extract jumlah (angka di awal/akhir)
+  const numMatch = q.match(/(\d+(?:\.\d+)?)/);
+  const qty = numMatch ? parseFloat(numMatch[1]) : 1;
+  const nameOnly = q.replace(/\d+(?:\.\d+)?/g, '').replace(/(piring|butir|potong|bungkus|lembar|gelas|buah|porsi|cup|scoop|kaleng|mangkok|slice)/g,'').trim();
+  
+  // Cari di database
+  let best = null;
+  let bestScore = 0;
+  for (const food of FOOD_DB) {
+    for (const alias of food.aliases) {
+      if (nameOnly.includes(alias) || alias.includes(nameOnly)) {
+        const score = alias.length;
+        if (score > bestScore) { best = food; bestScore = score; }
+      }
+    }
+  }
+  if (best) {
+    return { name: best.name, emoji: best.emoji, cal: Math.round(best.cal * qty), protein: Math.round(best.protein * qty * 10) / 10, carbs: Math.round(best.carbs * qty * 10) / 10, fat: Math.round(best.fat * qty * 10) / 10, found: true };
+  }
+  return null; // not found → caller will use API
+}
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ APP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function App() {
@@ -899,11 +975,11 @@ export default function App() {
                         </div>
                       )}
                       <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 8 }}>
-                        <button onClick={() => spControl('prev')} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#aaa', padding: 8 }}>â®</button>
+                        <button onClick={() => spControl('prev')} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#aaa', padding: 8 }}>â ®</button>
                         <button onClick={() => spControl(spNowPlaying?.isPlaying ? 'pause' : 'play')} style={{ background: '#1DB954', border: 'none', width: 44, height: 44, borderRadius: '50%', fontSize: 18, cursor: 'pointer', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {spNowPlaying?.isPlaying ? 'â¸' : 'â–¶'}
+                          {spNowPlaying?.isPlaying ? 'â ¸' : 'â–¶'}
                         </button>
-                        <button onClick={() => spControl('next')} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#aaa', padding: 8 }}>â­</button>
+                        <button onClick={() => spControl('next')} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#aaa', padding: 8 }}>â ­</button>
                       </div>
                       <button onClick={spotifyLogout} style={{ width: '100%', padding: '6px', background: 'none', border: '1px solid #333', borderRadius: 8, color: '#555', fontSize: 9, fontFamily: "'JetBrains Mono'", cursor: 'pointer' }}>
                         DISCONNECT
@@ -917,150 +993,38 @@ export default function App() {
         </div>
       )}
 
-      {/* â•â•â•â•â•â•â• NUTRITION TAB â•â•â•â•â•â•â• */}
+      {/* ═══════ NUTRITION TAB ═══════ */}
       {tab === "nutrition" && (() => {
-        const pPct = Math.min(100, (proteinToday / autoProteinGoal) * 100);
-        const wPct = Math.min(100, (waterToday / autoWaterGoal) * 100);
-        const sPct = Math.min(100, (sleepToday / state.sleepGoal) * 100);
-        const cPct = Math.min(100, (caloriesToday / autoCalorieGoal) * 100);
-        const fuelScore = Math.round((pPct + wPct + sPct + cPct) / 4);
-        const fuelColor = fuelScore >= 80 ? '#88b4a0' : fuelScore >= 50 ? '#fbbf24' : '#ef4444';
-        const MEAL_PRESETS = [
-          { name: "Whey Shake", protein: 25, cal: 120, icon: "ðŸ¥¤" },
-          { name: "Dada Ayam", protein: 31, cal: 165, icon: "ðŸ—" },
-          { name: "Telur 2 butir", protein: 12, cal: 140, icon: "ðŸ¥š" },
-          { name: "Nasi + Lauk", protein: 15, cal: 450, icon: "ðŸš" },
-          { name: "Oatmeal", protein: 5, cal: 150, icon: "ðŸ¥£" },
-          { name: "Susu", protein: 8, cal: 120, icon: "ðŸ¥›" },
-        ];
+        const d2 = today();
+        const todayLog = (state.foodLog?.[d2] || []);
+        const totalCal = todayLog.reduce((s, f) => s + (f.cal || 0), 0);
+        const totalProtein = Math.round(todayLog.reduce((s, f) => s + (f.protein || 0), 0) * 10) / 10;
+        const totalCarbs = Math.round(todayLog.reduce((s, f) => s + (f.carbs || 0), 0) * 10) / 10;
+        const totalFat = Math.round(todayLog.reduce((s, f) => s + (f.fat || 0), 0) * 10) / 10;
+        
         return (
-        <div style={styles.page}>
-          <div style={{ ...styles.header, paddingBottom: 12 }}>
-            <div>
-              <div style={styles.headerLabel}>DAILY TRACKER</div>
-              <h1 style={{ ...styles.headerTitle, background: "linear-gradient(135deg, #88b4a0, #fff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>FUEL</h1>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 32, fontWeight: 900, color: fuelColor, fontFamily: "'Outfit'", lineHeight: 1 }}>{fuelScore}</div>
-              <div style={{ fontSize: 8, color: '#666', fontFamily: "'JetBrains Mono'", letterSpacing: 1 }}>FUEL SCORE</div>
-            </div>
-          </div>
-
-          <div style={{ padding: "0 20px 120px" }}>
-            {/* Auto-calc notice */}
-            {state.weight > 0 && (
-              <div style={{ background: '#251f1a', borderRadius: 12, padding: '10px 14px', marginBottom: 16, border: '1px solid #2a2320', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 14 }}>âš¡</span>
-                <span style={{ fontSize: 10, color: '#888', fontFamily: "'JetBrains Mono'" }}>
-                  Target otomatis dari berat {state.weight}kg â€” Protein: {autoProteinGoal}g Â· Kalori: {autoCalorieGoal} Â· Air: {autoWaterGoal} gelas
-                </span>
-              </div>
-            )}
-            {!state.weight && (
-              <div style={{ background: '#2a2320', borderRadius: 12, padding: '12px 14px', marginBottom: 16, border: '1px solid #333', textAlign: 'center' }}>
-                <span style={{ fontSize: 11, color: '#fbbf24' }}>âš ï¸ Isi berat badan di tab Stats untuk target otomatis</span>
-              </div>
-            )}
-
-            {/* Fuel Score Ring */}
-            <div style={{ ...styles.trackerCard, display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{ position: 'relative', width: 80, height: 80 }}>
-                <svg viewBox="0 0 36 36" width="80" height="80">
-                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#2a2320" strokeWidth="3" />
-                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke={fuelColor} strokeWidth="3" strokeDasharray={`${fuelScore}, 100`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 0.6s ease' }} />
-                </svg>
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 900, color: fuelColor, fontFamily: "'Outfit'" }}>{fuelScore}</div>
-              </div>
-              <div style={{ flex: 1 }}>
-                <SummaryRow label="Protein" value={`${proteinToday}/${autoProteinGoal}g`} pct={pPct} color="#c9a96e" />
-                <SummaryRow label="Kalori" value={`${caloriesToday}/${autoCalorieGoal}`} pct={cPct} color="#f59e0b" />
-                <SummaryRow label="Air" value={`${waterToday}/${autoWaterGoal}`} pct={wPct} color="#3b82f6" />
-                <SummaryRow label="Tidur" value={`${sleepToday}/${state.sleepGoal}h`} pct={sPct} color="#88b4a0" />
-              </div>
-            </div>
-
-            {/* Meal Presets */}
-            <div style={styles.trackerCard}>
-              <div style={{ ...styles.trackerTitle, marginBottom: 12, letterSpacing: 2 }}>ðŸ½ï¸ QUICK ADD</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-                {MEAL_PRESETS.map(m => (
-                  <button key={m.name} onClick={() => { addProtein(m.protein); addCalories(m.cal); showToast(`+${m.protein}g protein, +${m.cal} kcal`); }}
-                    style={{ background: '#251f1a', border: '1px solid #2a2320', borderRadius: 12, padding: '12px 6px', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}>
-                    <div style={{ fontSize: 24 }}>{m.icon}</div>
-                    <div style={{ fontSize: 9, color: '#ddd', fontWeight: 600, marginTop: 4 }}>{m.name}</div>
-                    <div style={{ fontSize: 8, color: '#888', fontFamily: "'JetBrains Mono'", marginTop: 2 }}>{m.protein}g Â· {m.cal}kcal</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Calorie Card */}
-            <TrackerCard title="CALORIES" icon="ðŸ”¥" value={caloriesToday} goal={autoCalorieGoal} unit="kcal" color="#f59e0b"
-              onAdd={(a) => addCalories(a)} buttons={[100, 200, 300, 500]} canSubtract
-              onEditGoal={() => {}} isEditing={false} goalValue={autoCalorieGoal} onSetGoal={() => {}} />
-
-            {/* Protein Card */}
-            <TrackerCard title="PROTEIN" icon="ðŸ¥©" value={proteinToday} goal={autoProteinGoal} unit="g" color="#c9a96e"
-              onAdd={(a) => addProtein(a)} buttons={[10, 20, 30, 50]} canSubtract
-              onEditGoal={() => {}} isEditing={false} goalValue={autoProteinGoal} onSetGoal={() => {}} />
-
-            {/* Water Card */}
-            <div style={{ ...styles.trackerCard, position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: -50, right: -50, width: 100, height: 100, background: '#3b82f6', filter: 'blur(60px)', opacity: 0.15, borderRadius: '50%' }} />
-              <div style={styles.trackerHeader}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ fontSize: 24, background: `#3b82f615`, padding: 8, borderRadius: 12 }}>ðŸ’§</div>
-                  <span style={{ ...styles.trackerTitle, fontSize: 16 }}>HYDRATION</span>
-                </div>
-                <div style={{ ...styles.goalEditBtn, background: '#2a2320', border: '1px solid #333' }}>
-                  {waterToday}/{autoWaterGoal}
-                  <span style={{ fontSize: 10, color: '#888', marginLeft: 4 }}>gelas</span>
-                </div>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24, marginBottom: 8 }}>
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', flex: 1 }}>
-                  {Array.from({ length: autoWaterGoal }, (_, i) => {
-                    const isFilled = i < waterToday;
-                    return (
-                      <button key={i} onClick={() => update((s) => ({ ...s, water: { ...s.water, [d]: isFilled ? i : i + 1 } }))}
-                        style={{ width: 32, height: 40, borderRadius: '12px 12px 16px 16px', border: `1px solid ${isFilled ? '#3b82f6' : '#222'}`,
-                          background: isFilled ? 'linear-gradient(180deg, #60a5fa, #3b82f6)' : '#1f1a16',
-                          boxShadow: isFilled ? '0 4px 12px rgba(59, 130, 246, 0.4), inset 0 2px 4px rgba(255,255,255,0.3)' : 'none',
-                          cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: isFilled ? 'scale(1.05) translateY(-2px)' : 'scale(1)' }} />
-                    );
-                  })}
-                </div>
-                <div style={{ fontSize: 40, fontWeight: 900, color: '#3b82f6', fontFamily: "'Outfit'", textShadow: '0 0 20px rgba(59, 130, 246, 0.4)', marginLeft: 16 }}>{waterToday}</div>
-              </div>
-              <div style={{ ...styles.barTrack, height: 4, borderRadius: 4, background: '#1f1a16', marginTop: 16 }}>
-                <div style={{ ...styles.barFill, height: '100%', width: `${Math.min(100, (waterToday / autoWaterGoal) * 100)}%`, background: "linear-gradient(90deg, #3b82f6, #60a5fa)", boxShadow: "0 0 10px #3b82f688" }} />
-              </div>
-            </div>
-
-            {/* Sleep Card */}
-            <div style={{ ...styles.trackerCard, position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: -50, right: -50, width: 100, height: 100, background: '#9b5de5', filter: 'blur(60px)', opacity: 0.15, borderRadius: '50%' }} />
-              <div style={styles.trackerHeader}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ fontSize: 24, background: `#9b5de515`, padding: 8, borderRadius: 12 }}>ðŸ˜´</div>
-                  <span style={{ ...styles.trackerTitle, fontSize: 16 }}>REST</span>
-                </div>
-                <div style={{ ...styles.goalEditBtn, background: '#2a2320', border: '1px solid #333' }}>Goal: {state.sleepGoal}h</div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, marginTop: 24, marginBottom: 20 }}>
-                <button onClick={() => setSleep(Math.max(0, sleepToday - 0.5))} style={{ ...styles.circleBtn, width: 48, height: 48, fontSize: 24, background: '#1f1a16', border: '1px solid #333', color: '#888' }}>âˆ’</button>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{ fontSize: 64, lineHeight: 0.9, fontWeight: 900, color: sleepToday >= state.sleepGoal ? "#88b4a0" : sleepToday >= state.sleepGoal * 0.75 ? "#fbbf24" : "#ef4444", fontFamily: "'Outfit'" }}>{sleepToday}</div>
-                  <div style={{ fontSize: 12, color: "#666", fontFamily: "'JetBrains Mono'", letterSpacing: 2, marginTop: 8, fontWeight: 600 }}>HOURS</div>
-                </div>
-                <button onClick={() => setSleep(Math.min(14, sleepToday + 0.5))} style={{ ...styles.circleBtn, width: 48, height: 48, fontSize: 24, background: '#1f1a16', border: '1px solid #333', color: '#888' }}>+</button>
-              </div>
-              <div style={{ ...styles.barTrack, height: 6, borderRadius: 6, background: '#1f1a16' }}>
-                <div style={{ ...styles.barFill, height: '100%', width: `${sPct}%`, background: sleepToday >= state.sleepGoal ? "linear-gradient(90deg, #88b4a0, #6ee7b7)" : "linear-gradient(90deg, #ef4444, #fbbf24)", boxShadow: `0 0 12px ${sleepToday >= state.sleepGoal ? '#88b4a0' : '#fbbf24'}88`, borderRadius: 6 }} />
-              </div>
-            </div>
-          </div>
-        </div>
+          <FuelTab
+            todayLog={todayLog}
+            totalCal={totalCal} totalProtein={totalProtein} totalCarbs={totalCarbs} totalFat={totalFat}
+            waterToday={waterToday} autoWaterGoal={autoWaterGoal}
+            sleepToday={sleepToday} sleepGoal={state.sleepGoal}
+            autoCalorieGoal={autoCalorieGoal} autoProteinGoal={autoProteinGoal}
+            weight={state.weight}
+            onAddFood={(entry) => update(s => {
+              const log = s.foodLog || {};
+              const dayLog = [...(log[d2] || [])];
+              dayLog.push(entry);
+              return { ...s, foodLog: { ...log, [d2]: dayLog } };
+            })}
+            onDeleteFood={(id) => update(s => {
+              const log = s.foodLog || {};
+              const dayLog = (log[d2] || []).filter(f => f.id !== id);
+              return { ...s, foodLog: { ...log, [d2]: dayLog } };
+            })}
+            onWater={(v) => update(s => ({ ...s, water: { ...s.water, [d2]: v } }))}
+            onSleep={(v) => setSleep(v)}
+            showToast={showToast}
+          />
         );
       })()}
 
@@ -1811,6 +1775,229 @@ export default function App() {
     </div>
   );
 }
+
+// ──────────────── FOOD DIARY COMPONENT ────────────────
+function FuelTab({ 
+  todayLog, totalCal, totalProtein, totalCarbs, totalFat,
+  waterToday, autoWaterGoal, sleepToday, sleepGoal,
+  autoCalorieGoal, autoProteinGoal, weight,
+  onAddFood, onDeleteFood, onWater, onSleep, showToast
+}) {
+  const [query, setQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+
+    setIsSearching(true);
+    let result = estimateNutrition(query);
+
+    if (!result) {
+      // Fallback API to Nutritionix (Free endpoint)
+      try {
+        const response = await fetch("https://trackapi.nutritionix.com/v2/natural/nutrients", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-app-id": "YOUR_NUTRITIONIX_APP_ID", // TODO: Replace with real key
+            "x-app-key": "YOUR_NUTRITIONIX_APP_KEY" // TODO: Replace with real key
+          },
+          body: JSON.stringify({ query: query })
+        });
+        const data = await response.json();
+        
+        if (data.foods && data.foods.length > 0) {
+          const food = data.foods[0];
+          result = {
+            name: food.food_name,
+            emoji: "🍽️",
+            cal: Math.round(food.nf_calories),
+            protein: Math.round(food.nf_protein * 10) / 10,
+            carbs: Math.round(food.nf_total_carbohydrate * 10) / 10,
+            fat: Math.round(food.nf_total_fat * 10) / 10,
+            found: true
+          };
+        }
+      } catch (err) {
+        console.error("API Error", err);
+      }
+    }
+
+    if (result && result.found) {
+      onAddFood({
+        id: Date.now().toString(),
+        name: result.name,
+        emoji: result.emoji,
+        cal: result.cal,
+        protein: result.protein,
+        carbs: result.carbs,
+        fat: result.fat,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      showToast(`+${result.cal} kcal dari ${result.name}`);
+      setQuery("");
+    } else {
+      showToast("Gagal menemukan makanan. Coba kata lain.");
+    }
+    setIsSearching(false);
+  };
+
+  const calPct = Math.min(100, (totalCal / autoCalorieGoal) * 100);
+  const protPct = Math.min(100, (totalProtein / autoProteinGoal) * 100);
+  const wPct = Math.min(100, (waterToday / autoWaterGoal) * 100);
+  const sPct = Math.min(100, (sleepToday / sleepGoal) * 100);
+  const fuelScore = Math.round((protPct + wPct + sPct + calPct) / 4) || 0;
+  const fuelColor = fuelScore >= 80 ? '#88b4a0' : fuelScore >= 50 ? '#c9a96e' : '#ef4444';
+
+  const MEAL_PRESETS = [
+    { name: "Whey Shake", emoji: "🥤", query: "1 scoop whey protein" },
+    { name: "Dada Ayam", emoji: "🍗", query: "1 potong dada ayam" },
+    { name: "Telur Rebus", emoji: "🥚", query: "2 butir telur rebus" },
+    { name: "Nasi + Lauk", emoji: "🍛", query: "1 porsi nasi putih ayam goreng" },
+    { name: "Oatmeal", emoji: "🥣", query: "1 porsi oatmeal" },
+    { name: "Susu", emoji: "🥛", query: "1 gelas susu sapi" },
+  ];
+
+  return (
+    <div style={styles.page}>
+      <div style={{ ...styles.header, paddingBottom: 12 }}>
+        <div>
+          <div style={styles.headerLabel}>FOOD DIARY</div>
+          <h1 style={{ ...styles.headerTitle, background: "linear-gradient(135deg, #c9a96e, #fff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>FUEL</h1>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: 32, fontWeight: 900, color: fuelColor, fontFamily: "'Outfit'", lineHeight: 1 }}>{fuelScore}</div>
+          <div style={{ fontSize: 8, color: '#7a6a5a', fontFamily: "'Outfit'", letterSpacing: 1 }}>FUEL SCORE</div>
+        </div>
+      </div>
+
+      <div style={{ padding: "0 20px 120px" }}>
+        
+        {/* Daily Macros */}
+        <div style={{ ...styles.trackerCard, display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ position: 'relative', width: 80, height: 80 }}>
+            <svg viewBox="0 0 36 36" width="80" height="80">
+              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#2a2320" strokeWidth="3" />
+              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke={fuelColor} strokeWidth="3" strokeDasharray={`${fuelScore}, 100`} strokeLinecap="round" style={{ transition: 'stroke-dasharray 0.6s ease' }} />
+            </svg>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 900, color: fuelColor, fontFamily: "'Outfit'" }}>{fuelScore}</div>
+          </div>
+          <div style={{ flex: 1 }}>
+            <SummaryRow label="Kalori" value={`${totalCal}/${autoCalorieGoal}`} pct={calPct} color="#c9a96e" />
+            <SummaryRow label="Protein" value={`${totalProtein}/${autoProteinGoal}g`} pct={protPct} color="#88b4a0" />
+            <SummaryRow label="Carbs" value={`${totalCarbs}g`} pct={0} color="#b08a5e" />
+            <SummaryRow label="Fat" value={`${totalFat}g`} pct={0} color="#e8ddd0" />
+          </div>
+        </div>
+
+        {/* Input Food */}
+        <div style={{ marginBottom: 20 }}>
+          <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8 }}>
+            <input 
+              type="text" 
+              value={query} 
+              onChange={(e) => setQuery(e.target.value)} 
+              placeholder="Misal: 1 piring nasi goreng" 
+              style={{ flex: 1, ...styles.inputField }} 
+              disabled={isSearching}
+            />
+            <button type="submit" disabled={isSearching} style={{ background: '#c9a96e', color: '#16120f', border: 'none', borderRadius: 12, padding: '0 16px', fontWeight: 'bold', fontFamily: "'Outfit'", cursor: 'pointer' }}>
+              {isSearching ? '...' : '+ ADD'}
+            </button>
+          </form>
+          <div style={{ fontSize: 10, color: '#7a6a5a', marginTop: 8, display: 'flex', gap: 4, alignItems: 'center' }}>
+            <span>⚡ Quick Add:</span>
+            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', flex: 1, paddingBottom: 4 }}>
+              {MEAL_PRESETS.map(m => (
+                <button key={m.name} onClick={() => { setQuery(m.query); setTimeout(() => handleSearch({preventDefault:()=>{}}), 50); }} 
+                  style={{ background: '#1f1a16', border: '1px solid #2e2720', borderRadius: 12, padding: '4px 8px', fontSize: 11, color: '#e8ddd0', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                  {m.emoji} {m.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Food Log Cards */}
+        <h3 style={{ fontSize: 14, color: '#e8ddd0', marginBottom: 12 }}>Hari Ini</h3>
+        {todayLog.length === 0 ? (
+          <div style={{ background: '#1f1a16', border: '1px dashed #2e2720', borderRadius: 16, padding: 24, textAlign: 'center', color: '#7a6a5a', fontSize: 13, marginBottom: 20 }}>
+            Belum ada makanan yang dicatat hari ini.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
+            {todayLog.map(f => (
+              <div key={f.id} style={{ background: '#1f1a16', border: '1px solid #2e2720', borderRadius: 16, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ fontSize: 24 }}>{f.emoji}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 'bold', color: '#e8ddd0' }}>{f.name}</div>
+                  <div style={{ fontSize: 11, color: '#9a8a7a', display: 'flex', gap: 8, marginTop: 4 }}>
+                    <span>🔥 {f.cal} kcal</span>
+                    <span>🥩 {f.protein}g</span>
+                    <span>🌾 {f.carbs}g</span>
+                    <span>🧈 {f.fat}g</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                  <span style={{ fontSize: 10, color: '#7a6a5a' }}>{f.time}</span>
+                  <button onClick={() => onDeleteFood(f.id)} style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: 16, cursor: 'pointer', padding: 4 }}>×</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Water Card */}
+        <div style={{ ...styles.trackerCard, position: 'relative', overflow: 'hidden' }}>
+          <div style={styles.trackerHeader}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ fontSize: 24 }}>💧</div>
+              <span style={{ ...styles.trackerTitle, fontSize: 16 }}>HYDRATION</span>
+            </div>
+            <div style={{ ...styles.goalEditBtn, background: '#16120f', border: '1px solid #2e2720' }}>
+              {waterToday}/{autoWaterGoal} gelas
+            </div>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24, marginBottom: 8 }}>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', flex: 1 }}>
+              {Array.from({ length: autoWaterGoal }, (_, i) => {
+                const isFilled = i < waterToday;
+                return (
+                  <button key={i} onClick={() => onWater(isFilled ? i : i + 1)}
+                    style={{ width: 32, height: 40, borderRadius: '12px 12px 16px 16px', border: `1px solid ${isFilled ? '#88b4a0' : '#2e2720'}`,
+                      background: isFilled ? '#88b4a0' : '#1f1a16',
+                      cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: isFilled ? 'scale(1.05) translateY(-2px)' : 'scale(1)' }} />
+                );
+              })}
+            </div>
+            <div style={{ fontSize: 40, fontWeight: 900, color: '#88b4a0', fontFamily: "'Outfit'", marginLeft: 16 }}>{waterToday}</div>
+          </div>
+        </div>
+
+        {/* Sleep Card */}
+        <div style={{ ...styles.trackerCard, position: 'relative', overflow: 'hidden' }}>
+          <div style={styles.trackerHeader}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ fontSize: 24 }}>🌙</div>
+              <span style={{ ...styles.trackerTitle, fontSize: 16 }}>REST</span>
+            </div>
+            <div style={{ ...styles.goalEditBtn, background: '#16120f', border: '1px solid #2e2720' }}>Goal: {sleepGoal}h</div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, marginTop: 24, marginBottom: 20 }}>
+            <button onClick={() => onSleep(Math.max(0, sleepToday - 0.5))} style={{ ...styles.circleBtn }}>−</button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ fontSize: 64, lineHeight: 0.9, fontWeight: 900, color: sleepToday >= sleepGoal ? "#c9a96e" : "#e8ddd0", fontFamily: "'Outfit'" }}>{sleepToday}</div>
+              <div style={{ fontSize: 12, color: "#7a6a5a", fontFamily: "'Outfit'", letterSpacing: 2, marginTop: 8, fontWeight: 600 }}>HOURS</div>
+            </div>
+            <button onClick={() => onSleep(Math.min(14, sleepToday + 0.5))} style={{ ...styles.circleBtn }}>+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ SUB-COMPONENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function NavBtn({ icon, label, active, onClick, color }) {
